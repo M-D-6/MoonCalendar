@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Mooncalendar</string>
+    <string name="widget_name">Persian Calendar</string>
+    <string name="widget_mini_name">Persian Calendar</string>
+    <string name="widget_config_title">تنظیم ویجت ۴×۲</string>
+    <string name="widget_config_summary">تنظیمات کامل ویجت ۴×۲ با الگوبرداری از نسخه Android اصلی</string>
+    <string name="widget_config_text_size">اندازهٔ متن</string>
+    <string name="widget_config_global_note">تنظیمات ویجت از همین صفحه ذخیره می‌شوند و با تنظیمات برنامه Flutter همگام هستند.</string>
+    <string name="widget_config_scale_value">%1$.2f×</string>
+    <string name="cancel">انصراف</string>
+    <string name="save">ذخیره</string>
+    <string name="shortcut_calendar">تقویم</string>
+    <string name="shortcut_converter">تبدیل تاریخ</string>
+    <string name="shortcut_compass">قطب‌نما</string>
+    <string name="shortcut_level">تراز</string>
+    <string name="shortcut_astronomy">نجوم</string>
+    <string name="shortcut_map">نقشه</string>
+    <string name="widget_moon_name">ماه</string>
+    <string name="widget_sun_view_name">مسیر خورشید</string>
+    <string name="widget_map_name">نقشه</string>
+    <string name="widget_counter_name">شمارنده</string>
+</resources>

@@ -1,0 +1,3022 @@
+D	ب.ظ	PM
+D	ق.ظ	AM
+D	پرتیپدا	Pratipada
+D	دویتیا	Dwitiya
+D	تریتیا	Tritiya
+D	چاتورتی	Chaturthi
+D	پانچمی	Panchami
+D	شَشْتی	Shashthi
+D	سَپْتَمی	Saptami
+D	اَشْتَمی	Ashtami
+D	نَوَمی	Navami
+D	دَشَمی	Dashami
+D	اِکادَشی	Ekadashi
+D	دِوَداشی	Dwadashi
+D	ترِیودَشی	Trayodashi
+D	چَتُرْدَشی	Chaturdashi
+D	پورنیما	Purnima
+D	اَماواسیا	Amavasya
+D	حمل	Aries
+D	ثور	Taurus
+D	جوزا	Gemini
+D	سرطان	Cancer
+D	اسد	Leo
+D	سنبله	Virgo
+D	میزان	Libra
+D	عقرب	Scorpio
+D	قوس	Sagittarius
+D	جدی	Capricorn
+D	دلو	Aquarius
+D	حوت	Pisces
+D	فاره	Mouse
+D	بقر	Ox
+D	پلنگ	Leopard
+D	ارنب	Hare
+D	نهنگ	Whale
+D	حیه	Snake
+D	فرس	Horse
+D	گوسفند	Sheep
+D	شادی	Monkey
+D	مرغ	Rooster
+D	کلب	Dog
+D	خنزیر	Pig
+D	سیچقان ئیل	Sichqan Il (Mouse)
+D	اود ئیل	Ud Il (Ox)
+D	بارس ئیل	Bars Il (Leopard)
+D	تَوِشقان ئیل	Tavishqan Il (Hare)
+D	لوی ئیل	Lui Il (Crocodile)
+D	ئیلان ئیل	Ilan Il (Snake)
+D	یونت ئیل	Yunt Il (Horse)
+D	قُوی ئیل	Qoy Il (Sheep)
+D	پیچی ئیل	Pichi Il (Monkey)
+D	تُخاقوی ئیل	Tukhaqoy Il (Hen)
+D	ایت ئیل	It Il (Dog)
+D	تُنگوز ئیل	Tonguz Il (Pig)
+D	موش	Rat
+D	گاو	Ox
+D	ببر	Tiger
+D	خرگوش	Rabbit
+D	اژدها	Dragon
+D	مار	Snake
+D	اسب	Horse
+D	بز	Goat
+D	میمون	Monkey
+D	خروس	Rooster
+D	سگ	Dog
+D	خوک	Pig
+D	نمر	Leopard
+D	تمساح\n(ثعبان)	Crocodile\n(Snake)
+D	غنم	Sheep
+D	حمدونه\n(قرده)	Hamdouna\n(Monkey)
+D	دجاجه	Hen
+D	عطارد	Mercury
+D	زهره	Venus
+D	مریخ	Mars
+D	مشتری	Jupiter
+D	زحل	Saturn
+D	اورانوس	Uranus
+D	نپتون	Neptune
+D	زمین	Earth
+D	بهار	Spring
+D	تابستان	Summer
+D	پاییز	Autumn
+D	زمستان	Winter
+D	خورشیدگرفتگی جزئی	Partial solar eclipse
+D	خورشیدگرفتگی کلی	Total solar eclipse
+D	خورشیدگرفتگی حلقه‌ای	Annular solar eclipse
+D	ماه‌گرفتگی کلی	Total lunar eclipse
+D	ماه‌گرفتگی جزئی	Partial lunar eclipse
+D	ماه‌گرفتگی نیم‌سایه‌ای	Penumbral lunar eclipse
+D	ماه	Moon
+D	پلوتو	Pluto
+D	خورشید	Sun
+D	لیلیت	Lilith
+D	رأس	North node
+D	ذنب	South node
+D	نیرالسیف	Sirius
+D	آلولا شمالی	Alula Borealis
+D	ماه نو یا بَرن	New moon
+D	هلال سوی ماه تمام	Waxing crescent
+D	یک‌چهارم نخست	First quarter
+D	برآمدگی سوی ماه تمام	Waxing gibbous
+D	ماه تمام یا بدر	Full moon
+D	برآمدگی سوی کمرنگی	Waning gibbous
+D	یک‌چهارم سوم	Last quarter
+D	هلال سوی کمرنگی	Waning crescent
+D	ورود_صورت_فلکی	Constellation_Entry
+D	خروج_صورت_فلکی	Constellation_Exit
+D	صورت فلکی	Constellation
+D	ورود_برج	Sign_Entry
+D	خروج_برج	Sign_Exit
+D	برج	Sign
+D	سهم السعادة	Part of Fortune
+D	سهم السلطان	Part of the Sultan
+D	سهم الحنطة	Part of Wheat
+D	سهم العنب	Part of Grapes
+D	فروردین	Farvardin
+D	اردیبهشت	Ordibehesht
+D	خرداد	Khordad
+D	تیر	Tir
+D	مرداد	Mordad
+D	شهریور	Shahrivar
+D	مهر	Mehr
+D	آبان	Aban
+D	آذر	Azar
+D	دی	Dey
+D	بهمن	Bahman
+D	اسفند	Esfand
+D	شنبه	Saturday
+D	یکشنبه	Sunday
+D	دوشنبه	Monday
+D	سه‌شنبه	Tuesday
+D	چهارشنبه	Wednesday
+D	پنجشنبه	Thursday
+D	جمعه	Friday
+D	ش	S
+D	ی	S
+D	د	M
+D	س	T
+D	چ	W
+D	پ	T
+D	ج	F
+D	ژانویه	January
+D	فوریه	February
+D	مارس	March
+D	آوریل	April
+D	مه	May
+D	ژوئن	June
+D	ژوئیه	July
+D	اوت	August
+D	سپتامبر	September
+D	اکتبر	October
+D	نوامبر	November
+D	دسامبر	December
+D	محرم	Muharram
+D	صفر	Safar
+D	ربیع‌الاول	Rabi' al-awwal
+D	ربیع‌الثانی	Rabi' al-thani
+D	جمادی‌الاول	Jumada al-awwal
+D	جمادی‌الثانی	Jumada al-thani
+D	رجب	Rajab
+D	شعبان	Sha'ban
+D	رمضان	Ramadan
+D	شوال	Shawwal
+D	ذوالقعده	Dhu al-Qi'dah
+D	ذوالحجه	Dhu al-Hijjah
+D	شمسی	Solar Hijri
+D	میلادی	Gregorian
+D	قمری	Lunar Hijri
+D	بدون نام	Unnamed
+D	پیش فرض	Default
+D	مکان‌یاب خاموش است، برای بهره‌وری از این ویژگی لطفاً آن را روشن سازید.	Location services are off. Please turn them on to use this feature.
+D	دسترسی به موقعیت داده نشد.	Couldn't get the location.
+D	دسترسی برنامه‌ها به موقعیت در ویندوز خاموش است. از تنظیمات ویندوز (حریم خصوصی ← موقعیت مکانی) آن را روشن کنید.	App access to location is off in Windows. Turn it on in Windows settings (Privacy → Location).
+D	دسترسی به موقعیت برای همیشه رد شده است؛ از تنظیمات سیستم آن را مجاز کنید.	Location access was permanently denied; allow it in the system settings.
+D	دریافت موقعیت بیش از حد طول کشید؛ دوباره تلاش کنید.	Getting the location took too long; try again.
+D	دریافت موقعیت ناموفق بود.	Getting the location failed.
+D	ایران	Iran
+D	روز هفته	Weekday
+D	تاریخ شمسی	Solar Hijri date
+D	تاریخ قمری	Lunar Hijri date
+D	تاریخ میلادی	Gregorian date
+D	اذان صبح	Fajr
+D	طلوع آفتاب	Sunrise
+D	اذان ظهر	Dhuhr
+D	اذان عصر	Asr
+D	غروب آفتاب	Sunset
+D	اذان مغرب	Maghrib
+D	اذان عشاء	Isha
+D	نیمه شب شرعی	Midnight
+D	تیتر	Title
+D	پررنگ	Bold
+D	کم‌رنگ	Light
+D	زیرخط	Underline
+D	روزکاری	Day shift
+D	استراحت	Rest
+D	عصرکاری	Afternoon shift
+D	شب‌کاری	Night shift
+D	مرخصی	Leave
+D	صبح/شب	Morning/Night
+D	صبح/عصر	Morning/Afternoon
+D	عصر/شب	Afternoon/Night
+D	 شمسی	 Solar Hijri
+D	 میلادی	 Gregorian
+D	 قمری	 Lunar Hijri
+D	تقویم	Calendar
+D	برنامه	Schedule
+D	هفته	Week
+D	تبدیل تاریخ	Date converter
+D	قطب‌نما	Compass
+D	تراز	Level
+D	ستاره‌شناسی	Astronomy
+D	نقشه	Map
+D	تنظیمات	Settings
+D	ویجت‌های دسکتاپ	Desktop widgets
+D	درباره	About
+D	مجوزها	Licenses
+D	اطلاعات دستگاه	Device info
+D	شمارنده	Counter
+D	برای خروج دوباره بازگشت را بزنید	Press back again to exit
+D	منو	Menu
+D	نمایش‌های بیشتر	More views
+D	برنامه روزانه	Daily schedule
+D	نمایش هفته	Week view
+D	نمایش ماه	Month view
+D	خروج	Exit
+D	نسخه ۱۰.۵.۲۶ · v63	Version 10.5.26 · v63
+D	یک پیاده‌سازی Flutter با حفظ منطق و قابلیت‌های تقویم.	A Flutter implementation that keeps the calendar's logic and features.
+D	این پورت تلاش می‌کند ظاهر، ترتیب صفحات و منطق اصلی تقویم را با نسخهٔ Android هم‌راستا نگه دارد.	This port tries to keep the look, page order and core calendar logic in line with the Android version.
+D	هستهٔ پورت از کد و داده‌های ارائه‌شده در پروژهٔ اصلی و مخازن همراه استفاده می‌کند. هنگام انتشار نسخهٔ مشتق‌شده، متن مجوزهای منبع را همراه برنامه نگه دارید.	The port's core uses code and data from the original project and its companion repositories. When publishing a derived version, keep the source license texts with the app.
+D	سیستم‌عامل	Operating system
+D	عرض پنجره	Window width
+D	ارتفاع پنجره	Window height
+D	پلتفرم چندسکویی Android / Windows	Cross-platform Android / Windows
+D	تأیید	OK
+D	ماه سیاه	Black moon
+D	الأولى الشمالية	Alula Australis
+D	غارب\n	Ghareb\n
+D	لغو	Cancel
+D	امروز	Today
+D	ابجد	Abjad
+D	تهران	Tehran
+D	، قمر در عقرب	, Moon in Scorpio
+D	نحس اکبر	Greater malefic
+D	سعد اکبر	Greater benefic
+D	نحس اصغر	Lesser malefic
+D	سعد	Benefic
+D	سعد اصغر	Lesser benefic
+D	ممترج	Mixed
+D	طالع	Ascendant
+D	ورود ماه	Moon enters
+D	خروج ماه	Moon exits
+D	گزینه‌ها	Options
+D	اعتدالی	Equinox
+D	انتخاب تاریخ	Choose date
+D	زایچه	Horoscope
+D	زایچه، سال	Horoscope, year
+D	ساعات کواکب	Planetary hours
+D	قمر در عقرب	Moon in Scorpio
+D	اوقات شرعی	Prayer times
+D	مناسبت‌ها	Events
+D	برای امروز مناسبتی ثبت نشده است	No events are registered for today
+D	نمایش روزهای هفته جاری	Show the current week's days
+D	ظهر شرعی	Solar noon
+D	عصر	Asr
+D	اذان عشا	Isha
+D	، 	, 
+D	تنظیم شیفت‌کاری	Shift schedule
+D	تکرار شود	Repeat
+D	خاموش‌سازی یا برنامه‌ریزی مجدد	Silence or reschedule
+D	افزودن	Add
+D	انصراف	Cancel
+D	نوع شیفت	Shift type
+D	حذف	Delete
+D	روز	Day
+D	طلوع	Sunrise
+D	غروب	Sunset
+D	عشا	Isha
+D	نیمه‌شب	Midnight
+D	بستن	Close
+D	عبارتی بنویسید	Type a phrase
+D	موردی پیدا نشد	Nothing found
+D	تقویم اصلی	Main calendar
+D	تقویم دوم	Second calendar
+D	تقویم سوم	Third calendar
+D	اولویت نمایش تقویم‌ها	Calendar display priority
+D	با کشیدن، ترتیب را عوض کنید. تقویم اول، تقویم اصلی برنامه است؛ دوم و سوم کنار آن نمایش داده می‌شوند. ترتیب ویجت و اعلان هم از همین فهرست می‌آید.	Drag to reorder. The first calendar is the app's main calendar; the second and third are shown beside it. The order of widgets and notifications comes from this list too.
+D	غیرفعال	Disabled
+D	گزینه‌های بیشتر	More options
+D	گزینش تاریخ	Select date
+D	اوقات در ماه	Times this month
+D	نمای سال	Year view
+D	شمارهٔ هفته	Week number
+D	بستن نمای سال	Close year view
+D	جستجو در رویدادها	Search events
+D	اسکرول بین سال‌ها	Scroll between years
+D	امسال	This year
+D	جزئیات روز انتخاب‌شده	Selected day details
+D	ماه قبل	Previous month
+D	ماه بعد	Next month
+D	رویدادها	Events
+D	اوقات	Times
+D	دانشگاه تهران	University of Tehran
+D	بین‌المللی	International
+D	افغانستان	Afghanistan
+D	ایران باستان	Ancient Iran
+D	نپال	Nepal
+D	سایر	Other
+D	رویداد بدون عنوان	Untitled event
+D	تقویم دستگاه	Device calendar
+D	تمام‌روز	All day
+D	برای این روز رویدادی ثبت نشده است	No events are registered for this day
+D	 و 	 and 
+D	ماه حرام	Sacred month
+D	شمال	North
+D	شرق	East
+D	جنوب	South
+D	غرب	West
+D	قبله	Qibla
+D	شمال شرق	Northeast
+D	شمال غرب	Northwest
+D	جنوب غرب	Southwest
+D	جنوب شرق	Southeast
+D	تحت الارض	Below the horizon
+D	فوق الارض	Above the horizon
+D	نمایش مسیر خورشید و ماه در ۲۴ ساعت	Show the Sun and Moon path over 24 hours
+D	شمال حقیقی	True north
+D	نمایش قبله	Show Qibla
+D	مزبوره/مذکوره	Mentioned / aforementioned
+D	به‌روزرسانی انحراف مغناطیسی	Update magnetic declination
+D	مکان‌یاب	Locate
+D	حسگر قطب‌نما در این دستگاه در دسترس نیست	The compass sensor is not available on this device
+D	راهنما	Guide
+D	ادامه	Continue
+D	توقف	Stop
+D	برای دقت بیشتر از اجسام فلزی و میدان‌های مغناطیسی دور شوید و دستگاه را چند بار بچرخانید.	For better accuracy, move away from metal objects and magnetic fields and rotate the device a few times.
+D	فاصله	Distance
+D	حسابگر	Calculator
+D	مناطق زمانی	Time zones
+D	کیو آر کد	QR code
+D	هجری شمسی	Solar Hijri
+D	هجری قمری	Lunar Hijri
+D	نپالی	Nepali
+D	بهترین	Best
+D	بد	Bad
+D	خوب	Good
+D	بدترین	Worst
+D	خنثی	Neutral
+D	تاریخ کپی شد	Date copied
+D	پاک‌کردن	Clear
+D	بازگشت به امروز	Back to today
+D	اشتراک‌گذاری	Share
+D	متن برای اشتراک‌گذاری در کلیپ‌بورد کپی شد	The text to share was copied to the clipboard
+D	منطقه زمانی	Time zone
+D	انتخاب ساعت	Select time
+D	عبارت	Expression
+D	واحدهای زمانی: d=روز، h=ساعت، m=دقیقه، s=ثانیه؛ عملیات +، −، ×، ÷، % و توان پشتیبانی می‌شوند.	Time units: d = days, h = hours, m = minutes, s = seconds; the operations +, −, ×, ÷, % and powers are supported.
+D	زمان مبنا	Base time
+D	تغییر تاریخ و ساعت مبنا	Change the base date and time
+D	متن یا لینک	Text or link
+D	نمونه‌های QR	QR examples
+D	این متن برای QR بیش از ظرفیت نسخه ۴۰ است.	This text exceeds the capacity of QR version 40.
+D	عبارت نامعتبر است	Invalid expression
+D	تقسیم بر صفر	Division by zero
+D	باقی‌مانده بر صفر	Remainder by zero
+D	پرانتز بسته نشده است	Parenthesis not closed
+D	عدد مورد انتظار است	A number is expected
+D	هدف و ذخیره‌ها	Goal and saves
+D	مدیریت ذخیره‌ها	Manage saves
+D	ذخیرهٔ جدید	New save
+D	ویرایش ذخیرهٔ فعلی	Edit current save
+D	حذف ذخیرهٔ فعلی	Delete current save
+D	بازنشانی شمارنده	Reset counter
+D	آیا مطمئنی می‌خواهی شمارنده بازنشانی شود؟	Are you sure you want to reset the counter?
+D	بازنشانی	Reset
+D	ذخیره‌ها	Saves
+D	به هدف رسیدی!	You reached the goal!
+D	آفرین! هدف این ذخیره کامل شد.	Well done! This save's goal is complete.
+D	دوباره	Again
+D	ذخیره جدید	New save
+D	صدا و ویبره	Sound and vibration
+D	صدا	Sound
+D	ویبره	Vibration
+D	بدون صدا و ویبره	No sound or vibration
+D	در حال استفاده	In use
+D	ویرایش	Edit
+D	ویرایش ذخیره	Edit save
+D	اسم ذخیره	Save name
+D	مثلاً تمرین امروز	e.g. today's practice
+D	هدف اختیاری	Optional goal
+D	خالی = بدون هدف	Empty = no goal
+D	ساخت	Create
+D	ذخیره تغییرات	Save changes
+D	حذف ذخیره	Delete save
+D	رنگ شمارنده	Counter color
+D	همان انتخاب‌گر رنگ ویجت	Same as the widget color picker
+D	تنظیمات شمارنده	Counter settings
+D	رنگ پوستهٔ فعلی برنامه	The app's current theme color
+D	رنگ سفارشی انتخاب‌شده	Selected custom color
+D	رنگ اولیهٔ پوسته	Theme seed color
+D	انتخاب رنگ	Choose color
+D	برای انتخاب رنگ دلخواه، استفاده از رنگ پوسته را خاموش کن.	To pick a custom color, turn off "use theme color".
+D	شدت ویبره	Vibration strength
+D	مدت ویبره	Vibration duration
+D	هماهنگ‌سازی متن RESET با زبان برنامه	Match the RESET text to the app language
+D	نمایش دکمه ۱-	Show the "-1" button
+D	تقویم‌های دیگر	Other calendars
+D	تعطیلات رسمی	Official holidays
+D	مناسبت‌های غیر تعطیل	Non-holiday events
+D	مکان اوقات شرعی	Prayer times location
+D	امساک	Imsak
+D	همه	All
+D	هیچ‌کدام	None
+D	مکان تنظیم نشده	Location not set
+D	هدف همین ویجت	This widget's goal
+D	بدون هدف	No goal
+D	ساخت هدف جدید	Create a new goal
+D	هدف جدید از صفر شروع می‌شود و عدد فعلی منتقل نمی‌شود.	The new goal starts from zero and the current number is not carried over.
+D	انتقال عدد فعلی به هدف جدید	Carry the current number to the new goal
+D	می‌توانی این گزینه را در تنظیمات ویجت هم تغییر بدهی.	You can change this option in the widget settings too.
+D	نام هدف	Goal name
+D	عدد هدف	Goal number
+D	رنگ بدنهٔ همین ویجت	This widget's body color
+D	فقط همین ویجت را تغییر می‌دهد؛ رنگ شمارندهٔ اصلی برنامه دست‌نخورده می‌ماند.	Changes only this widget; the app's main counter color stays untouched.
+D	شفافیت پس‌زمینهٔ ویجت	Widget background opacity
+D	فقط برای همین ویجت اعمال می‌شود	Applies to this widget only
+D	رنگ پس‌زمینهٔ ویجت	Widget background color
+D	رنگ نوشته‌های ویجت	Widget text color
+D	رنگ و کدری زمینهٔ ویجت	Widget background color and opacity
+D	رنگ متن‌ها و نوشته‌ها در ویجت	Color of the texts in the widget
+D	کدام موارد در ویجت نمایش داده شوند؟	Which items should the widget show?
+D	هر موردی را که نمی‌خواهید خاموش کنید	Turn off any item you don't want
+D	اوقات نمایش‌داده‌شده در ویجت	Times shown in the widget
+D	امساک، اذان عصر و اذان عشاء به‌صورت پیش‌فرض خاموش‌اند	Imsak, Asr and Isha are off by default
+D	حداقل یک وقت باید انتخاب شود	At least one time must be selected
+D	هدف ویجت	Widget goal
+D	بدون هدف — شمارندهٔ خصوصی این ویجت است و در ذخیره‌های برنامه دیده نمی‌شود	No goal — this widget has its own private counter and it doesn't appear in the app's saves
+D	پیروی از تم ویجت	Follow the widget theme
+D	رنگ بدنه دقیقاً از رنگ سیستم/تم ویجت گرفته می‌شود	The body color is taken exactly from the system / widget theme
+D	رنگ بدنه فقط برای همین ویجت و مستقل از شمارندهٔ اصلی است	The body color is for this widget only, independent of the main counter
+D	هنگام ساخت هدف جدید، شمارش فعلی هم منتقل می‌شود	When creating a new goal, the current count is carried over too
+D	هدف جدید از صفر شروع می‌شود	The new goal starts from zero
+D	دکمهٔ کاهش روی همین ویجت نمایش داده می‌شود	The decrease button is shown on this widget
+D	دکمهٔ کاهش روی همین ویجت مخفی است	The decrease button is hidden on this widget
+D	متن RESET با زبان برنامه هماهنگ می‌شود	The RESET text follows the app language
+D	متن RESET به‌صورت RESET نمایش داده می‌شود	The RESET text is shown as RESET
+D	رنگ بدنهٔ ویجت	Widget body color
+D	انتخاب رنگ مستقل برای همین ویجت	Pick an independent color for this widget
+D	نمایش	Display
+D	اندازهٔ متن	Text size
+D	پیروی از رنگ‌بندی دستگاه در ویجت‌ها	Follow the device color scheme in widgets
+D	با خاموش بودن این گزینه، آسمان نقشه آبی اصلی خود را حفظ می‌کند	When off, the map sky keeps its original blue
+D	انتخاب رنگ دلخواه برای نوشته‌های ویجت	Choose a custom color for the widget texts
+D	انتخاب رنگ دلخواه برای پس‌زمینهٔ ویجت	Choose a custom color for the widget background
+D	تنظیمات ویجت	Widget settings
+D	نمایش تاریخ به‌صورت عددی	Show the date numerically
+D	استفاده از ۱۳۹۰/۱/۱ شمسی به‌جای ۱ فروردین ۱۳۹۰ در ویجت و اعلان	Use 1390/1/1 instead of "1 Farvardin 1390" in widgets and notifications
+D	ساعت در ویجت	Clock in widget
+D	نمایش ساعت در ویجت‌ها	Show the clock in widgets
+D	۲۴ ساعته	24-hour
+D	نمایش ساعت به‌صورت ۲۴تایی	Show the time in 24-hour format
+D	نمایش ثانیه	Show seconds
+D	نمایش ثانیه در ساعت ویجت؛ به‌صورت پیش‌فرض خاموش است	Show seconds on the widget clock; off by default
+D	تراز کناری ساعت و تاریخ	Clock and date side by side
+D	ساعت چپ‌چین و تاریخ راست‌چین؛ پیش‌فرض همچنان وسط‌چین است	Clock aligned left and date aligned right; the default is still centered
+D	تراز وسط ویجت‌ها	Center widgets vertically
+D	محتوای ویجت وسط قرار بگیرد، نه بالا	Center the widget content instead of putting it at the top
+D	وقت ایران	Iran time
+D	نمایش ویجت و اعلان برنامه به‌وقت ایران در همه‌جا، مناسب ایرانیان خارج از ایران	Show widgets and notifications in Iran time everywhere, good for Iranians abroad
+D	سفارشی‌سازی ویجت	Customize widget
+D	موقعیت	Location
+D	دریافت مختصات از مکان‌یاب (GPS)	Get coordinates from the locator (GPS)
+D	اگر از این طریق ممکن باشد، نیازی به سایر تنظیمات این بخش نیست	If this works, you don't need the other settings in this section
+D	اگر موقعیتتان در این فهرست نبود، مختصات را در گزینهٔ بعدی وارد کنید	If your location isn't in this list, enter the coordinates in the next option
+D	مختصات جغرافیایی	Geographic coordinates
+D	عدم نمایش اوقات	Hide times
+D	نمایش اوقات	Show times
+D	موقعیت پاک می‌شود و اوقات در ویجت نمایش داده نمی‌شود	The location is cleared and times are not shown in the widget
+D	بازگرداندن آخرین موقعیت	Restore the last location
+D	برای نمایش اوقات، یک موقعیت انتخاب کنید	Choose a location to show the times
+D	رفتار روی دسکتاپ	Desktop behavior
+D	پنهان کردن ویجت	Hide widget
+D	نمایش ویجت	Show widget
+D	ویجت تا زمان نمایش دوباره روی دسکتاپ دیده نمی‌شود	The widget won't be visible on the desktop until shown again
+D	ویجت دوباره روی دسکتاپ نمایش داده می‌شود	The widget is shown on the desktop again
+D	همیشه روی سایر پنجره‌ها	Always on top of other windows
+D	به‌صورت پیش‌فرض خاموش است	Off by default
+D	عبور کلیک از ویجت	Click-through
+D	کلیک‌های ماوس به پنجرهٔ زیر ویجت می‌رسد	Mouse clicks reach the window below the widget
+D	قفل موقعیت و اندازه	Lock position and size
+D	ویجت نه جابه‌جا می‌شود و نه تغییر اندازه می‌دهد	The widget can neither be moved nor resized
+D	میزان دیده‌شدن ویجت	Widget visibility
+D	این ویجت مانند نسخهٔ اندروید تنظیمات محتوایی جداگانه ندارد.	Like the Android version, this widget has no separate content settings.
+D	تایید	OK
+D	جدید	New
+D	قبلی	Previous
+D	کدری رنگ	Color opacity
+D	کد رنگ	Color code
+D	رنگ‌های آماده	Preset colors
+D	اینچ	inch
+D	سانتی‌متر	cm
+D	سانتی‌متر / اینچ	cm / inch
+D	تمام‌صفحه	Full screen
+D	حسگر شتاب‌سنج در این دستگاه در دسترس نیست	The accelerometer is not available on this device
+D	خروج از تمام‌صفحه	Exit full screen
+D	کپی شد	Copied
+D	کمی درنگ کنید… اگر پس از یک دقیقه نتیجه‌ای حاصل نشد مطمئن شوید که مکان‌یاب دستگاه از تنظیمات روشن است. اگر روشن کردن آن کارساز نبود، احتمالاً باید گزینه‌های دیگر را بیازمایید	Please wait… If nothing happens after a minute, make sure the device's location service is on in settings. If turning it on doesn't help, you may need to try the other options.
+D	کمی درنگ کنید…	Please wait…
+D	باز کردن تنظیمات	Open settings
+D	تلاش دوباره	Try again
+D	مقدار نامعتبر	Invalid value
+D	عرض جغرافیایی	Latitude
+D	طول جغرافیایی	Longitude
+D	ارتفاع	Altitude
+D	به متر (اختیاری)	In meters (optional)
+D	ذخیره به‌عنوان مکان برنامه	Save as the app location
+D	انتخاب شهر	Choose city
+D	بیشتر (استان‌های ایران)	More (Iran's provinces)
+D	انتخاب استان	Choose province
+D	بدون پوشش	No overlay
+D	شب و روز	Day and night
+D	رویت‌پذیری ماه	Moon visibility
+D	قدرت میدان مغناطیسی	Magnetic field strength
+D	انحراف مغناطیسی	Magnetic declination
+D	میل مغناطیسی	Magnetic inclination
+D	صفحات تکتونیکی	Tectonic plates
+D	بازگشت	Back
+D	نمایش کره	Show globe
+D	مسیر مستقیم	Straight path
+D	نمایش شبکه	Show grid
+D	موقعیت من	My location
+D	نمایش موقعیت	Show location
+D	نوع پوشش	Overlay type
+D	بعدی	Next
+D	انتخاب تاریخ نقشه	Choose map date
+D	رابط و تقویم	Interface and calendar
+D	اعلان و ویجت	Notification and widget
+D	موقعیت و اذان	Location and Athan
+D	رابط کاربری	User interface
+D	تنظیم پوسته	Theme
+D	زبان	Language
+D	نمایش تقویم دوم در جدول ماه	Show the second calendar in the month grid
+D	شمارهٔ روز تقویم دوم، کوچک زیر هر روز	The second calendar's day number, small under each day
+D	نمایش تقویم سوم در جدول ماه	Show the third calendar in the month grid
+D	شمارهٔ روز تقویم سوم، کنار تقویم دوم	The third calendar's day number, beside the second calendar
+D	رنگ، ویبره و دکمهٔ ۱-؛ تنظیمات از همین برنامه	Color, vibration and the "-1" button; settings are in this app
+D	فارسی	Persian
+D	اندازهٔ پنجره	Window size
+D	اندازه در ویندوز ذخیره می‌شود؛ ارتفاع آزاد است و حداقل عرض حالت موبایلی حفظ می‌شود	The size is saved on Windows; the height is free and the minimum mobile-layout width is kept
+D	طیف رنگی	Color gradient
+D	فعال‌کردن پس‌زمینهٔ گرادیانی	Enable the gradient background
+D	تعطیلات به رنگ قرمز	Holidays in red
+D	نمایش تعطیلات با رنگ قرمز	Show holidays in red
+D	نوشتار پررنگ	Bold text
+D	افزایش وزن نوشتار رابط	Increase the weight of the interface text
+D	رقم‌های فارسی	Persian digits
+D	نمایش رقم‌ها به فارسی	Show digits in Persian
+D	نام انگلیسی ماه‌های میلادی	English names for Gregorian months
+D	در متن فارسی، نام ماه‌های میلادی مثل June و July نمایش داده شود	In Persian text, show Gregorian month names like June and July
+D	شروع هفته	Week start
+D	نمایش شمارهٔ هفته در صفحهٔ تقویم	Show the week number on the calendar page
+D	نوع مناسبت‌ها	Event types
+D	تنظیم تقویم قمری	Lunar calendar adjustment
+D	اطلاعات نجومی	Astronomical info
+D	نمایش صورت فلکی، نام سال و اطلاعات نجومی تکمیلی	Show constellations, year name and extra astronomical info
+D	نمایش وضعیت قمر در عقرب	Show the Moon in Scorpio status
+D	اعلان	Notification
+D	روشن کردن اعلان	Turn on notification
+D	نمایش بی‌صدای تاریخ و اوقات شرعی در اعلان‌های ویندوز	Silently show the date and prayer times in Windows notifications
+D	اعلان همیشگی برای تاریخ‌ها	Persistent notification for dates
+D	برای نمایش اعلان همیشگی، دسترسی اعلان را فعال کنید	Enable notification access to show a persistent notification
+D	نمایش اعلان در قفل صفحه	Show notification on the lock screen
+D	فقط هنگامی که قفل صفحه فعال باشد	Only when the screen is locked
+D	عدد بزرگ در نوار اعلان	Big number in the status bar
+D	نمایش روز ماه به صورت عددی بزرگ	Show the day of the month as a big number
+D	آیکون برنامه با عدد روز	App icon with the day number
+D	به‌جای حرف M، عدد روز ماه روی آیکون برنامه نمایش داده می‌شود و هر روز عوض می‌شود	Instead of the letter M, the day of the month is shown on the app icon and changes every day
+D	به‌جای حرف M، عدد روز ماه روی آیکون Tray نمایش داده می‌شود	Instead of the letter M, the day of the month is shown on the Tray icon
+D	ویجت‌ها و پیش‌فرض‌ها	Widgets and defaults
+D	تاریخ‌ها به صورت سال/ماه/روز نمایش داده می‌شوند و در پایان «شمسی»، «قمری» یا «میلادی» می‌آید	Dates are shown as year/month/day, ending with "Solar", "Lunar" or "Gregorian"
+D	رنگ‌های سیستم در ویجت	System colors in widgets
+D	پیش‌فرض ویجت‌هایی که هنوز سفارشی نشده‌اند؛ تنظیم هر ویجت جداگانه قابل تغییر است	Default for widgets not customized yet; each widget can be set separately
+D	رنگ متن ویجت	Widget text color
+D	محتوای ویجت	Widget content
+D	پیش‌فرض ویجت‌هایی که هنوز سفارشی نشده‌اند	Default for widgets not customized yet
+D	نمایش ثانیه در ویجت	Show seconds in widgets
+D	نمایش ثانیه در ساعت ویجت؛ پیش‌فرض خاموش است	Show seconds on the widget clock; off by default
+D	ساعت چپ‌چین و تاریخ راست‌چین؛ پیش‌فرض وسط‌چین باقی می‌ماند	Clock aligned left and date aligned right; stays centered by default
+D	تراز وسط ویجت	Center widget vertically
+D	چیدمان مرکزی محتوای ویجت‌ها	Center the widget content layout
+D	مدیریت ویجت‌های دسکتاپ	Manage desktop widgets
+D	افزودن، حذف، جابه‌جایی، تغییر اندازه و تنظیم کامل ویجت‌های دسکتاپ	Add, remove, move, resize and fully configure desktop widgets
+D	به‌روزرسانی ویجت‌های Android	Update Android widgets
+D	دادهٔ تاریخ، مناسبت، اوقات و ماه در همهٔ اندازه‌های ویجت همگام می‌شود	Date, event, times and Moon data are synced across all widget sizes
+D	ویجت‌ها به‌روزرسانی شدند	Widgets updated
+D	والپیپر زندهٔ تقویم	Live calendar wallpaper
+D	والپیپر Mooncalendar را در تنظیمات Android فعال کنید	Enable the Mooncalendar wallpaper in Android settings
+D	بازکردن والپیپر ممکن نشد	Couldn't open the wallpaper
+D	حالت Screensaver	Screensaver mode
+D	تنظیم Mooncalendar به‌عنوان محافظ صفحهٔ Android	Set Mooncalendar as the Android screensaver
+D	بازکردن تنظیمات محافظ صفحه ممکن نشد	Couldn't open the screensaver settings
+D	ویندوز	Windows
+D	فعال ماندن در پس‌زمینه	Keep running in the background
+D	با بستن پنجره، برنامه به‌جای خروج در پس‌زمینه می‌ماند	Closing the window keeps the app in the background instead of quitting
+D	نمایش آیکون Tray	Show the Tray icon
+D	نمایش آیکون Mooncalendar در ناحیهٔ اعلان ویندوز	Show the Mooncalendar icon in the Windows notification area
+D	انتخاب شهر یا استان	Choose a city or province
+D	استفاده از موقعیت فعلی دستگاه	Use the device's current location
+D	انتخاب روی نقشه	Choose on the map
+D	تنظیم مختصات به‌صورت دستی	Set coordinates manually
+D	ورود دستی مختصات	Enter coordinates manually
+D	عرض، طول و ارتفاع جغرافیایی را دستی وارد کنید	Enter the latitude, longitude and altitude manually
+D	پاک‌کردن مکان ذخیره‌شده و غیرفعال‌شدن اوقات شرعی و اذان	Clear the saved location and turn off prayer times and Athan
+D	اذان	Athan
+D	برای فعال‌شدن اوقات شرعی و اذان، ابتدا مکان خود را تعیین کنید	To enable prayer times and Athan, set your location first
+D	شیوهٔ محاسبه	Calculation method
+D	شیوهٔ عرض‌های جغرافیایی بالا	High-latitude method
+D	شیوهٔ محاسبهٔ اذان عصر حنفی	Hanafi Asr calculation
+D	استفاده از روش حنفی برای عصر	Use the Hanafi method for Asr
+D	فاصلهٔ بین اذان واقعی و اذان برنامه	Offset between actual Athan and the app's Athan
+D	انتخاب اذان	Choose Athan
+D	پیش‌نمایش	Preview
+D	اعلان و صدای اذان را همین حالا مثل زمان واقعی نشان می‌دهد	Shows the Athan notification and sound right now as at the real time
+D	توقف صدای اذان	Stop the Athan sound
+D	لرزش	Vibration
+D	لرزش هنگام اذان (با تغییر آن، کانال اعلان اذان دوباره ساخته می‌شود)	Vibrate during Athan (changing it recreates the Athan notification channel)
+D	برای تنظیم حجم صدای اذان، هنگام زدن دکمهٔ فیزیکی صدای گوشی، در قسمت سه‌نقطهٔ آن پنجره، حجم صدای کانال اعلان (Notification) دستگاه را تغییر دهید.	To adjust the Athan volume, press the phone's physical volume button, then in the three-dot menu of that panel change the Notification channel volume.
+D	اذان‌ها	Athans
+D	جهت عملکرد صحیح اذان برنامه به دسترسی اعلان نیاز دارد. اگر پنجرهٔ درخواست نمایش داده نمی‌شود، از تنظیمات اعلان‌های برنامه آن را فعال کنید.	For Athan to work properly the app needs notification access. If the request dialog doesn't appear, enable it from the app's notification settings.
+D	اذان بعدی	Next Athan
+D	زمانی برای نمایش وجود ندارد	Nothing to show
+D	اعلان‌های برنامه غیرفعال است	App notifications are disabled
+D	بدون دسترسی اعلان، اذان نمایش داده نمی‌شود. برای فعال‌سازی ضربه بزنید.	Without notification access, Athan won't be shown. Tap to enable.
+D	اجازهٔ زنگ دقیق داده نشده است	Exact alarm permission not granted
+D	برای اینکه اذان دقیقاً سر وقت پخش شود، «آلارم‌ها و یادآورها» را برای برنامه مجاز کنید.	For Athan to play exactly on time, allow "Alarms & reminders" for the app.
+D	محدودیت باتری	Battery restriction
+D	اگر اذان گاهی پخش نمی‌شود، برنامه را از بهینه‌سازی باتری مستثنا کنید (در برخی گوشی‌ها «شروع خودکار» هم باید فعال باشد).	If Athan sometimes doesn't play, exclude the app from battery optimization (on some phones "Auto-start" must also be enabled).
+D	فردا	Tomorrow
+D	صدای انتخاب‌شده	Selected sound
+D	صدای اذان تنظیم شد؛ برای شنیدن آن از «پیش‌نمایش» استفاده کنید	The Athan sound is set; use "Preview" to hear it
+D	صدای درخواستی تنظیم شد	The requested sound is set
+D	پیش‌فرض دستگاه	Device default
+D	انتخاب از زنگ‌ها و اعلان‌های گوشی	Choose from the phone's ringtones and notifications
+D	بیشتر	More
+D	انتخاب یک پرونده صوتی، برای نمونه «mp3»	Choose an audio file, for example "mp3"
+D	نمایش پیش‌نمایش اذان ناموفق بود	Showing the Athan preview failed
+D	چیدمان خالی است	The layout is empty
+D	چیدمان اعلان	Notification layout
+D	تعداد خط‌ها نامحدود است. هر خط می‌تواند چند آیتم داشته باشد و خط‌ها و آیتم‌ها قابل جابه‌جایی هستند.	The number of lines is unlimited. Each line can hold several items, and lines and items can be rearranged.
+D	هیچ خطی فعال نیست. برای ساختن اعلان، یک خط اضافه کنید.	No line is active. Add a line to build the notification.
+D	بدون آیتم	No item
+D	خط ۱	Line 1
+D	افزودن آیتم	Add item
+D	حذف خط	Remove line
+D	ظاهر این خط	This line's style
+D	در ویندوز «زیرخط» پشتیبانی نمی‌شود و فقط سه بخش اول اعلان استایل جدا دارند.	On Windows "Underline" is not supported and only the first three parts of the notification have separate styles.
+D	انتخاب آیتم‌های این خط	Choose this line's items
+D	انتقال به خط دیگر	Move to another line
+D	حذف آیتم	Remove item
+D	انتخاب آیتم‌ها	Choose items
+D	افزودن خط	Add line
+D	ذخیره	Save
+D	برای نمایش رویدادهای تقویم دستگاه، دسترسی تقویم لازم است	Calendar permission is needed to show the device calendar events
+D	رویدادهای شخصی	Personal events
+D	رویدادهای تقویم گوشی با حفظ تقویم‌های برنامه نمایش داده می‌شوند	The phone's calendar events are shown along with the app's calendars
+D	در Android از تقویم سیستم خوانده می‌شود	On Android it is read from the system calendar
+D	روزهای تعطیل هفته	Weekly holidays
+D	اصلاح تقویم قمری	Lunar calendar adjustment
+D	بدون اصلاح	No adjustment
+D	شفاف	Transparent
+D	شفافیت	Opacity
+D	قرمز	Red
+D	سبز	Green
+D	آبی	Blue
+D	مناسبت‌های غیرتعطیل	Non-holiday events
+D	نیمه‌شب شرعی	Midnight
+D	تعطیلات رسمی تنظیم‌شدهٔ مرکز تقویم دانشگاه تهران	Official holidays set by the University of Tehran Calendar Center
+D	مناسبت‌های تقویم رسمی دانشگاه تهران	Events of the official calendar of the University of Tehran
+D	رخصتی‌های افغانستان	Afghanistan holidays
+D	سایر مناسبت‌های افغانستان	Other Afghanistan events
+D	مناسبت‌های ایران باستان	Ancient Iran events
+D	مناسبت‌های بین‌المللی	International events
+D	تعطیلات نپال	Nepal holidays
+D	سایر مناسبت‌های نپال	Other Nepal events
+D	فاصلهٔ اذان	Athan offset
+D	دقیقه	minutes
+D	اندازهٔ پنجره پس از بستن برنامه ذخیره می‌شود و در اجرای بعدی بازگردانده می‌شود.	The window size is saved when the app is closed and restored on the next launch.
+D	حالت موبایلی	Mobile mode
+D	حالت دسکتاپی	Desktop mode
+D	مکان اوقات	Times location
+D	اگر مایلید اوقات نمایش داده شود این بخش را تنظیم کنید	Set this section if you want the times to be shown
+D	انجمن ژئوفیزیک، دانشگاه تهران	Institute of Geophysics, University of Tehran
+D	اتحادیهٔ جهانی اسلام	Muslim World League
+D	دانشگاه علوم اسلامی، کراچی	University of Islamic Sciences, Karachi
+D	جامعهٔ اسلامی آمریکای شمالی	Islamic Society of North America
+D	شیعهٔ دوازده امامی، قم	Shia Ithna-Ashari, Qom
+D	مرجع عمومی تحقیقات مصر	Egyptian General Authority of Survey
+D	دانشگاه ام‌القری، مکه	Umm al-Qura University, Makkah
+D	مسلمانان فرانسه	Union of Islamic Organizations of France
+D	شورای مسلمانان روسیه	Spiritual Administration of Muslims of Russia
+D	شورای دینی اسلامی سنگاپور	Majlis Ugama Islam Singapura
+D	بر پایهٔ زاویه	Angle based
+D	یک‌هفتم	One-seventh
+D	نیمهٔ شب	Midnight
+D	از غروب تا طلوع	Sunset to sunrise
+D	از غروب تا صبح	Sunset to dawn
+D	از مغرب تا طلوع	Maghrib to sunrise
+D	از مغرب تا صبح	Maghrib to dawn
+D	روشن	Light
+D	تاریک	Dark
+D	رنگ دستگاه	Device color
+D	مدرن	Modern
+D	رودبار	Aqua
+D	فیروزه‌ای	Turquoise
+D	خاکستری	Gray
+D	مشکی	Black
+D	پیش‌فرض	Default
+D	براساس حالت تاریک و رنگ‌بندی دستگاه	Based on the device's dark mode and color scheme
+D	با رنگ‌بندی دستگاه	With the device's color scheme
+D	دلخواه	Custom
+D	حالت نمایش	Display mode
+D	دستگاه	Device
+D	رنگ‌بندی	Color scheme
+D	حمل (بره)	Aries (Ram)
+D	ثور (گاو)	Taurus (Bull)
+D	جوزا (دوپیکر)	Gemini (Twins)
+D	سرطان (خرچنگ)	Cancer (Crab)
+D	اسد (شیر)	Leo (Lion)
+D	سنبله (خوشه)	Virgo (Maiden)
+D	میزان (ترازو)	Libra (Scales)
+D	عقرب (کژدم)	Scorpio (Scorpion)
+D	قوس (کمان)	Sagittarius (Archer)
+D	جدی (بزغاله)	Capricorn (Goat)
+D	دلو (آبریز)	Aquarius (Water-bearer)
+D	حوت (ماهی)	Pisces (Fish)
+D	برج شمسی: 	Solar sign: 
+D	برج قمر: 	Moon sign: 
+D	فصل	Season
+D	سال	Year
+D	اورمزد	Ohrmazd
+D	وهمن	Vohuman
+D	سپندارمزد	Spandarmad
+D	خورداد	Khordad
+D	امرداد	Amurdad
+D	دی‌بآذر	Dey-be-Azar
+D	خور (خیر)	Khor
+D	گوش	Gosh
+D	دی‌بمهر	Dey-be-Mehr
+D	سروش	Soroush
+D	رشن	Rashn
+D	ورهرام	Vahram
+D	رام	Ram
+D	باد	Bad
+D	دی‌بدین	Dey-be-Din
+D	دین	Din
+D	ارد	Ard
+D	اشتاد	Ashtad
+D	آسمان	Asman
+D	زامیاد	Zamyad
+D	مانتره‌سپند	Mahraspand
+D	انارام	Anaram
+D	اهنود	Ahnavad
+D	اشتود	Ashtavad
+D	سپنتمد	Spandarmad
+D	وهوخشتر	Vohu Khshathra
+D	وهوشتواش	Vohushtvash
+D	اورداد	Ordibehesht
+D	تشرین اول	Tishrin al-Awwal (October)
+D	تشرین آخر	Tishrin al-Thani (November)
+D	کانون اول	Kanun al-Awwal (December)
+D	کانون آخر	Kanun al-Thani (January)
+D	شباط	Shubat (February)
+D	نیسان	Nisan (April)
+D	ایار	Ayyar (May)
+D	حزیران	Haziran (June)
+D	تموز	Tammuz (July)
+D	آب	Ab (August)
+D	ایلول	Aylul (September)
+D	ظهر	Noon
+D	صبح	Morning
+D	مغرب	Maghrib
+D	عشاء	Isha
+D	برای نمایش زمان‌های شرعی، مکان خود را تعیین کنید	To show the prayer times, set your location
+D	دریافت از GPS	Get from GPS
+D	جشن نوروز	Nowruz celebration
+D	جشن دهقان	Farmer's celebration
+D	روز زنگ مکتب	School Bell Day
+D	روز مطبوعات	Press Day
+D	کودتای حزب دموکراتیک خلق افغانستان (سال ۱۳۵۷)	Coup of the People's Democratic Party of Afghanistan (1357 SH)
+D	پیروزی جهاد مقدس افغانستان (سال ۱۳۷۱)	Victory of the Holy Jihad of Afghanistan (1371 SH)
+D	روز مادر	Mother's Day
+D	روز استرداد استقلال کشور (سال ۱۲۹۸ مصادف با ۱۹۱۹ میلادی)	Day of the Restoration of the Country's Independence (1298 SH, 1919 CE)
+D	روز همبستگی با برادران پشتون و بلوچ	Day of solidarity with the Pashtun and Baloch brothers
+D	روز شهادت قهرمان ملی افغانستان (آغاز هفتهٔ شهید)	Day of the martyrdom of the national hero of Afghanistan (start of Martyr Week)
+D	روز هنر	Art Day
+D	روز جیودیزیست‌های کشور	Country's Geodesists Day
+D	آغاز هفتهٔ مخصوص سره میاشت	Start of the special Sra Miashta week
+D	روز ملی زبان اوزبیکی	National Uzbek Language Day
+D	روز وحدت ملی و شهادت شش عضو ولسی جرگه شورای ملی در بغلان (سال ۱۳۸۶)	National Unity Day and martyrdom of six members of the Wolesi Jirga in Baghlan (1386 SH)
+D	روز تحقیق و پژوهش	Research Day
+D	روز تجاوز ارتش اتحاد شوروی سابق بر حریم کشور (سال ۱۳۵۸)	Day of the invasion of the former Soviet army on the country (1358 SH)
+D	هفتهٔ قانون اساسی افغانستان (۱۴-۲۰ جدی)	Constitution Week of Afghanistan (14–20 Jadi)
+D	روز متعاقدین	Contractors Day
+D	روز شکست و خروج ارتش اتحاد شوروی سابق از افغانستان	Day of the defeat and exit of the former Soviet army from Afghanistan
+D	روز تکبیر و قیام مردم کابل در برابر تجاوز ارتش اتحاد شوروی سابق	Day of Takbir and the uprising of the people of Kabul against the invasion of the former Soviet army
+D	روز ملی حمایت از نیروهای دفاعی و امنیتی کشور	National Day of Support for the country's defense and security forces
+D	روز حفاظت از میراث‌های فرهنگی کشور	Day of the protection of the country's cultural heritage
+D	روز شهید وحدت ملی استاد عبدالعلی مزاری (۱۳۷۳)	Day of the martyr of national unity, Ustad Abdul Ali Mazari (1373)
+D	روز قیام مردم هرات بر علیه جمهوری دموکراتیک خلق افغانستان	Day of the uprising of the people of Herat against the Democratic Republic of Afghanistan
+D	روز ملی خبرنگار	National Journalist Day
+D	آغاز نوروز	Start of Nowruz
+D	عید نوروز	Nowruz holiday
+D	هجوم مأموران ستم‌شاهی پهلوی به مدرسهٔ فیضیهٔ قم (۱۳۴۲ ه‍.ش)	Attack of the Pahlavi regime's agents on the Faiziyeh School of Qom (1342 SH)
+D	آغاز عملیات فتح‌المبین (۱۳۶۱ ه‍.ش)	Start of Operation Fath-ol-Mobin (1361 SH)
+D	زادروز زرتشت پیامبر	Birthday of the Prophet Zoroaster
+D	روز هنرهای نمایشی	Performing Arts Day
+D	روز جمهوری اسلامی ایران	Day of the Islamic Republic of Iran
+D	روز طبیعت	Nature Day
+D	روز ذخایر ژنتیکی و زیستی	Genetic and Biological Reserves Day
+D	روز سلامتی	Health Day
+D	شهادت آیت‌اللّه سیدمحمدباقر صدر و خواهر ایشان بنت‌الهدی به دست حکومت بعث عراق (۱۳۵۹ ه‍.ش)	Martyrdom of Ayatollah Sayyid Muhammad Baqir al-Sadr and his sister Bint al-Huda by the Iraqi Ba'ath regime (1359 SH)
+D	روز ملی فناوری هسته‌ای	National Nuclear Technology Day
+D	شهادت سید مرتضی آوینی (۱۳۷۲ ه‍.ش)	Martyrdom of Seyyed Morteza Avini (1372 SH)
+D	روز هنر انقلاب اسلامی	Islamic Revolution Art Day
+D	شهادت امیر سپهبد علی صیاد شیرازی (۱۳۷۸ ه‍.ش)	Martyrdom of Lieutenant General Ali Sayyad Shirazi (1378 SH)
+D	سالروز افتتاح حساب شمارهٔ ۱۰۰ به فرمان حضرت امام خمینی (ره) و تأسیس بنیاد مسکن انقلاب اسلامی (۱۳۵۸ ه‍.ش)	Anniversary of opening Account No. 100 by order of Imam Khomeini and the founding of the Islamic Revolution Housing Foundation (1358 SH)
+D	روز بزرگداشت عطار نیشابوری	Commemoration of Attar of Nishapur
+D	روز ارتش جمهوری اسلامی و نیروی زمینی	Day of the Islamic Republic's Army and the Ground Forces
+D	روز گندم و نان	Wheat and Bread Day
+D	روز بزرگداشت سعدی	Commemoration of Saadi
+D	روز نثر فارسی	Persian Prose Day
+D	روز شهدای ورزشکار	Day of Martyred Athletes
+D	تأسیس سپاه پاسداران انقلاب اسلامی (۱۳۵۸ ه‍.ش)	Founding of the Islamic Revolutionary Guard Corps (1358 SH)
+D	سالروز اعلام انقلاب فرهنگی (۱۳۵۹ ه‍.ش)	Anniversary of the announcement of the Cultural Revolution (1359 SH)
+D	روز زمین پاک	Clean Earth Day
+D	روز بزرگداشت شیخ بهایی	Commemoration of Sheikh Baha'i
+D	روز معماری	Architecture Day
+D	سالروز شهادت امیر سپهبد قرنی (۱۳۵۸ ه‍.ش)	Anniversary of the martyrdom of Lieutenant General Qarani (1358 SH)
+D	شکست حملهٔ نظامی آمریکا به ایران در طبس (۱۳۵۹ ه‍.ش)	Failure of the American military attack on Iran at Tabas (1359 SH)
+D	روز ایمنی حمل و نقل	Transport Safety Day
+D	روز شوراها	Councils Day
+D	روز ملی خلیج فارس	National Persian Gulf Day
+D	آغاز عملیات بیت‌المقدس (۱۳۶۱ ه‍.ش)	Start of Operation Bayt al-Muqaddas (1361 SH)
+D	شهادت استاد مرتضی مطهری (۱۳۵۸ ه‍.ش)	Martyrdom of Ustad Morteza Motahhari (1358 SH)
+D	روز معلم	Teacher's Day
+D	روز بزرگداشت شیخ صدوق	Commemoration of Sheikh Saduq
+D	روز بیماری‌های خاص و صعب‌العلاج	Day of special and difficult-to-treat diseases
+D	روز بزرگداشت شیخ کلینی	Commemoration of Sheikh Kulayni
+D	روز اسناد ملی و میراث مکتوب	National Documents and Written Heritage Day
+D	روز گل محمدی و گلاب	Damask Rose and Rose Water Day
+D	لغو امتیاز تنباکو به فتوای آیت‌الله میرزا حسن شیرازی (۱۲۷۰ ه‍.ش)	Cancellation of the tobacco concession by the fatwa of Ayatollah Mirza Hasan Shirazi (1270 SH)
+D	روز پاسداشت زبان فارسی و بزرگداشت حکیم ابوالقاسم فردوسی	Persian Language Day and commemoration of Hakim Abolqasem Ferdowsi
+D	روز ارتباطات و روابط عمومی	Communications and Public Relations Day
+D	روز بزرگداشت حکیم عمر خیام	Commemoration of Hakim Omar Khayyam
+D	روز ملی جمعیت	National Population Day
+D	روز شهدای خدمت	Day of Service Martyrs
+D	روز اهدای عضو، اهدای زندگی	Organ Donation Day, donating life
+D	روز بهره‌وری و بهینه‌سازی مصرف	Productivity and Consumption Optimization Day
+D	روز بزرگداشت ملاصدرا (صدرالمتألهین)	Commemoration of Mulla Sadra (Sadr al-Muta'allihin)
+D	فتح خرمشهر در عملیات بیت‌المقدس (۱۳۶۱ ه‍.ش) و روز مقاومت، ایثار و پیروزی	Liberation of Khorramshahr in Operation Bayt al-Muqaddas (1361 SH) and Day of Resistance, Sacrifice and Victory
+D	روز مقاومت و پایداری	Day of Resistance and Perseverance
+D	روز دزفول	Dezful Day
+D	روز نسیم مهر (روز حمایت از خانواده زندانیان)	Mehr Breeze Day (Day of supporting the families of prisoners)
+D	افتتاح اولین دورهٔ مجلس شورای اسلامی (۱۳۵۹ ه‍.ش)	Opening of the first term of the Islamic Consultative Assembly (1359 SH)
+D	رحلت حضرت امام خمینی (ره) رهبر کبیر انقلاب و بنیان‌گذار جمهوری اسلامی ایران (۱۳۶۸ ه‍.ق)	Demise of Imam Khomeini, the great leader of the Revolution and founder of the Islamic Republic of Iran (1368 SH)
+D	انتخاب حضرت آیت‌الله امام خامنه‌ای به رهبری (۱۳۶۸ ه‍.ش)	Selection of Ayatollah Imam Khamenei as Leader (1368 SH)
+D	قیام خونین ۱۵ خرداد (۱۳۴۲ ه‍.ش)	Bloody uprising of 15 Khordad (1342 SH)
+D	زندانی‌شدن حضرت امام خمینی (ره) به دست مأموران ستم شاهی پهلوی (۱۳۴۲ ه‍.ش)	Imprisonment of Imam Khomeini by the Pahlavi regime's agents (1342 SH)
+D	روز صنایع دستی	Handicrafts Day
+D	روز ملی فرش	National Carpet Day
+D	شهادت آیت‌الله سعیدی به دست مأموران ستم‌شاهی پهلوی (۱۳۴۹ ه‍.ش)	Martyrdom of Ayatollah Saeedi by the Pahlavi regime's agents (1349 SH)
+D	روز شهدای اقتدار و اتحاد ملی ایران	Day of the martyrs of Iran's power and national unity
+D	شهادت سربازان دلیر اسلام: بخارایی، امانی، صفار هرندی و نیک‌نژاد (۱۳۴۴ ه‍.ش)	Martyrdom of Islam's brave soldiers: Bukharai, Amani, Saffar Harandi and Nikneżhad (1344 SH)
+D	روز جهاد کشاورزی (تشکیل جهاد سازندگی به فرمان حضرت امام خمینی (ره)) (۱۳۵۸ ه‍.ش)	Agricultural Jihad Day (formation of the Construction Jihad by order of Imam Khomeini) (1358 SH)
+D	درگذشت دکتر علی شریعتی (۱۳۵۶ ه‍.ش)	Death of Dr. Ali Shariati (1356 SH)
+D	شهادت زائران حرم رضوی (ع) به دست ایادی آمریکا (عاشورای ۱۳۷۳ ه‍.ش)	Martyrdom of the pilgrims of the Razavi shrine by American agents (Ashura 1373 SH)
+D	شهادت دکتر مصطفی چمران (۱۳۶۰ ه‍.ش)	Martyrdom of Dr. Mostafa Chamran (1360 SH)
+D	روز بسیج استادان	Professors' Basij Day
+D	سالروز صدور فرمان حضرت امام خمینی (ره) مبنی بر تأسیس سازمان تبلیغات اسلامی (۱۳۶۰ ه‍.ش)	Anniversary of Imam Khomeini's decree establishing the Islamic Propagation Organization (1360 SH)
+D	روز تبلیغ و اطلاع‌رسانی دینی	Religious Propagation and Information Day
+D	روز اصناف	Guilds Day
+D	شهادت مظلومانهٔ آیت‌الله دکتر بهشتی و ۷۲ تن از یاران حضرت امام خمینی (ره) با انفجار بمب به دست منافقان در دفتر مرکزی حزب جمهوری اسلامی (۱۳۶۰ ه‍.ش)	Unjust martyrdom of Ayatollah Dr. Beheshti and 72 companions of Imam Khomeini in the bombing at the Islamic Republic Party headquarters (1360 SH)
+D	روز قوهٔ قضائیه	Judiciary Day
+D	بمباران شیمیایی شهر سردشت (۱۳۶۶ ه‍.ش)	Chemical bombing of the city of Sardasht (1366 SH)
+D	روز مبارزه با سلاح‌های شیمیایی و میکروبی	Day against Chemical and Biological Weapons
+D	روز صنعت و معدن	Industry and Mining Day
+D	روز دیپلماسی فرهنگی و تعامل با جهان	Cultural Diplomacy and Engagement with the World Day
+D	روز آزادسازی شهر مهران	Day of the liberation of the city of Mehran
+D	روز بزرگداشت صائب تبریزی	Commemoration of Saib Tabrizi
+D	یاد روز ورود حضرت امام رضا (ع) به نیشابور و نقل حدیث سلسلةالذهب	Commemoration of Imam Reza's arrival in Nishapur and the narration of the Silsilat al-Dhahab hadith
+D	شهادت چهارمین شهید محراب، آیت‌الله صدوقی به دست منافقان (۱۳۶۱ ه‍.ش)	Martyrdom of the fourth martyr of the mihrab, Ayatollah Sadoughi, by the hypocrites (1361 SH)
+D	حملهٔ ددمنشانهٔ ناوگان آمریکای جنایتکار به هواپیمای مسافربری جمهوری اسلامی ایران (۱۳۶۷ ه‍.ش)	Brutal attack of the American fleet on an Iranian passenger plane (1367 SH)
+D	روز افشای حقوق بشر آمریکایی	Day of exposing American human rights
+D	روز بزرگداشت علامه امینی (۱۳۴۹ ه‍.ش)	Commemoration of Allameh Amini (1349 SH)
+D	روز قلم	Pen Day
+D	روز شهرداری و دهیاری	Municipality and Village Administration Day
+D	روز مالیات	Tax Day
+D	روز ادبیات کودکان و نوجوانان	Children's and Young Adults' Literature Day
+D	کشف توطئهٔ آمریکایی در پایگاه هوایی شهید نوژه (کودتای نافرجام نقاب) (۱۳۵۹ ه‍.ش)	Discovery of the American plot at Shahid Nojeh Air Base (the failed Nojeh coup) (1359 SH)
+D	روز عفاف و حجاب	Chastity and Hijab Day
+D	حمله به مسجد گوهرشاد و کشتار مردم به دست رضاخان (۱۳۱۴ ه‍.ش)	Attack on the Goharshad Mosque and massacre of the people by Reza Khan (1314 SH)
+D	روز بزرگداشت خوارزمی	Commemoration of Khwarizmi
+D	روز فناوری اطلاعات	Information Technology Day
+D	روز گفت‌وگو و تعامل سازنده با دنیا	Dialogue and Constructive Engagement with the World Day
+D	گشایش نخستین مجلس خبرگان رهبری (۱۳۶۲ ه‍.ش)	Opening of the first Assembly of Experts (1362 SH)
+D	روز بهزیستی و تأمین اجتماعی	Welfare and Social Security Day
+D	سالروز تأسیس نهاد شورای نگهبان (۱۳۵۹ ه‍.ش)	Anniversary of the founding of the Guardian Council (1359 SH)
+D	اعلام پذیرش قطعنامهٔ ۵۹۸ شورای امنیت از سوی ایران (۱۳۶۷ ه‍.ش)	Iran's announcement of accepting Security Council Resolution 598 (1367 SH)
+D	روز بزرگداشت آیت‌الله سید ابوالقاسم کاشانی	Commemoration of Ayatollah Sayyid Abolqasem Kashani
+D	روز بزرگداشت شیخ صفی‌الدین اردبیلی	Commemoration of Sheikh Safi al-Din Ardabili
+D	سالروز عملیات افتخار‌آفرین مرصاد (۱۳۶۷ ه‍.ش)	Anniversary of the glorious Operation Mersad (1367 SH)
+D	روز اقامهٔ اولین نماز جمعه با حکم حضرت امام خمینی (ره) در سال ۱۳۵۸	Day of holding the first Friday prayer by order of Imam Khomeini in 1358
+D	روز کارآفرینی و آموزش‌های فنی‌و‌حرفه‌ای	Entrepreneurship and Technical and Vocational Training Day
+D	روز شعر و ادبیات آیینی	Ritual Poetry and Literature Day
+D	روز بزرگداشت محتشم کاشانی	Commemoration of Mohtasham Kashani
+D	روز بزرگداشت شیخ شهاب‌الدین سهروردی (شیخ اشراق)	Commemoration of Sheikh Shahab al-Din Suhrawardi (Sheikh Ishraq)
+D	روز زنجان	Zanjan Day
+D	روز اهدای خون	Blood Donation Day
+D	شهادت آیت‌الله شیخ فضل‌الله نوری (۱۲۸۸ ه‍.ش)	Martyrdom of Ayatollah Sheikh Fazlollah Nouri (1288 SH)
+D	صدور فرمان مشروطیت (۱۲۸۵ ه‍.ش)	Issuing of the Constitutional decree (1285 SH)
+D	روز حقوق بشر اسلامی و کرامت انسانی	Islamic Human Rights and Human Dignity Day
+D	سالروز شهادت امیر سرلشکر خلبان عباس بابایی (۱۳۶۶ ه‍.ش)	Anniversary of the martyrdom of Major General pilot Abbas Babaei (1366 SH)
+D	تشکیل جهاد دانشگاهی (۱۳۵۹ ه‍.ش)	Formation of the Academic Jihad (1359 SH)
+D	سالروز شهادت محمود صارمی	Anniversary of the martyrdom of Mahmoud Saremi
+D	روز خبرنگار	Journalist Day
+D	روز بزرگداشت شهدای مدافع حرم	Commemoration of the martyrs defending the shrine
+D	روز حمایت از صنایع کوچک	Small Industries Support Day
+D	روز تشکل‌ها و مشارکت‌های اجتماعی	Organizations and Social Participation Day
+D	روز مقاومت اسلامی	Islamic Resistance Day
+D	آغاز بازگشت آزادگان به میهن اسلامی (۱۳۶۹ ه‍.ش)	Start of the return of the freed prisoners to the Islamic homeland (1369 SH)
+D	کودتای آمریکا برای بازگرداندن شاه (۱۳۳۲ ه‍.ش)	American coup to restore the Shah (1332 SH)
+D	گشایش مجلس خبرگان برای بررسی نهایی قانون اساسی جمهوری اسلامی ایران (۱۳۵۸ ه‍.ش)	Opening of the Assembly of Experts for the final review of the constitution of the Islamic Republic of Iran (1358 SH)
+D	روز بزرگداشت علامهٔ مجلسی	Commemoration of Allameh Majlesi
+D	روز صنعت دفاعی	Defense Industry Day
+D	روز عسل	Honey Day
+D	روز بزرگداشت ابوعلی سینا	Commemoration of Avicenna
+D	روز پزشک	Physician's Day
+D	روز همدان	Hamedan Day
+D	آغاز هفتهٔ دولت	Start of Government Week
+D	شهادت سید علی اندرزگو (در روز ۱۹ ماه مبارک رمضان) (۱۳۵۷ ه‍.ش)	Martyrdom of Seyyed Ali Andarzgoo (on the 19th of the holy month of Ramadan) (1357 SH)
+D	اِشغال ایران توسط متفقین و فرار رضاخان (۱۳۲۰ ه‍.ش)	Occupation of Iran by the Allies and the flight of Reza Khan (1320 SH)
+D	روز کارمند	Employee Day
+D	روز بزرگداشت محمدبن زکریای رازی	Commemoration of Muhammad ibn Zakariya al-Razi
+D	روز داروسازی	Pharmacy Day
+D	روز کُشتی	Wrestling Day
+D	انفجار دفتر نخست‌وزیری به دست منافقان و شهادت مظلومانهٔ شهیدان رجایی و باهنر (۱۳۶۰ ه‍.ش)	Bombing of the Prime Minister's office by the hypocrites and the martyrdom of Rajai and Bahonar (1360 SH)
+D	روز مبارزه با تروریسم	Day Against Terrorism
+D	سالروز تصویب قانون عملیات بانکی بدون ربا (۱۳۶۲ ه‍.ش)	Anniversary of the approval of the Usury-Free Banking Law (1362 SH)
+D	روز بانکداری اسلامی	Islamic Banking Day
+D	روز تشکیل قرارگاه پدافند هوایی حضرت خاتم‌الانبیا (ص) (۱۳۷۱ ه‍.ش)	Day of the formation of the Khatam al-Anbiya Air Defense Headquarters (1371 SH)
+D	روز صنعت چاپ	Printing Industry Day
+D	شهادت رئیسعلی دلواری (۱۲۹۴ ه‍.ش)	Martyrdom of Raisali Delvari (1294 SH)
+D	روز مبارزه با استعمار انگلیس	Day of Struggle Against British Colonialism
+D	روز بهوَرز	Behvarz Day
+D	روز تعاون	Cooperation Day
+D	روز بزرگداشت ابوریحان بیرونی	Commemoration of Abu Rayhan Biruni
+D	روز علوم پایه	Basic Sciences Day
+D	روز مردم‌شناسی	Anthropology Day
+D	سالروز زلزله فردوس در سال ۱۳۴۷	Anniversary of the Ferdows earthquake in 1347
+D	روز حرکت‌های جهادی و امداد مردمی	Jihadi Movements and Popular Relief Day
+D	شهادت آیت‌الله قدوسی و سرتیپ وحید دستجردی (۱۳۶۰ ه‍.ش)	Martyrdom of Ayatollah Quddusi and Brigadier General Vahid Dastjerdi (1360 SH)
+D	قیام ۱۷ شهریور و کشتار جمعی از مردم به دست مأموران ستم‌شاهی پهلوی (۱۳۵۷ ه‍.ش)	Uprising of 17 Shahrivar and mass killing of people by the Pahlavi regime's agents (1357 SH)
+D	وفات آیت‌الله سیدمحمود طالقانی اولین امام جمعهٔ تهران (۱۳۵۸ ه‍.ش)	Death of Ayatollah Sayyid Mahmoud Taleghani, first Friday prayer leader of Tehran (1358 SH)
+D	شهادت دومین شهید محراب، آیت‌الله مدنی به دست منافقان (۱۳۶۰ ه‍.ش)	Martyrdom of the second martyr of the mihrab, Ayatollah Madani, by the hypocrites (1360 SH)
+D	روز سینما	Cinema Day
+D	روز خرما	Date Fruit Day
+D	روز شعر و ادب فارسی	Persian Poetry and Literature Day
+D	روز بزرگداشت استاد سید محمدحسین شهریار	Commemoration of Ustad Sayyid Mohammad Hossein Shahriar
+D	آغاز جنگ تحمیلی (۱۳۵۹ ه‍.ش)	Start of the Imposed War (1359 SH)
+D	آغاز هفتهٔ دفاع مقدس	Start of Holy Defense Week
+D	روز پرچم	Flag Day
+D	روز بزرگداشت شهدای منا	Commemoration of the martyrs of Mina
+D	روز سرباز	Soldier's Day
+D	شکست حصر آبادان در عملیات ثامن‌الائمه (ع) (۱۳۶۰ ه‍.ش)	Breaking of the siege of Abadan in Operation Samen-ol-Aemeh (1360 SH)
+D	روز گردشگری	Tourism Day
+D	شهادت سرداران اسلام: فلاحی، فکوری، نامجو، کلاهدوز و جهان‌آرا (۱۳۶۰ ه‍.ش)	Martyrdom of Islam's commanders: Fallahi, Fakouri, Namjoo, Kolahdooz and Jahanara (1360 SH)
+D	روز بزرگداشت فرماندهان شهید دفاع مقدس	Commemoration of the martyred commanders of the Holy Defense
+D	روز آتش‌نشانی و ایمنی	Firefighting and Safety Day
+D	روز بزرگداشت شمس	Commemoration of Shams
+D	روز بزرگداشت مولوی	Commemoration of Rumi
+D	روز نخبگان	Elites Day
+D	هجرت حضرت امام خمینی (ره) از عراق به پاریس (۱۳۵۷ ه‍.ش)	Imam Khomeini's migration from Iraq to Paris (1357 SH)
+D	روز نیروی انتظامی	Police Day
+D	روز دامپزشکی	Veterinary Day
+D	روز روستا و عشایر	Village and Nomads Day
+D	روز جهانی حماسهٔ فلسطین	International Day of the Palestinian Epic
+D	طوفان الاقصی	Al-Aqsa Flood
+D	روز بزرگداشت حافظ	Commemoration of Hafez
+D	شهادت پنجمین شهید محراب، آیت‌الله اشرفی اصفهانی به دست منافقان (۱۳۶۱ ه‍.ش)	Martyrdom of the fifth martyr of the mihrab, Ayatollah Ashrafi Isfahani, by the hypocrites (1361 SH)
+D	روز ملی پارالمپیک	National Paralympic Day
+D	روز پیوند اولیا و مربیان	Parent-Teacher Association Day
+D	سالروز واقعهٔ به آتش کشیدن مسجد جامع شهر کرمان به دست دژخیمان حکومت پهلوی (۱۳۵۷ ه‍.ش)	Anniversary of the burning of the Jame Mosque of Kerman by the Pahlavi regime's executioners (1357 SH)
+D	روز نسل‌کشی کودکان و زنان فلسطینی	Day of the genocide of Palestinian children and women
+D	روز تربیت‌بدنی و ورزش	Physical Education and Sports Day
+D	روز صادرات	Exports Day
+D	شهادت مظلومانهٔ آیت‌الله حاج سید مصطفی خمینی (۱۳۵۶ ه‍.ش)	Martyrdom of Ayatollah Hajj Sayyid Mostafa Khomeini (1356 SH)
+D	روز آمار و برنامه‌ریزی	Statistics and Planning Day
+D	روز بزرگداشت ابوالفضل بیهقی	Commemoration of Abolfazl Beyhaqi
+D	اعتراض و افشاگری حضرت امام خمینی (ره) علیه پذیرش کاپیتولاسیون (۱۳۴۳ ه‍.ش)	Imam Khomeini's protest and exposure against the acceptance of capitulation (1343 SH)
+D	روز زعفران	Saffron Day
+D	روز انار	Pomegranate Day
+D	شهادت محمدحسین فهمیده (بسیجی ۱۳ ساله) (۱۳۵۹ ه‍.ش)	Martyrdom of Mohammad Hossein Fahmideh (13-year-old Basiji) (1359 SH)
+D	روز نوجوان و بسیج دانش‌آموزی	Teen and Student Basij Day
+D	روز پدافند غیرعامل	Passive Defense Day
+D	شهادت اولین شهید محراب، آیت‌الله قاضی طباطبایی به دست منافقان (۱۳۵۸ ه‍.ش)	Martyrdom of the first martyr of the mihrab, Ayatollah Qazi Tabatabai, by the hypocrites (1358 SH)
+D	تسخیر لانهٔ جاسوسی آمریکا به دست دانشجویان پیرو خط حضرت امام (۱۳۵۸ ه‍.ش)	Seizure of the American spy den by students following the Imam's line (1358 SH)
+D	روز ملی مبارزه با استکبار جهانی	National Day of Struggle Against Global Arrogance
+D	روز دانش‌آموز	Student Day
+D	تبعید حضرت امام خمینی (ره) از ایران به ترکیه (۱۳۴۳ ه‍.ش)	Exile of Imam Khomeini from Iran to Turkey (1343 SH)
+D	روز فرهنگ عمومی	Public Culture Day
+D	روز مازندران	Mazandaran Day
+D	روز کیفیت	Quality Day
+D	روز هوافضا	Aerospace Day
+D	روز کتاب، کتاب‌خوانی و کتابدار	Book, Reading and Librarian Day
+D	روز بزرگداشت آیت‌الله علامه سید محمّدحسین طباطبایی (۱۳۶۰ ه‍.ش)	Commemoration of Ayatollah Allameh Sayyid Mohammad Hossein Tabatabai (1360 SH)
+D	روز اصفهان	Isfahan Day
+D	سالروز آزادسازی سوسنگرد	Anniversary of the liberation of Susangerd
+D	روز قهرمان ملی	National Hero Day
+D	روز بزرگداشت ابونصر فارابی	Commemoration of Abu Nasr Farabi
+D	روز حکمت و فلسفه	Wisdom and Philosophy Day
+D	روز زیتون	Olive Day
+D	تشکیل بسیج مستضعفان به فرمان حضرت امام خمینی (ره) (۱۳۵۸ ه‍.ش)	Formation of the Mobilization of the Oppressed by order of Imam Khomeini (1358 SH)
+D	روز بسیج مستضعفان	Basij of the Oppressed Day
+D	سالروز قیام مردم گرگان (۱۳۵۷ ه‍.ش)	Anniversary of the uprising of the people of Gorgan (1357 SH)
+D	روز نیروی دریایی	Navy Day
+D	روز نوآوری و فناوری ایران‌ساخت	Iranian-Made Innovation and Technology Day
+D	روز بزرگداشت شیخ مفید	Commemoration of Sheikh Mufid
+D	روز جزایر سه‌گانهٔ خلیج فارس (بوموسی، تنب بزرگ و تنب کوچک)	Day of the three Persian Gulf islands (Abu Musa, Greater Tunb and Lesser Tunb)
+D	شهادت آیت‌الله سید حسن مدرس (۱۳۱۶ ه‍.ش) و روز مجلس	Martyrdom of Ayatollah Sayyid Hasan Modarres (1316 SH) and Parliament Day
+D	شهادت میرزا کوچک‌خان جنگلی (۱۳۰۰ ه‍.ش)	Martyrdom of Mirza Kuchik Khan Jangali (1300 SH)
+D	تصویب قانون اساسی جمهوری اسلامی ایران (۱۳۵۸ ه‍.ش)	Approval of the Constitution of the Islamic Republic of Iran (1358 SH)
+D	روز قانون اساسی جمهوری اسلامی ایران	Constitution Day of the Islamic Republic of Iran
+D	روز بیمه	Insurance Day
+D	روز دانشجو	University Student Day
+D	معرفی عراق به عنوان مسئول و آغازگر جنگ از سوی سازمان ملل (۱۳۷۰ ه‍.ش)	Introduction of Iraq by the United Nations as responsible for and initiator of the war (1370 SH)
+D	تشکیل شورای عالی انقلاب فرهنگی به فرمان حضرت امام خمینی (ره) (۱۳۶۳ ه‍.ش)	Formation of the Supreme Council of the Cultural Revolution by order of Imam Khomeini (1363 SH)
+D	شهادت سومین شهید محراب، آیت‌الله دستغیب به دست منافقان (۱۳۶۰ ه‍.ش)	Martyrdom of the third martyr of the mihrab, Ayatollah Dastgheib, by the hypocrites (1360 SH)
+D	روز پژوهش	Research Day
+D	روز حمل‌و‌نقل و رانندگان	Transport and Drivers Day
+D	شهادت آیت‌الله دکتر محمد مفتح (۱۳۵۸ ه‍.ش)	Martyrdom of Ayatollah Dr. Mohammad Mofatteh (1358 SH)
+D	روز وحدت حوزه و دانشگاه	Day of the unity of seminary and university
+D	روز جهان عاری از خشونت و افراطی‌گری	Day of a World Free of Violence and Extremism
+D	روز تجلیل از شهید تندگویان	Commemoration of the martyr Tondgouyan
+D	شب یلدا (چله)	Yalda Night (Chelleh)
+D	ترویج فرهنگ میهمانی و پیوند با خویشان	Promoting the culture of hospitality and ties with relatives
+D	روز ثبت احوال	Civil Registration Day
+D	روز بزرگداشت رودکی	Commemoration of Rudaki
+D	روز ایمنی در برابر زلزله و کاهش اثرات بلایای طبیعی	Earthquake Safety and Natural Disaster Mitigation Day
+D	سالروز تشکیل نهضت سوادآموزی به فرمان حضرت امام خمینی (ره) (۱۳۵۸ ه‍.ش)	Anniversary of the founding of the Literacy Movement by order of Imam Khomeini (1358 SH)
+D	شهادت آیت‌الله حسین غفاری به دست مأموران ستم‌شاهی پهلوی (۱۳۵۳ ه‍.ش)	Martyrdom of Ayatollah Hossein Ghaffari by the Pahlavi regime's agents (1353 SH)
+D	روز صنعت پتروشیمی	Petrochemical Industry Day
+D	روز بصیرت و میثاق امت با ولایت	Day of Insight and the nation's pledge to Wilayah
+D	روز بزرگداشت علامه مصباح یزدی	Commemoration of Allameh Mesbah Yazdi
+D	روز علوم انسانی اسلامی	Islamic Humanities Day
+D	روز جهانی مقاومت	World Resistance Day
+D	شهادت الگوی اخلاص و عمل سردار سپهبد قاسم سلیمانی به دست استکبار جهانی	Martyrdom of the role model of sincerity and action, General Qasem Soleimani, by global arrogance
+D	ابلاغ پیام تاریخی حضرت امام خمینی (ره) به گورباچف رهبر شوروی سابق (۱۳۶۷ ه‍.ش)	Delivery of Imam Khomeini's historic message to Gorbachev, leader of the former Soviet Union (1367 SH)
+D	شهادت سیدحسین علم‌الهدی و همرزمان وی در هویزه	Martyrdom of Seyyed Hossein Alamolhoda and his comrades in Hoveyzeh
+D	روز شهدای دانشجو	Day of Student Martyrs
+D	اجرای طرح استعماری حذف حجاب (کشف حجاب) به دست رضاخان (۱۳۱۴ ه‍.ش)	Implementation of the colonial plan to remove the hijab (unveiling) by Reza Khan (1314 SH)
+D	روز بزرگداشت خواجوی کرمانی	Commemoration of Khwaju Kermani
+D	روز کرمان	Kerman Day
+D	قیام خونین مردم قم (۱۳۵۶ ه‍.ش)	Bloody uprising of the people of Qom (1356 SH)
+D	شهادت میرزا تقی‌خان امیرکبیر (۱۲۳۰ ه‍.ش)	Martyrdom of Mirza Taqi Khan Amir Kabir (1230 SH)
+D	تشکیل شورای انقلاب به فرمان حضرت امام خمینی (ره) (۱۳۵۷ ه‍.ش)	Formation of the Revolutionary Council by order of Imam Khomeini (1357 SH)
+D	روز تاریخ‌نگاری انقلاب اسلامی	Islamic Revolution Historiography Day
+D	فرار شاه معدوم (۱۳۵۷ ه‍.ش)	Flight of the deposed Shah (1357 SH)
+D	شهادت نواب صفوی، طهماسبی، برادران واحدی و ذوالقدر از فدائیان اسلام (۱۳۳۴ ه‍.ش)	Martyrdom of Navvab Safavi, Tahmasebi, the Vahedi brothers and Zolghadr of the Fada'iyan-e Islam (1334 SH)
+D	روز بزرگداشت خاقانی شروانی	Commemoration of Khaqani Shirvani
+D	سالروز حماسهٔ مردم آمل	Anniversary of the epic of the people of Amol
+D	روز بزرگداشت صفی‌الدین اُرمَوی	Commemoration of Safi al-Din Urmawi
+D	روز آواها و نواهای ایرانی	Day of Iranian Sounds and Melodies
+D	سالروز بازگشت حضرت امام خمینی (ره) به ایران و آغاز دههٔ مبارک فجر انقلاب اسلامی	Anniversary of the return of Imam Khomeini to Iran and start of the blessed Fajr decade of the Islamic Revolution
+D	روز فناوری فضایی	Space Technology Day
+D	روز نیروی هوایی	Air Force Day
+D	روز چهارمحال و بختیاری	Chaharmahal and Bakhtiari Day
+D	شکسته‌شدن حکومت‌نظامی به فرمان حضرت امام خمینی (ره) (۱۳۵۷ ه‍.ش)	Breaking of the martial law by order of Imam Khomeini (1357 SH)
+D	پیروزی انقلاب اسلامی ایران و سقوط نظام شاهنشاهی (۱۳۵۷ ه‍.ش)	Victory of the Islamic Revolution of Iran and fall of the monarchy (1357 SH)
+D	صدور حکم تاریخی حضرت امام خمینی (ره) مبنی بر ارتداد سلمان‌رشدی نویسندهٔ خائن کتاب آیات شیطانی (۱۳۶۷ ه‍.ش)	Issuing of Imam Khomeini's historic ruling on the apostasy of Salman Rushdie, author of The Satanic Verses (1367 SH)
+D	قیام مردم تبریز به مناسبت چهلمین روز شهادت شهدای قم (۱۳۵۶ ه‍.ش)	Uprising of the people of Tabriz on the fortieth day after the martyrs of Qom (1356 SH)
+D	روز اقتصاد مقاومتی و کارآفرینی	Resistance Economy and Entrepreneurship Day
+D	کودتای انگلیسی رضاخان (۱۲۹۹ ه‍.ش)	Reza Khan's British-backed coup (1299 SH)
+D	روز بزرگداشت خواجه نصیرالدین طوسی	Commemoration of Khwaja Nasir al-Din Tusi
+D	روز مهندسی	Engineering Day
+D	روز امور تربیتی و تربیت اسلامی	Educational Affairs and Islamic Upbringing Day
+D	روز بزرگداشت حکیم حاج ملاهادی سبزواری	Commemoration of Hakim Haj Mulla Hadi Sabzevari
+D	روز حمایت از بیماران نادر	Rare Diseases Patients Support Day
+D	روز حمایت از حقوق مصرف‌کنندگان	Consumer Rights Protection Day
+D	روز احسان و نیکوکاری	Charity and Benevolence Day
+D	روز ترویج فرهنگ قرض‌الحسنه	Day of promoting the culture of Qard al-Hasan (interest-free loans)
+D	روز درختکاری	Tree Planting Day
+D	روز آموزش همگانی حفظ محیط زیست	Public Environmental Education Day
+D	روز بزرگداشت سید جمال‌الدین اسدآبادی	Commemoration of Sayyid Jamal al-Din Asadabadi
+D	سالروز تأسیس کانون‌های فرهنگی و هنری مساجد کشور	Anniversary of the founding of the country's Mosque Cultural and Artistic Centers
+D	روز بوشهر	Bushehr Day
+D	روز راهیان نور	Rahian-e Noor (Caravans of Light) Day
+D	روز بزرگداشت نظامی گنجوی	Commemoration of Nizami Ganjavi
+D	سالروز صدور فرمان حضرت امام خمینی (ره)، مبنی بر تأسیس بنیاد شهید انقلاب اسلامی (۱۳۵۸ ه‍.ش)	Anniversary of Imam Khomeini's decree establishing the Martyr Foundation of the Islamic Revolution (1358 SH)
+D	روز بزرگداشت شهدا	Martyrs' Commemoration Day
+D	روز بزرگداشت پروین اعتصامی	Commemoration of Parvin Etesami
+D	بمباران شیمیایی حلبچه به دست ارتش بعث عراق (۱۳۶۶ ه‍.ش)	Chemical bombing of Halabja by the Iraqi Ba'ath army (1366 SH)
+D	روز ملی‌شدن صنعت نفت ایران (۱۳۲۹ ه‍.ش)	Day of the nationalization of Iran's oil industry (1329 SH)
+D	روز آزمایشگاهیان	Laboratory Workers Day
+D	روز روان‌شناس و مشاور	Psychologist and Counselor Day
+D	روز صنعت بتن آماده	Ready-Mix Concrete Industry Day
+D	روز صنعت تهویه مطبوع	Air Conditioning Industry Day
+D	روز مشاغل خانگی و تولید خانواده‌محور	Home-Based Jobs and Family-Oriented Production Day
+D	روز بوم‌گردی	Ecotourism Day
+D	روز نقشه‌برداری	Surveying Day
+D	روز مشاور املاک	Real Estate Agent Day
+D	روز صنعت موتورسیکلت	Motorcycle Industry Day
+D	روز صنعت ابزارآلات	Tools Industry Day
+D	روز عینک‌سازی و بینایی‌سنجی	Optician and Optometry Day
+D	روز حمایت از تولید ملی و مبارزه با قاچاق کالا	Support for National Production and Fighting Goods Smuggling Day
+D	روز خیاط، صنعت نساجی و پوشاک	Tailor, Textile and Clothing Industry Day
+D	روز صنعت قیر و آسفالت	Bitumen and Asphalt Industry Day
+D	روز خلبان	Pilot Day
+D	روز کفاش، صنعت کفش و چرم	Cobbler, Shoe and Leather Industry Day
+D	روز فوریت‌های پزشکی (اورژانس)	Medical Emergency (EMS) Day
+D	روز صنعت آسانسور و پله‌برقی	Elevator and Escalator Industry Day
+D	روز صنعت ساختمان	Construction Industry Day
+D	روز محیط‌بان	Environmental Ranger Day
+D	روز صنعت نوشت‌افزار	Stationery Industry Day
+D	روز صنعت سرب و روی	Lead and Zinc Industry Day
+D	روز حسابدار	Accountant Day
+D	روز سد و نیروگاه برق‌آبی	Dam and Hydroelectric Power Plant Day
+D	روز صنعت مس	Copper Industry Day
+D	روز آرایشگر	Hairdresser Day
+D	روز دفاتر اسناد رسمی	Notary Offices Day
+D	روز صنعت سیمان	Cement Industry Day
+D	روز قناد، صنعت شیرینی و شکلات	Confectioner, Sweets and Chocolate Industry Day
+D	روز معاینه فنی خودرو	Vehicle Technical Inspection Day
+D	روز ویراستار	Editor Day
+D	روز بازاریاب و مدیر فروش	Marketer and Sales Manager Day
+D	روز کارشناس و متخصص تغذیه	Nutrition Expert and Specialist Day
+D	روز خادمان آرامستان	Cemetery Workers Day
+D	روز صنعت طلا، جواهر، نقره و گوهرسنگ‌ها	Gold, Jewelry, Silver and Gemstones Industry Day
+D	جشن نوروز، نوروز جمشیدی (جمشید پیشدادی) - ابتدای بهار	Nowruz celebration, Jamshedi Nowruz (Jamshid Peshdadi) – start of spring
+D	نوروز بزرگ (هودرو)، زادروز آشو زرتشت - روییدن مشی و مشیانه	Great Nowruz (Khordad Sal), birthday of Zoroaster – growth of Mashi and Mashyanag
+D	آیین نیایش پیر هریشت از ۷ تا ۱۱ فروردین	Pir-e Harisht worship ceremony, 7 to 11 Farvardin
+D	سیزده نوروز، سیزده‌بدر	Sizdah Bedar (13th of Nowruz)
+D	جشن فرودینگان	Farvardigan festival
+D	جشن اردیبهشتگان، پوشیدن لباس سپید به نشانه پاکی	Ordibeheshtegan festival, wearing white clothes as a sign of purity
+D	جشن چلمو (چله بهار) - گاهان بار میدیوزرم‌گاه از ۱۰ تا ۱۴ اردیبهشت	Chelamu festival (spring chelleh) – Gahanbar Maidyozarem from 10 to 14 Ordibehesht
+D	جشن پنجاه بدر	Panjah Bedar festival
+D	بزرگداشت استاد توس فردوسی بزرگ	Commemoration of the great Ustad of Tus, Ferdowsi
+D	جشن خوردادگان، امشاسپند خورداد نگاهبان آبها	Khordadegan festival, Amesha Spenta Khordad guardian of the waters
+D	آیین نیایش ستی پیر و پیر سبز (چک چک)	Sati Pir and Pir-e Sabz (Chak Chak) worship ceremony
+D	جشن ابتدای تیر ماه، آب پاشونک	Festival of the start of Tir month, Ab-Pashan
+D	آیین نیایش پیر نارستانه	Pir-e Narestaneh worship ceremony
+D	گاهان‌بار میدیوشهیم‌گاه از ۸ تا ۱۲ تیر	Gahanbar Maidyoshahem from 8 to 12 Tir
+D	جشن تیرگان، آب پاشونک	Tirgan festival, Ab-Pashan
+D	آیین نیایش پارس بانو از ۱۳ تا ۱۷ تیر	Pars Banu worship ceremony from 13 to 17 Tir
+D	جشن امردادگان، امشاسپند امرداد نگاهبان رستنی‌ها	Amordadegan festival, Amesha Spenta Amordad guardian of plants
+D	جشن چلهٔ تابستان	Summer chelleh festival
+D	آیین نیایش پیر نارکی از ۱۲ تا ۱۶ مرداد	Pir-e Naraki worship ceremony from 12 to 16 Mordad
+D	جشن شهریورگان، امشاسپند شهریور نگاهبان فلزات	Shahrivargan festival, Amesha Spenta Shahrivar guardian of metals
+D	جشن خزان	Autumn festival (Khazan)
+D	گاهان‌بار پتیه‌شهیم‌گاه از ۲۱ تا ۲۵ شهریور	Gahanbar Paitishahem from 21 to 25 Shahrivar
+D	جشن مهرگان	Mehregan festival
+D	جشن آبانگان	Abangan festival
+D	روز کوروش بزرگ	Cyrus the Great Day
+D	جشن پاییزانه	Paizaneh festival
+D	جشن گالشی	Galeshi festival
+D	جشن آذرگان	Azargan festival
+D	اولین جشن دی‌گان	First Deygan festival
+D	جشن شب یلدا	Yalda Night festival
+D	دومین جشن دی‌گان	Second Deygan festival
+D	جشن سیر و سور	Sir-o-Sur festival
+D	سومین جشن دی‌گان	Third Deygan festival
+D	چهارمین جشن دی‌گان	Fourth Deygan festival
+D	جشن بهمنگان، روز پدر، بهمن (منش نیک) امشاسپند	Bahmanegan festival, Father's Day, Bahman (Good Mind) Amesha Spenta
+D	جشن نوسره	Nosereh festival
+D	جشن میانهٔ زمستان	Midwinter festival
+D	جشن سده، آتش افروزی به هنگام غروب آفتاب	Sadeh festival, lighting fires at sunset
+D	جشن اسفندگان، روز مادر و روز عشق پاک	Esfandegan festival, Mother's Day and Day of Pure Love
+D	جشن گلدان (اینجه، رسیدگی به امور نباتات)	Pot Festival (Inje, tending to plants)
+D	روز عاشورا	Day of Ashura
+D	روز میلاد نبی (ص)	Birthday of the Prophet (PBUH)
+D	اول ماه مبارک رمضان	First of the holy month of Ramadan
+D	روز حمایت از اطفال آسیب‌پذیر، یتیم و بی‌سرپرست	Day of supporting vulnerable, orphaned and unsupervised children
+D	روز گرامیداشت از نزول قرآن عظیم‌الشان	Commemoration of the revelation of the glorious Quran
+D	عید سعید فطر	Eid al-Fitr
+D	عید سعید فطر، روز دوم	Eid al-Fitr, second day
+D	عید سعید فطر، روز سوم	Eid al-Fitr, third day
+D	روز عرفه و عید سعید اضحی	Day of Arafah and Eid al-Adha
+D	آغاز سال هجری قمری	Start of the Hijri lunar year
+D	روز امر به معروف و نهی از منکر	Day of enjoining good and forbidding evil
+D	تاسوعای حسینی	Tasua of Hussein
+D	عاشورای حسینی	Ashura of Hussein
+D	روز تجلیل از اسرا و مفقودان	Day of honoring prisoners of war and the missing
+D	شهادت حضرت امام زین‌العابدین (ع) (۹۵ ه‍.ق)	Martyrdom of Imam Zayn al-Abidin (AS) (95 AH)
+D	شهادت حضرت امام زین‌العابدین (ع) (۹۵ ه‍.ق) به روایتی	Martyrdom of Imam Zayn al-Abidin (AS) (95 AH), according to one narration
+D	یاد روز قیام مردم سیستان به خون‌خواهی شهدای کربلا (سال ۶۲ ه‍.ق)	Commemoration of the uprising of the people of Sistan to avenge the martyrs of Karbala (62 AH)
+D	ولادت حضرت امام محمد باقر (ع) (۵۷ ﻫ.ق) به روایتی	Birth of Imam Muhammad al-Baqir (AS) (57 AH), according to one narration
+D	شهادت حضرت امام حسن مجتبی (ع) (۵۰ ه‍.ق) به روایتی	Martyrdom of Imam Hasan al-Mujtaba (AS) (50 AH), according to one narration
+D	روز بزرگداشت سلمان فارسی	Commemoration of Salman the Persian
+D	اربعین حسینی	Arbaeen of Hussein
+D	رحلت حضرت رسول اکرم (ص) (۱۱ ه‍.ق) – شهادت حضرت امام حسن مجتبی (ع) (۵۰ ه‍.ق)	Demise of the Holy Prophet (PBUH) (11 AH) – Martyrdom of Imam Hasan al-Mujtaba (AS) (50 AH)
+D	هجرت رسول اکرم (ص) از مکه به مدینه	Migration of the Holy Prophet (PBUH) from Mecca to Medina
+D	شهادت حضرت امام حسن عسکری (ع) (۲۶۰ ه‍.ق) و آغاز امامت حضرت ولی عصر (عج)	Martyrdom of Imam Hasan al-Askari (AS) (260 AH) and start of the Imamate of Imam al-Mahdi (AJ)
+D	ولادت حضرت رسول اکرم (ص) به روایت اهل سنت (۵۳ سال قبل از هجرت)	Birth of the Holy Prophet (PBUH) according to Sunni sources (53 years before the Hijra)
+D	آغاز هفتهٔ وحدت	Start of Unity Week
+D	روز سیستان و بلوچستان	Sistan and Baluchestan Day
+D	روز وقف	Endowment (Waqf) Day
+D	ولادت حضرت رسول اکرم (ص) (۵۳ سال قبل از هجرت) و روز اخلاق و مهرورزی	Birth of the Holy Prophet (PBUH) (53 years before the Hijra) and Day of Ethics and Kindness
+D	ولادت حضرت امام جعفر صادق (ع) مؤسس مذهب جعفری (۸۳ ه‍.ق)	Birth of Imam Ja'far al-Sadiq (AS), founder of the Ja'fari school (83 AH)
+D	ولادت حضرت عبدالعظیم حسنی (ع)	Birth of Abdul Azim al-Hasani (AS)
+D	ولادت حضرت امام حسن عسکری (ع) (۲۳۲ ه‍.ق)	Birth of Imam Hasan al-Askari (AS) (232 AH)
+D	وفات حضرت معصومه (س) (۲۰۱ ه‍.ق)	Demise of Fatima Masumah (SA) (201 AH)
+D	ولادت حضرت زینب (س) (۵ ه‍.ق) و روز پرستار	Birth of Zaynab (SA) (5 AH) and Nurse's Day
+D	شهادت حضرت فاطمهٔ زهرا (س) (۱۱ ه‍.ق) به روایتی	Martyrdom of Fatima al-Zahra (SA) (11 AH), according to one narration
+D	شهادت حضرت فاطمهٔ زهرا (س) (۱۱ ه‍.ق)	Martyrdom of Fatima al-Zahra (SA) (11 AH)
+D	سالروز وفات حضرت ام‌البنین (س)	Anniversary of the demise of Umm al-Banin (SA)
+D	روز تکریم مادران و همسران شهدا	Day of honoring mothers and wives of martyrs
+D	ولادت حضرت فاطمهٔ زهرا (س) (سال هشتم قبل از هجرت) و روز زن	Birth of Fatima al-Zahra (SA) (8 years before the Hijra) and Women's Day
+D	تولد حضرت امام خمینی (ره) رهبر کبیر انقلاب اسلامی (۱۳۲۰ ه‍.ق)	Birth of Imam Khomeini, great leader of the Islamic Revolution (1320 AH)
+D	ولادت حضرت امام محمد باقر (ع) (۵۷ ه‍.ق)	Birth of Imam Muhammad al-Baqir (AS) (57 AH)
+D	شهادت حضرت امام علی النقی الهادی (ع) (۲۵۴ ه‍.ق)	Martyrdom of Imam Ali al-Hadi (AS) (254 AH)
+D	ولادت حضرت امام محمد تقی (ع) «جوادالائمه» (۱۹۵ ه‍.ق)	Birth of Imam Muhammad al-Taqi (AS) "al-Jawad" (195 AH)
+D	ولادت حضرت امام علی (ع) (۲۳ سال قبل از هجرت)	Birth of Imam Ali (AS) (23 years before the Hijra)
+D	روز پدر	Father's Day
+D	آغاز ایام‌البیض (اعتکاف)	Start of the Ayyam al-Bid (i'tikaf)
+D	ارتحال حضرت زینب (س) (۶۲ ه‍.ق)	Demise of Zaynab (SA) (62 AH)
+D	تغییر قبلهٔ مسلمین از بیت‌المقدس به مکهٔ معظمه (۲ ه‍.ق)	Change of the Muslims' qibla from Jerusalem to Mecca (2 AH)
+D	شهادت حضرت امام موسی کاظم (ع) (۱۸۳ ه‍.ق)	Martyrdom of Imam Musa al-Kadhim (AS) (183 AH)
+D	مبعث حضرت رسول اکرم (ص) (۱۳ سال قبل از هجرت)	Mab'ath of the Holy Prophet (PBUH) (13 years before the Hijra)
+D	ولادت حضرت امام حسین (ع) (۴ ه‍.ق) و روز پاسدار	Birth of Imam Hussein (AS) (4 AH) and Guardian Day
+D	ولادت حضرت ابوالفضل العباس (ع) (۲۶ ه‍.ق) و روز جانباز	Birth of Abbas ibn Ali (AS) (26 AH) and Veterans' Day
+D	ولادت حضرت امام زین‌العابدین (ع) (۳۸ ه‍.ق)	Birth of Imam Zayn al-Abidin (AS) (38 AH)
+D	روز صحیفهٔ سجادیه	Sahifa Sajjadiyya Day
+D	ولادت حضرت علی اکبر (ع) (۳۳ ه‍.ق) و روز جوان	Birth of Ali Akbar (AS) (33 AH) and Youth Day
+D	ولادت حضرت قائم (عج) (۲۵۵ ه‍.ق) و روز جهانی مستضعفان	Birth of al-Qa'im (AJ) (255 AH) and World Day of the Oppressed
+D	روز سربازان گمنام حضرت امام زمان (عج)	Day of the Unknown Soldiers of Imam al-Zaman (AJ)
+D	وفات حضرت خدیجه (س) (۳ سال قبل از هجرت)	Demise of Khadija (SA) (3 years before the Hijra)
+D	ولادت حضرت امام حسن مجتبی (ع) (۳ ه‍.ق) و روز اکرام و تکریم خیرین	Birth of Imam Hasan al-Mujtaba (AS) (3 AH) and Day of honoring benefactors
+D	شب قدر	Laylat al-Qadr (Night of Destiny)
+D	ضربت خوردن حضرت امام علی (ع) (۴۰ ه‍.ق)	Striking of Imam Ali (AS) (40 AH)
+D	روز نهج‌البلاغه	Nahj al-Balagha Day
+D	شهادت حضرت امام علی (ع) (۴۰ ه‍.ق)	Martyrdom of Imam Ali (AS) (40 AH)
+D	تعطیل به مناسبت عید سعید فطر	Holiday for Eid al-Fitr
+D	روز فرهنگ پهلوانی و ورزش زورخانه‌ای	Day of the culture of heroism and Zurkhaneh sport
+D	فتح اندلس به دست مسلمانان (۹۲ ه‍.ق)	Conquest of Andalusia by the Muslims (92 AH)
+D	شهادت حضرت امام جعفر صادق (ع) (۱۴۸ ه‍.ق)	Martyrdom of Imam Ja'far al-Sadiq (AS) (148 AH)
+D	ولادت حضرت معصومه (س) (۱۷۳ ه‍.ق) و روز دختران	Birth of Masumah (SA) (173 AH) and Girls' Day
+D	آغاز دههٔ کرامت	Start of the Decade of Karamat (Dignity)
+D	روز تجلیل از امامزادگان و بقاع متبرکه	Day of honoring Imamzadehs and holy shrines
+D	روز بزرگداشت حضرت صالح بن موسی کاظم (ع)	Commemoration of Saleh ibn Musa al-Kadhim (AS)
+D	روز بزرگداشت حضرت احمدبن‌موسی شاهچراغ (ع)	Commemoration of Ahmad ibn Musa Shah Cheragh (AS)
+D	ولادت حضرت امام رضا (ع) (۱۴۸ ه‍.ق)	Birth of Imam Reza (AS) (148 AH)
+D	سالروز ازدواج حضرت امام علی (ع) و حضرت فاطمه (س) (۲ ه‍.ق)	Anniversary of the marriage of Imam Ali (AS) and Fatima (SA) (2 AH)
+D	روز ازدواج	Marriage Day
+D	شهادت مظلومانهٔ زائران خانهٔ خدا به دست مأموران آل سعود (۱۳۶۶ ه‍.ش برابر با ۶ ذی‌الحجه ۱۴۰۷ ه‍.ق)	Unjust martyrdom of the pilgrims of the House of God by Al Saud agents (1366 SH, equal to 6 Dhu al-Hijjah 1407 AH)
+D	شهادت حضرت امام محمد باقر (ع) (۱۱۴ ه‍.ق)	Martyrdom of Imam Muhammad al-Baqir (AS) (114 AH)
+D	روز عرفه (روز نیایش)	Day of Arafah (day of supplication)
+D	عید سعید قربان	Eid al-Adha
+D	آغاز دههٔ امامت و ولایت	Start of the Decade of Imamate and Wilayah
+D	ولادت حضرت امام علی النقی الهادی (ع) (۲۱۲ ه‍.ق)	Birth of Imam Ali al-Hadi (AS) (212 AH)
+D	عید سعید غدیر خم (۱۰ ه‍.ق)	Eid al-Ghadir Khumm (10 AH)
+D	ولادت حضرت امام موسی کاظم (ع) (۱۲۸ ه‍.ق)	Birth of Imam Musa al-Kadhim (AS) (128 AH)
+D	روز مباهلهٔ پیامبر اسلام (ص) (۱۰ ه‍.ق)	Day of the Mubahala of the Prophet of Islam (PBUH) (10 AH)
+D	روز خانواده و تکریم بازنشستگان	Family Day and Retirees' Appreciation Day
+D	روز ملی مبارزه علیه مواد انفجاری تعبیه شده	National Day Against Improvised Explosive Devices
+D	روز جهانی زن	International Women's Day
+D	روز جهانی حقوق مستهلک	World Consumer Rights Day
+D	روز جهانی آب	World Water Day
+D	روز جهانی هواشناسی	World Meteorological Day
+D	روز بین‌المللی کارگر	International Workers' Day
+D	روز جهانی تیلی‌کمیونیکیشن	World Telecommunication Day
+D	روز بین‌المللی موزیم‌ها	International Museum Day
+D	روز بین‌المللی طفل	International Children's Day
+D	هفتهٔ محیط زیست (۵-۱۱ جون)	Environment Week (5–11 June)
+D	روز بین‌المللی پناهنده‌گان	International Refugee Day
+D	روز جهانی المپیک	World Olympic Day
+D	هفتهٔ مبارزه علیه مواد مخدر، روز جهانی مبارزه علیه مواد مخدر	Anti-Drug Week, International Day Against Drug Abuse
+D	روز جهانی نفوس	World Population Day
+D	هفتهٔ تغذیه از شیر مادر (۱-۷ آگست)	Breastfeeding Week (1–7 August)
+D	روز بین المللی یادبود و گرامیداشت از قربانیان تروریزم	International Day of Remembrance of and Tribute to the Victims of Terrorism
+D	روز بین‌المللی سواد	International Literacy Day
+D	روز جهانی صلح	International Day of Peace
+D	روز جهانی توریزم	World Tourism Day
+D	روز جهانی معلم	World Teachers' Day
+D	روز جهانی پست	World Post Day
+D	روز جهانی کاهش خطرپذیری	International Day for Disaster Risk Reduction
+D	روز جهانی غذا	World Food Day
+D	روز جهانی ملل متحد	United Nations Day
+D	روز جهانی محصلان	World Students' Day
+D	روز جهانی هوانوردی	International Civil Aviation Day
+D	روز جهانی مهاجرت	International Migrants Day
+D	روز جهانی سینما	World Cinema Day
+D	آغاز سال میلادی	Start of the Gregorian year
+D	روز جهانی گمرک	International Customs Day
+D	روز جهانی کودک فلسطینی	International Palestinian Child Day
+D	روز جهانی کار و کارگر	International Labour Day
+D	روز جهانی ماما	International Day of the Midwife
+D	روز جهانی صلیب سرخ و هلال احمر	World Red Cross and Red Crescent Day
+D	روز جهانی موزه و میراث فرهنگی	International Museum and Cultural Heritage Day
+D	روز جهانی بدون دخانیات	World No Tobacco Day
+D	روز جهانی والدین	Global Day of Parents
+D	روز جهانی محیط زیست	World Environment Day
+D	روز جهانی بیابان‌زدایی	World Day to Combat Desertification
+D	روز جهانی مبارزه با مواد مخدر	International Day Against Drug Abuse
+D	روز جهانی شیر مادر	World Breastfeeding Day
+D	انفجار بمب اتمی آمریکا در هیروشیما با بیش از ۱۶۰هزار کشته و مجروح (۱۹۴۵ میلادی)	American atomic bombing of Hiroshima with over 160,000 killed and injured (1945 CE)
+D	روز جهانی مسجد	World Mosque Day
+D	روز جهانی جهانگردی	World Tourism Day
+D	روز جهانی دریانوردی	World Maritime Day
+D	روز جهانی ناشنوایان	International Day of the Deaf
+D	روز جهانی سالمندان	International Day of Older Persons
+D	روز جهانی کودک	World Children's Day
+D	روز جهانی استاندارد	World Standards Day
+D	روز جهانی نابینایان (عصای سفید)	World Sight Day (White Cane)
+D	روز جهانی علم در خدمت صلح و توسعه	World Science Day for Peace and Development
+D	روز جهانی مبارزه با ایدز	World AIDS Day
+D	روز جهانی معلولان	International Day of Persons with Disabilities
+D	روز جهانی هواپیمایی	International Civil Aviation Day
+D	ولادت حضرت عیسی مسیح (ع)	Birth of Jesus Christ (AS)
+D	روز جهانی بریل	World Braille Day
+D	روز جهانی آموزش	International Day of Education
+D	روز جهانی تالاب‌ها	World Wetlands Day
+D	روز جهانی سرطان	World Cancer Day
+D	روز جهانی مبارزه با ناقص‌سازی زنان	International Day of Zero Tolerance for Female Genital Mutilation
+D	روز جهانی حبوبات	World Pulses Day
+D	روز جهانی زن و دختر در علم	International Day of Women and Girls in Science
+D	روز جهانی رادیو	World Radio Day
+D	روز جهانی عدالت اجتماعی	World Day of Social Justice
+D	روز جهانی زبان مادری	International Mother Language Day
+D	روز جهانی بدون تبعیض	Zero Discrimination Day
+D	روز جهانی حیات وحش	World Wildlife Day
+D	روز جهانی شادی	International Day of Happiness
+D	روز جهانی شعر	World Poetry Day
+D	روز جهانی سندروم داون	World Down Syndrome Day
+D	روز بین‌المللی جنگل‌ها	International Day of Forests
+D	روز جهانی سل	World Tuberculosis Day
+D	روز بین‌المللی حق بر صحت و درستی دربارهٔ نقض فاحش حقوق بشر و منزلت قربانیان	International Day for the Right to the Truth concerning Gross Human Rights Violations and for the Dignity of Victims
+D	روز بین‌المللی یادبود قربانیان بردگی و تجارت برده از آن سوی اقیانوس اطلس	International Day of Remembrance of the Victims of Slavery and the Transatlantic Slave Trade
+D	روز جهانی تئاتر	World Theatre Day
+D	روز جهانی کتاب کودک	International Children's Book Day
+D	روز جهانی کارتونیست‌ها	World Cartoonists Day
+D	روز جهانی سلامت	World Health Day
+D	روز جهانی هنر (سالروز تولد داوینچی)	World Art Day (Da Vinci's birthday)
+D	روز جهانی کبد	World Liver Day
+D	روز جهانی زمین پاک	Earth Day
+D	روز جهانی کتاب و حق مؤلف	World Book and Copyright Day
+D	روز جهانی مالاریا	World Malaria Day
+D	روز جهانی گرافیک	World Graphic Design Day
+D	روز جهانی ایمنی و بهداشت حرفه‌ای	World Day for Safety and Health at Work
+D	روز جهانی آزادی مطبوعات	World Press Freedom Day
+D	روز جهانی پرستار	International Nurses Day
+D	روز جهانی زنان در ریاضیات	International Day of Women in Mathematics
+D	روز جهانی خانواده	International Day of Families
+D	روز جهانی پسران	International Boys' Day
+D	روز جهانی زنبور	World Bee Day
+D	روز جهانی حافظان صلح ملل متحد	International Day of UN Peacekeepers
+D	روز جهانی حمایت از کودکان قربانی خشونت	International Day of Innocent Children Victims of Aggression
+D	روز جهانی صنایع دستی	World Handicraft Day
+D	روز جهانی منع کار کودکان	World Day Against Child Labour
+D	روز جهانی اهدای خون	World Blood Donor Day
+D	روز جهانی پناهندگان	World Refugee Day
+D	روز جهانی موسیقی	World Music Day
+D	روز جهانی قربانیان خشونت	International Day for Victims of Violence
+D	روز جهانی والیبال	World Volleyball Day
+D	روز جهانی جمعیت	World Population Day
+D	روز جهانی جوانان	International Youth Day
+D	روز جهانی چپ‌دستان	International Left-Handers Day
+D	روز جهانی انسان دوستی	World Humanitarian Day
+D	روز جهانی عکاسی	World Photography Day
+D	روز جهانی مبارزه با آزمایش‌های هسته‌ای	International Day Against Nuclear Tests
+D	روز جهانی باسوادی	International Literacy Day
+D	روز جهانی جلوگیری از خودکشی	World Suicide Prevention Day
+D	روز جهانی مردم‌سالاری	International Day of Democracy
+D	روز جهانی حفاظت از لایهٔ اُزن	International Day for the Preservation of the Ozone Layer
+D	روز جهانی آلزایمر	World Alzheimer's Day
+D	روز جهانی ترجمه	International Translation Day
+D	روز بین‌المللی قهوه	International Coffee Day
+D	روز جهانی بهداشت روان	World Mental Health Day
+D	روز جهانی دختران	International Day of the Girl Child
+D	روز ملل متحد و روز جهانی توسعه اطلاعات	United Nations Day and World Development Information Day
+D	روز جهانی هنرمند	World Artist Day
+D	روز جهانی میراث سمعی و بصری	World Day for Audiovisual Heritage
+D	روز جهانی کاردرمانی	World Occupational Therapy Day
+D	روز جهانی شهرها	World Cities Day
+D	جشن هالووین	Halloween
+D	روز بین‌المللی پیشگیری از سوء استفاده از محیط زیست در جنگ و مناقشات مسلحانه	International Day for Preventing the Exploitation of the Environment in War and Armed Conflict
+D	روز جهانی حسابداری	World Accounting Day
+D	روز جهانی دیابت	World Diabetes Day
+D	روز جهانی مرد	International Men's Day
+D	روز جهانی تلویزیون	World Television Day
+D	روز جهانی مبارزه با خشونت علیه زنان	International Day for the Elimination of Violence against Women
+D	روز جهانی همبستگی با مردم فلسطین	International Day of Solidarity with the Palestinian People
+D	روز جهانی لغو برده‌داری	International Day for the Abolition of Slavery
+D	روز جهانی داوطلبان پیشرفت اجتماعی	International Volunteer Day for Economic and Social Development
+D	روز جهانی مبارزه با فساد	International Anti-Corruption Day
+D	روز جهانی حقوق بشر	Human Rights Day
+D	روز جهانی کوهستان	International Mountain Day
+D	هفتهٔ جیولوجست‌های افغانستان (هفتهٔ دوم حمل)	Afghan Geologists Week (second week of Hamal)
+D	هفتهٔ کتاب‌خوانی (هفتهٔ اخیر ثور)	Reading Week (last week of Sawr)
+D	آیین مذهبی قالیشویان اردهال (دومین جمعهٔ مهر)	Ardehal carpet-washing ritual (second Friday of Mehr)
+D	بزرگداشت امامزاده علی بن محمدباقر (ع) (دومین جمعهٔ مهر)	Commemoration of Imamzadeh Ali ibn Muhammad al-Baqir (AS) (second Friday of Mehr)
+D	خورشیدگرفتگی جزئی قابل مشاهده در ایران	Partial solar eclipse visible in Iran
+D	شهادت حضرت امام رضا (ع) (۲۰۳ ه‍.ق) (۳۰ صَفَر یا انتهای ماه)	Martyrdom of Imam Reza (AS) (203 AH) (30 Safar or the end of the month)
+D	شهادت حضرت امام محمد تقی (ع) (۲۲۰ ه‍.ق) (۳۰ ذی‌القعده یا انتهای ماه)	Martyrdom of Imam Muhammad al-Taqi (AS) (220 AH) (30 Dhu al-Qi'dah or the end of the month)
+D	روز جهانی قدس (آخرین جمعهٔ رمضان)	International Quds Day (last Friday of Ramadan)
+D	روز تکریم همسایگان (شب آخرین چهارشنبهٔ سال)	Neighbors Appreciation Day (eve of the last Wednesday of the year)
+D	چهارشنبه‌سوری (آخرین سه‌شنبهٔ سال)	Chaharshanbe Suri (last Tuesday of the year)
+D	روز جهانی فلسفه (سومین پنجشنبهٔ نوامبر)	World Philosophy Day (third Thursday of November)
+D	روز جهانی کمک به جذامیان (آخرین یکشنبهٔ ژانویه)	World Leprosy Day (last Sunday of January)
+D	جمعهٔ سیاه یا بلک فرایدی (آخرین جمعهٔ نوامبر)	Black Friday (last Friday of November)
+D	روز جهانی برنامه‌نویس (روز ۲۵۶م سال میلادی)	International Programmers' Day (256th day of the Gregorian year)
+D	تقویم ۴×۲	Calendar 4×2
+D	مسیر خورشید	Sun path
+D	نقشه جهان	World map
+D	تاریخ، ساعت، مناسبت‌ها و اوقات شرعی	Date, time, events and prayer times
+D	فاز فعلی ماه و درصد روشنایی	Current Moon phase and illumination percentage
+D	طلوع، غروب و موقعیت فعلی خورشید	Sunrise, sunset and the Sun's current position
+D	روز و شب روی نقشه و موقعیت انتخاب‌شده	Day and night on the map and the selected location
+D	دستگاه شمارنده با هدف اختصاصی هر ویجت	A counter device with a dedicated goal for each widget
+D	ویجت	Widget
+D	هیچ ویجتی فعال نیست	No widget is active
+D	افزودن ویجت	Add widget
+D	نمایش ویجت‌ها	Show widgets
+D	ویجت‌ها را بدون حذف تنظیمات و موقعیت فعلی، موقتاً از دسکتاپ پنهان یا دوباره نمایش می‌دهد.	Temporarily hides the widgets from the desktop or shows them again, without deleting their settings and current position.
+D	از دکمهٔ «افزودن ویجت» یکی از پنج ویجت را به دسکتاپ اضافه کنید.	Use the "Add widget" button to add one of the five widgets to the desktop.
+D	همیشه روی پنجره‌ها	Always on top
+D	عبور کلیک	Click-through
+D	قفل موقعیت/اندازه	Lock position/size
+D	ویجت روی دسکتاپ موقتاً پنهان می‌شود و تنظیماتش حفظ می‌ماند	The widget is temporarily hidden on the desktop and its settings are kept
+D	باز کردن تنظیمات کامل ویجت	Open the widget's full settings
+D	ظاهر، موقعیت و محتوای ویجت	The widget's appearance, position and content
+D	حذف ویجت	Delete widget
+D	ویجت و تنظیمات اختصاصی آن از این دستگاه حذف می‌شود	The widget and its own settings are deleted from this device
+D	تغییر اندازه ویجت	Resize widget
+D	جابه‌جایی	Move
+D	مخفی کردن	Hide
+D	باز کردن MoonCalendar	Open MoonCalendar
+D	ه‍.ش	SH
+D	چینی	Chinese
+D	رنگ دلخواه	Custom color
+D	طیف	Hue
+D	اشباع	Saturation
+D	روشنایی	Brightness
+D	جهت ویجت	Widget direction
+D	راست‌چین	Right-to-left
+D	چپ‌چین	Left-to-right
+D	مطابق زبان	Follow language
+D	جهت اعلان	Notification direction
+D	نیمه شب	Midnight
+D	پیوند کپی شد	Link copied
+D	تقویم فارسی زیبا، رایگان و متن‌باز، توسعه‌داده‌شده با فلاتر؛ همراه با مناسبت‌ها، اوقات شرعی، ستاره‌شناسی، نقشه، تبدیل تاریخ و ویجت.	A beautiful, free and open-source Persian calendar built with Flutter, with events, prayer times, astronomy, a map, a date converter and widgets.
+D	کد برنامه در گیت‌هاب	App source code on GitHub
+D	پروژهٔ مرجع: تقویم فارسی اندروید	Reference project: Android Persian Calendar
+D	سپاس و قدردانی	Thanks & acknowledgements
+D	این برنامه از کدها، داده‌ها و ایده‌های پروژهٔ «تقویم فارسی اندروید» (Android Persian Calendar Developers) با مجوز GPLv3 استفاده کرده و ادامهٔ راه آن است. از همهٔ توسعه‌دهندگان، مترجمان و مشارکت‌کنندگان آن پروژه صمیمانه سپاسگزاریم.	This app uses the code, data and ideas of the “Android Persian Calendar” project (Android Persian Calendar Developers), licensed under GPLv3, and carries on from it. Heartfelt thanks to all of that project’s developers, translators and contributors.
+D	این برنامه تحت مجوز GPLv3 منتشر شده و از کد و داده‌های پروژهٔ «تقویم فارسی اندروید» (github.com/persian-calendar/persian-calendar) مشتق شده است. هنگام انتشار نسخهٔ مشتق‌شده، همین مجوز و اعلان‌های حق نشر اصلی را حفظ کنید.	This app is released under the GPLv3 license and is derived from the code and data of the “Android Persian Calendar” project (github.com/persian-calendar/persian-calendar). When publishing a derivative, keep this license and the original copyright notices.
+D	پلتفرم چندسکویی	Cross-platform
+D	تقویم فارسی رایگان و متن‌باز، توسعه‌داده‌شده با فلاتر	A free, open-source Persian calendar built with Flutter
+D	پروژه‌های استفاده‌شده	Projects used
+D	قدردانی	Acknowledgements
+D	چه چیزهایی از این پروژه استفاده شده	What was used from this project
+D	تقویم فارسی اندروید (Persian Calendar)	Android Persian Calendar
+D	منطق تقویم‌ها و تبدیل تاریخ (شمسی، میلادی، قمری)	Calendar logic and date conversion (Solar Hijri, Gregorian, Islamic)
+D	داده‌های مناسبت‌ها و تعطیلات	Events and holidays data
+D	محاسبهٔ اوقات شرعی و روش‌های آن	Prayer-time calculation and its methods
+D	محاسبات نجومی و داده‌های نقشه (جهان، مناطق زمانی، صفحات زمین‌ساخت)	Astronomical calculations and map data (world, time zones, tectonic plates)
+D	فهرست شهرها و مناطق ایران	List of cities and regions of Iran
+D	طراحی و ایدهٔ ویجت‌ها، اعلان و صفحه‌های برنامه	Design and ideas for the widgets, notification and app screens
+D	تصاویر فصل‌ها (Lotta Nieminen، CC BY-NC 4.0)	Season images (Lotta Nieminen, CC BY-NC 4.0)
+D	از همهٔ توسعه‌دهندگان، مترجمان و مشارکت‌کنندگان این پروژه صمیمانه سپاسگزاریم؛ بدون زحمت آن‌ها این برنامه وجود نداشت.	Heartfelt thanks to all of this project’s developers, translators and contributors — without their work this app would not exist.
+D	Flutter و Dart	Flutter and Dart
+D	چارچوب اصلی برنامه و رابط کاربری	The main framework of the app and its user interface
+D	از تیم Flutter و Dart برای این چارچوب فوق‌العاده سپاسگزاریم.	Thanks to the Flutter and Dart teams for this wonderful framework.
+D	بسته‌های متن‌باز Dart و Flutter	Open-source Dart and Flutter packages
+D	مجوزهای متفاوت	Various licenses
+D	astronomia: محاسبات نجومی	astronomia: astronomical calculations
+D	geolocator: موقعیت مکانی	geolocator: location
+D	window_manager، tray_manager، desktop_multi_window و desktop_context_menu: پنجره، تری و ویجت‌های دسکتاپ	window_manager, tray_manager, desktop_multi_window and desktop_context_menu: window, tray and desktop widgets
+D	share_plus، shared_preferences، timezone، qr و http: اشتراک‌گذاری، ذخیره‌سازی و ابزارهای کمکی	share_plus, shared_preferences, timezone, qr and http: sharing, storage and helpers
+D	از سازندگان و نگهدارندگان همهٔ این بسته‌ها سپاسگزاریم.	Thanks to the authors and maintainers of all these packages.
+D	فونت وزیرمتن (Vazirmatn)	Vazirmatn font
+D	فونت اصلی برنامه	The main font of the app
+D	عدد روز در آیکون اعلان	The day number in the notification icon
+D	از صابر راستی‌کردار و مشارکت‌کنندگان وزیرمتن سپاسگزاریم.	Thanks to Saber Rastikerdar and the Vazirmatn contributors.
+D	نمادهای برج‌های فلکی	Zodiac symbols
+D	از پروژهٔ Noto گوگل سپاسگزاریم.	Thanks to Google’s Noto project.
+D	آیکون‌های رابط کاربری	User-interface icons
+D	از تیم Material Design گوگل سپاسگزاریم.	Thanks to Google’s Material Design team.
+D	این برنامه بر پایهٔ کار ارزشمند پروژه‌ها و مشارکت‌کنندگان متن‌باز ساخته شده است. با لمس هر پروژه در فهرست بالا می‌توانید ببینید چه چیزهایی از آن استفاده شده. از همهٔ آن‌ها صمیمانه سپاسگزاریم.	This app is built on the valuable work of open-source projects and contributors. Tap any project in the list above to see what was used from it. Heartfelt thanks to all of them.
+D	برای دیدن قدردانی و موارد استفاده‌شده، روی هر پروژه بزنید.	Tap a project to see the acknowledgement and what was used from it.
+D	برای دیدن موارد استفاده‌شده از هر پروژه، روی آن بزنید.	Tap a project to see what was used from it.
+D	از تمامی پروژه‌های یادشده و توسعه‌دهندگان آن‌ها سپاسگزاریم و به‌ویژه از پروژهٔ تقویم فارسی اندروید (Persian Calendar) و همهٔ توسعه‌دهندگان، مترجمان و مشارکت‌کنندگان آن تشکر و قدردانی می‌کنیم؛ بدون زحمت آن‌ها این برنامه وجود نداشت.	We thank all of the projects listed above and their developers, and we especially wish to express our gratitude to the Android Persian Calendar project (Persian Calendar) and all of its developers, translators and contributors; without their work this app would not exist.
+D	نسخه ۱.۰.۰	Version 1.0.0
+D	امکانات برنامه	Features
+D	تقویم و تبدیل تاریخ	Calendar and date converter
+D	مناسبت‌ها و تعطیلات	Events and holidays
+D	اوقات شرعی و اذان	Prayer times and Athan
+D	نقشهٔ جهان	World map
+D	قطب‌نما و تراز	Compass and level
+D	ویجت و اعلان	Widgets and notification
+D	فارسی، انگلیسی و عربی	Persian, English and Arabic
+D	کمتر از ۱ دقیقه	Less than 1 min
+D	ابتدا موقعیت جغرافیایی را برای نمایش اوقات شرعی تنظیم کنید	Set your location first to show prayer times
+D	اعلان همیشگی تقویم	Persistent calendar notification
+D	تاریخ و اطلاعات روزانه Mooncalendar	Mooncalendar date and daily info
+D	میزان شفافیت زمینهٔ ویجت	Widget background opacity level
+D	تراز وسط ویجت‌های ۴×۱ و ۲×۲	Center-align the 4×1 and 2×2 widgets
+D	چه چیزهایی در ویجت و اعلان نمایش داده شوند	What is shown in the widget and notification
+D	اعداد اعشاری را با نقطه بنویسید؛ مثل 35.6892	Write decimals with a dot, e.g. 35.6892
+D	ارتفاع (متر، اختیاری)	Elevation (meters, optional)
+D	نام موقعیت (اختیاری)	Location name (optional)
+D	مختصات معتبر نیست.	The coordinates are not valid.
+D	در حال دریافت موقعیت…	Getting location…
+D	تنظیمات مکان	Location settings
+D	موقعیت پیدا نشد. مکان‌یاب را روشن کنید و دوباره تلاش کنید.	Location not found. Turn on location services and try again.
+D	عرض، طول و ارتفاع جغرافیایی را وارد کنید	Enter latitude, longitude and elevation
+D	پیش‌نمایش ویجت	Widget preview
+D	پیش‌نمایش مسیر خورشید	Sun path preview
+D	رنگ آماده	Preset color
+D	افزایش شمارنده	Increase counter
+D	کاهش شمارنده	Decrease counter
+D	همان دستگاه شمارندهٔ برنامه با هدف مستقل برای هر ویجت	The same counter device as the app, with an independent target for each widget
+D	نام هدف را وارد کن	Enter the target name
+D	ساخت هدف انجام نشد	The target could not be created
+D	فقط همین ویجت را تغییر می‌دهد.	Changes only this widget.
+D	باشه	OK
+D	حداقل یک مورد باید انتخاب شود	At least one item must be selected
+D	نقشهٔ جهان و وضعیت روز و شب	World map with day and night
+D	پیش‌نمایش ویجت نقشه	Map widget preview
+D	در اندروید ۱۲ و بالاتر رنگ‌های پویا از سیستم گرفته می‌شوند	On Android 12 and later, dynamic colors come from the system
+D	با خاموش بودن این گزینه، آسمان نقشه آبی اصلی خود را حفظ می‌کند. شفافیت فقط روی آسمان اعمال می‌شود.	With this option off, the map sky keeps its original blue. Transparency applies to the sky only.
+D	مسیر طلوع و غروب خورشید؛ مدت روز و زمان باقی‌مانده	Sunrise and sunset path; day length and remaining time
+D	پیش‌نمایش مسیر طلوع و غروب خورشید	Sunrise and sunset path preview
+D	رنگ متن و نوشته‌های روی مسیر خورشید	Color of the text on the sun path
+D	رنگ زمینه وقتی رنگ‌بندی دستگاه خاموش است	Background color when device colors are off
+D	موقعیت را از GPS دریافت و برای ویجت ذخیره می‌کند	Gets the location from GPS and saves it for the widget
+D	مسیر طلوع و غروب خورشید	Sunrise and sunset path
+D	ثبت نشده	Not set
+D	اهواز	Ahvaz
+D	البرز	Alborz
+D	اراک	Arak
+D	اردبیل	Ardabil
+D	بندرعباس	Bandar Abbas
+D	بیرجند	Birjand
+D	بجنورد	Bojnurd
+D	بوشهر	Bushehr
+D	اصفهان	Esfehan
+D	قزوین	Ghazvin
+D	قم	Qom
+D	گرگان	Gorgan
+D	همدان	Hamedan
+D	ایلام	Ilam
+D	کرمان	Kerman
+D	کرمانشاه	Kermanshah
+D	خرم‌آباد	Khoram Abad
+D	مشهد	Mashhad
+D	ارومیه	Orumiyeh
+D	رشت	Rasht
+D	سنندج	Sanandaj
+D	ساری	Sari
+D	سمنان	Semnan
+D	شهرکرد	Shahr-e-kord
+D	شیراز	Shiraz
+D	تبریز	Tabriz
+D	یاسوج	Yasuj
+D	یزد	Yazd
+D	زاهدان	Zahedan
+D	زنجان	Zanjan
+D	بلخ	Balkh
+D	بامیان	Bamyan
+D	دایکندی	Daykundi
+D	غزنی	Ghazni
+D	غور	Ghor
+D	هلمند	Helmand
+D	هرات	Herat
+D	کابل	Kabul
+D	قندهار	Kandahar
+D	قندوز	Kunduz
+D	ننگرهار	Nangarhar
+D	کربلا	Karbala
+D	نجف	Najaf
+D	بغداد	Baghdad
+D	بصره	Basrah
+D	تکریت	Tikrit
+D	کرکوک	Kirkuk
+D	سلمانیه	Sulaymaniyah
+D	اربیل	Erbil
+D	دهوک	Duhok
+D	موصل	Mosul
+D	زاخو	Zakho
+D	عراق	Iraq
+D	آنکارا	Ankara
+D	دیاربکر	Diyarbakır
+D	استانبول	Istanbul
+D	ازمیر	İzmir
+D	ترکیه	Turkey
+D	آذربایجان شرقی	East Azerbaijan
+D	آذرشهر	Azarshahr
+D	گوگان	Gogan
+D	تیمورلو	Teymurlu
+D	ممقان	Mamaqan
+D	ارسباران	Arasbaran
+D	آقابابا فرامرزی	Agha Baba Faramarzi
+D	خروانق	Khorvanaq
+D	ورزقان	Varzaqan
+D	اسکو	Osku
+D	سهند	Sahand
+D	ایلخچی	Ilkhchi
+D	بندر آق گنبد	Bandar Aq Gonbad
+D	کندوان	Kandovan
+D	اهر	Ahar
+D	هوراند	Hurand
+D	بستان‌آباد	Bostanabad
+D	بنه کهل	Boneh Kahl
+D	تیکمه داش	Tikmeh Dash
+D	سعیدآباد	Saidabad
+D	قره چمن	Qarah Chaman
+D	قزلجه میدان	Qezeljeh Meydan
+D	کردکندی	Kord Kandi
+D	یوسف آباد	Yusefabad
+D	بناب	Bonab
+D	خوشه‌مهر	Khoshehmehr
+D	اسفهلان	Esfahlan
+D	باسمنج	Basmenj
+D	شهریار	Shahriar
+D	خسروشاه	Khosrowshah
+D	سردرود	Sardrud
+D	قزل دیزج	Qezel Dizaj
+D	لیقوان	Liqvan
+D	لاهیجان	Lahijan
+D	مایان	Mayan
+D	جلفا	Jolfa
+D	سیه رود	Siah Rud
+D	نوردوز	Nordooz
+D	هادی شهر	Hadishahr
+D	چاراویماق	Charuymaq
+D	قره آغاج(آ-شرقی)	Qarah Aghaj
+D	سراب	Sarab
+D	دوزدوزان	Duzduzan
+D	شربیان	Sharabiyan
+D	کلیان	Kolayan
+D	مهربان	Mehraban
+D	شبستر	Shabestar
+D	تسوج	Tasuj
+D	سیس	Sis
+D	شرفخانه	Sharafkhaneh
+D	شندآباد	Shendabad
+D	علیشاه	Alishah
+D	صوفیان	Sufian
+D	خامنه	Khameneh
+D	کوزه‌کنان	Kuzeh Kanan
+D	داریان	Daryan
+D	نظرلو	Nazarlu
+D	وایقان	Vayqan
+D	لیلان	Leylan
+D	عجب‌شیر	Ajab Shir
+D	جوان‌قلعه	Javan Qaleh
+D	خداآفرین	Khoda Afarin
+D	عاشقلو	Asheqlu
+D	خمارلو	Khomarlu
+D	لاریجان	Larijan
+D	کلیبر	Kaleybar
+D	آبش احمد	Abish Ahmad
+D	اسکا نلو	Eskanlu
+D	اسکلو	Eskelu
+D	مراغه	Maragheh
+D	خداجو	Khodaju
+D	مرند	Marand
+D	زنوز	Zonuz
+D	بناب مرند	Bonab-e Marand
+D	کشکسرای	Kashksaray
+D	دیزج حسین‌بیگ	Dizaj Hosseinbeyg
+D	یامچی	Yamchi
+D	ملکان	Malekan
+D	مبارک‌شهر	Mobarakshahr
+D	میانه	Mianeh
+D	آقکند	Aqkand
+D	آچاچی	Achachi
+D	ترک	Tark
+D	ترکمانچای	Torkamanchay
+D	جمال آباد	Jamalabad
+D	قره بلاغ	Qarah Balagh
+D	کاغذکنان	Kaghazkonan
+D	گنج گاه	Ganjgah
+D	خاروانا	Kharvana
+D	هریس	Heris
+D	اربطان	Arbatan
+D	بخشایش	Bakhshayesh
+D	بیلوردی	Bilverdi
+D	خواجه	Khajeh
+D	زرنق	Zarnaq
+D	کلوانق	Kalvanaq
+D	هشترود	Hashtrud
+D	علی‌آباد	Aliabad
+D	نظرکهریزی	Nazar Kahrizi
+D	آذربایجان غربی	West Azerbaijan
+D	ارنسا	Arnesa
+D	امامزاده ارومیه	Emamzadeh Urmia
+D	با لانج	Balanj
+D	بندرگلمانخانه	Bandar Golmankhaneh
+D	راژان	Razhan
+D	زیوه	Ziveh
+D	سرو	Sero
+D	طلاتپه	Talatappeh
+D	فره آغاج ارومیه	Farah Aghaj Urmia
+D	قوشچی	Qushchi
+D	قولنجی	Qolanji
+D	موانا	Mavana
+D	نوشین شهر	Nushinshahr
+D	اشنویه	Oshnavieh
+D	بوکان	Bukan
+D	شهریکند	Shahrikand
+D	قارنیچه	Qarnicheh
+D	پیرانشهر	Piranshahr
+D	پسوه	Pasveh
+D	تمرچین	Tamarchin
+D	جلدیان	Jaldian
+D	تکاب	Takab
+D	احمدآباد زنجان	Ahmadabad Zanjan
+D	چپ دره	Chapdareh
+D	چالدران	Chaldoran
+D	شیخ سیلو	Sheykh Silu
+D	قره کلیسا	Qarah Kelisa
+D	خوی	Khoy
+D	ایواغلی	Ivoghli
+D	رازی	Razi
+D	فیرورق	Firuraq
+D	قره ضیاءالدین	Qarah Ziaeddin
+D	قطور	Qotur
+D	سردشت	Sardasht
+D	بیوران	Biuran
+D	میرآباد	Mirabad
+D	سلماس	Salmas
+D	تازه شهر	Tazeh Shahr
+D	شاهین دژ	Shahin Dezh
+D	شاهیندژ	Shahin Dezh
+D	کشاورز	Keshavarz
+D	ماکو	Maku
+D	بازرگان	Bazargan
+D	بورالان	Buralan
+D	پلدشت	Poldasht
+D	شوط	Showt
+D	کشمش تپه	Keshmesh Tappeh
+D	مرگن لر	Marganlar
+D	یولاگلدی	Yolageldi
+D	مهاباد	Mahabad
+D	خلیفان	Khalifan
+D	کیتکه	Kitkeh
+D	میاندوآب	Miandoab
+D	آرمناک	Armanak
+D	تپه رش	Tapeh Rash
+D	نقده	Naqadeh
+D	محمدیار	Mohammadyar
+D	سرعین	Sareyn
+D	هیر	Hir
+D	بیله سوار	Bileh Savar
+D	جعفرآباد(اردبیل)	Jafarabad Ardabil
+D	پارس آباد	Parsabad
+D	اصلاندوز	Aslanduz
+D	خلخال	Khalkhal
+D	کلور	Kolur
+D	هشتجین	Hashtjin
+D	کوثر	Kowsar
+D	دولت آباد(اردبیل)	Dowlatabad Ardabil
+D	فیروزآباد(اردبیل)	Firuzabad Ardabil
+D	گیوی (کوثر)	Givi
+D	گرمی	Germi
+D	قره آغاج(اردبیل)	Qarah Aghaj Ardabil
+D	مشگین شهر	Meshgin Shahr
+D	رضی	Razi
+D	لاهرود	Lahrud
+D	نمین	Namin
+D	آبی بیگلو	Abi Beyglu
+D	سولا	Sola
+D	نوجه ده	Nowjeh Deh
+D	نیر	Nir
+D	کورائیم	Kuraim
+D	نیر(اردبیل)	Nir Ardabil
+D	آران و بیدگل	Aran and Bidgol
+D	آران	Aran
+D	ابوزیدآباد	Abuzeydabad
+D	نوش آباد	Nushabad
+D	اردستان	Ardestan
+D	زواره	Zavareh
+D	ظفرقند	Zafarqand
+D	موغار	Mughar
+D	مهاباد اردستان	Mahabad Ardestan
+D	حسن آباد اصفهان	Hasanabad Isfahan
+D	دستجاه	Dastjah
+D	رامشه	Ramsheh
+D	زفره	Zafreh
+D	زیار	Ziar
+D	کوهپایه اصفهان	Kuhpayeh Isfahan
+D	محمدآباد اصفهان	Mohammadabad Isfahan
+D	نیک آباد	Nikabad
+D	ورتون	Varton
+D	ورزنه	Varzaneh
+D	هرند	Harand
+D	برخوار و میمه	Borkhar and Meymeh
+D	حبیب آباد اصفهان	Habibabad Isfahan
+D	دولت آباد اصفهان	Dowlatabad Isfahan
+D	سه  راهی  علویجه	Sehrahi Alavijeh
+D	شاهین شهر	Shahin Shahr
+D	مورچه خورت	Murcheh Khvort
+D	میمه	Meymeh
+D	بوئین میاندشت	Buin Miandasht
+D	تیران و کرون	Tiran and Karvan
+D	افجان	Afjan
+D	تیران	Tiran
+D	نجف آباد	Najafabad
+D	خمینی شهر	Khomeyni Shahr
+D	خوانسار	Khansar
+D	رحمت آباد اصفهان	Rahmatabad Isfahan
+D	سمیرم	Semirom
+D	حنا	Hana
+D	کمه	Komeh
+D	ونک	Vanak
+D	شهرضا	Shahreza
+D	پوده	Pudeh
+D	دهاقان	Dehaqan
+D	مرشدآباد	Morshedabad
+D	فریدن	Fereydan
+D	چادگان	Chadegan
+D	داران	Daran
+D	فریدون شهر	Fereydunshahr
+D	فریدونشهر	Fereydunshahr
+D	فلاورجان	Falavarjan
+D	پیربکران	Pir Bakran
+D	کلیشاد	Kelishad
+D	کاشان	Kashan
+D	راوند	Ravand
+D	فین	Fin
+D	قمصر	Qamsar
+D	مشهداردهال	Mashhad-e Ardahal
+D	نیاسر	Niasar
+D	گلپایگان	Golpayegan
+D	سعیدآباد گلپایگان	Saidabad Golpayegan
+D	گوگد	Gugad
+D	لنجان	Lenjan
+D	زرین شهر	Zarrin Shahr
+D	فولادشهر	Fuladshahr
+D	ورنامخواست	Varnamkhast
+D	هاردنگ	Hardang
+D	مبارکه	Mobarakeh
+D	نائین	Nain
+D	انارک	Anarak
+D	بیاضیه	Bayazeh
+D	جندق	Jandaq
+D	خوراصفهان	Khur
+D	حسینچه	Hoseyncheh
+D	دهق	Dehaq
+D	علویجه	Alavijeh
+D	قهدریجان	Qahderijan
+D	نطنز	Natanz
+D	آقاعلی عباس	Agha Ali Abbas
+D	اریسمان	Arisman
+D	بادرود	Badrud
+D	شجاع آباد	Shojaabad
+D	ساوجبلاغ	Savojbolagh
+D	برغان	Barghan
+D	جوستان	Juestan
+D	طالقان	Taleqan
+D	کردان	Kordan
+D	نجم آباد	Najmabad
+D	نظرآباد	Nazarabad
+D	ولیان	Valian
+D	هشتگرد	Hashtgerd
+D	کرج	Karaj
+D	اشتهارد	Eshtehard
+D	دیزین	Dizin
+D	شهرستانک	Shahrestanak
+D	گچسر	Gachsar
+D	کمال‌شهر	Kamalshahr
+D	ماهدشت	Mahdasht
+D	محمد شهر	Mohammadshahr
+D	آبدانان	Abdanan
+D	مورموری	Murmuri
+D	چوار	Chavar
+D	مورت	Murt
+D	ایوان	Eyvan
+D	چهارمله	Chahar Maleh
+D	زرنه	Zarneh
+D	دره شهر	Darreh Shahr
+D	بدره	Badreh
+D	دهلران	Dehloran
+D	ابوغریب	Abu Gharib
+D	پتک	Patak
+D	پهله	Pahleh
+D	دشت عباس	Dasht-e Abbas
+D	فکه	Fakkeh
+D	موسیان	Musiyan
+D	میمه ایلام	Meymeh Ilam
+D	شیروان وچرداول	Shirvan and Chardavol
+D	پیازآباد	Piyazabad
+D	سرابله	Sarableh
+D	کهره	Kahreh
+D	لومار	Lumar
+D	هلیلیان	Halilian
+D	مهران	Mehran
+D	ارگواز	Argavaz
+D	صالح آباد(ایلام)	Salehabad Ilam
+D	گنبد پیرمحمد	Gonbad Pir Mohammad
+D	احمدی	Ahmadi
+D	چاه کوتاه	Chah Kutah
+D	ابوموسی	Abu Musa
+D	تنب بزرگ	Greater Tunb
+D	تنب کوچک	Lesser Tunb
+D	تنگستان	Tangestan
+D	اهرم	Ahram
+D	باشی	Bashi
+D	بندررستمی	Bandar Rostami
+D	دلوار	Delvar
+D	سمل	Samal
+D	دشتستان	Dashtestan
+D	برازجان	Borazjan
+D	بوشکان	Bushkan
+D	پشت پر	Posht Par
+D	تنگ ارم	Tang-e Eram
+D	دالکی	Dalaki
+D	دشتی	Dashti
+D	خورموج	Khormuj
+D	عربی	Arabi
+D	کاکی	Kaki
+D	دیر	Dayyer
+D	آبدان	Abdan
+D	بردخون	Bardkhun
+D	بندردیر	Bandar Dayyer
+D	جاشک	Jashak
+D	دوراهک	Dorahak
+D	دیلم	Deylam
+D	خارگ	Khark
+D	جزیره خارگ	Khark Island
+D	عسلویه	Asaluyeh
+D	بندر عسلویه	Bandar Asaluyeh
+D	چاه‌مبارک	Chah Mobarak
+D	کنگان	Kangan
+D	بندرطاهری	Bandar-e Taheri
+D	بیدخون	Bidkhun
+D	جم	Jam
+D	گناوه	Genaveh
+D	بندرریگ	Bandar Rig
+D	بندرگناوه	Bandar Genaveh
+D	اسلام شهر	Eslamshahr
+D	پاکدشت	Pakdasht
+D	چنداب	Chendab
+D	فرون‌آباد	Farunabad
+D	شریف‌آباد	Sharifabad
+D	امامزاده داوود	Imamzadeh Davud
+D	بومهن	Bumehen
+D	جاجرود	Jajrud
+D	چهاردانگه	Chahardangeh
+D	سنگان تهران	Sangan
+D	قدس	Qods
+D	دماوند	Damavand
+D	آبسرد	Absard
+D	آبعلی	Abali
+D	دواب سمنان	Davab
+D	رودهن	Rudehen
+D	کیلان	Kilan
+D	رباط کریم	Robat Karim
+D	سلطان آباد تهران	Soltanabad
+D	ری	Rey
+D	حسن آباد تهران	Hasanabad
+D	شورآباد	Shurabad
+D	شهرری	Shahr-e Rey
+D	فیروزآباد تهران	Firuzabad
+D	قلعه نو ورامین	Qaleh Now
+D	کهریزک	Kahrizak
+D	نعلبندان	Na'lbandan
+D	وهن آباد	Vahnabad
+D	شمیرانات	Shemiranat
+D	آهار	Ahar
+D	فشم	Fasham
+D	لشکرک	Lashkarak
+D	لواسان	Lavasan
+D	اخترآباد	Akhtarabad
+D	ملارد	Malard
+D	فیروز کوه	Firuzkuh
+D	فیروزکوه	Firuzkuh
+D	ورامین	Varamin
+D	باقرآباد ورامین	Baqerabad
+D	پیشوا	Pishva
+D	جواد آباد ورامین	Javadabad
+D	قرچک	Qarchak
+D	چهار محال بختیاری	Chaharmahal and Bakhtiari
+D	اردل	Ardal
+D	دوآب چهارمحال	Do Ab
+D	سرخون	Sorkhun
+D	ناغان	Naghan
+D	بروجن	Borujen
+D	بلداجی	Boldaji
+D	سفیددشت	Sefid Dasht
+D	فرادنبه	Faradonbeh
+D	گندمان	Gandoman
+D	نقنه	Naqneh
+D	بن	Ben
+D	حیدری	Heydari
+D	دستگرد	Dastgerd
+D	سامان	Saman
+D	سورشجان	Soresjan
+D	شلمزار	Shalamzar
+D	شیخ شبان	Sheykh Shaban
+D	طاقانک	Taqanak
+D	فرخشهر	Farrokhshahr
+D	گهرو	Gahru
+D	هفشجان	Hafshejan
+D	یان چشمه	Yan Cheshmeh
+D	فارسان	Farsan
+D	باباحیدر	Baba Heydar
+D	جونقان	Junaqan
+D	کوهرنگ	Kuhrang
+D	چلگرد	Chelgerd
+D	دیمه	Dimeh
+D	لردگان	Lordegan
+D	سردشت(چهارمحال)	Sardasht
+D	کلواری	Kalvari
+D	گوشکی	Gushaki
+D	منج	Manj
+D	خراسان جنوبی	South Khorasan
+D	بشرویه	Boshruyeh
+D	اسدیه	Asadiyeh
+D	القورات	Al Qurat
+D	بسطاق	Bastaq
+D	حاجی آباد بیرجند	Hajiabad
+D	خور خراسان	Khur
+D	خوسف	Khusf
+D	درمیان	Darmian
+D	دوست آباد	Dustabad
+D	سرایان	Sarayan
+D	طبس مسینا	Tabas-e Masina
+D	گزیک	Gazik
+D	منصورآباد بیرجند	Mansurabad
+D	سربیشه	Sarbisheh
+D	درح	Deraj
+D	قرقری	Qarqari
+D	قلعه سرخ	Qaleh Sorkh
+D	نهبندان	Nehbandan
+D	شوسف	Shusef
+D	طبسین	Tabasin
+D	مزارسیدعلی	Mazar-e Seyyed Ali
+D	معدن حاجات	Ma'dan-e Hajat
+D	خراسان رضوی	Razavi Khorasan
+D	بردسکن	Bardaskan
+D	برداسکن	Bardaskan
+D	درونه	Daruneh
+D	دهانه قلعه	Dahaneh Qaleh
+D	تایباد	Taybad
+D	باخزر	Bakharz
+D	دوغارون	Dughayron
+D	تربت جام	Torbat-e Jam
+D	سمیع آباد	Samiabad
+D	شورستان	Shurestan
+D	صالح آباد خراسان	Salehabad
+D	تربت حیدریه	Torbat-e Heydarieh
+D	اسدآباد خراسان	Asadabad
+D	بایگ	Bayg
+D	تلخ بخش گلبو	Talkh Bakhsh-e Golbu
+D	فیض آباد	Feyzabad
+D	کدکن	Kadkan
+D	چناران	Chenaran
+D	خواف	Khaf
+D	سنگان(خراسان)	Sangan
+D	قاسم آباد	Qasemabad
+D	نیازآباد	Niazabad
+D	درگز	Dargaz
+D	حصارخراسان	Hesar
+D	لطف آباد	Lotfabad
+D	رشتخوار	Roshtkhar
+D	سبزوار	Sabzevar
+D	جغتای	Joghatai
+D	حارث آباد	Harethabad
+D	حکم آباد	Hokmabad
+D	داورزن	Davarzan
+D	سلطان آبادخراسان	Soltanabad
+D	ششتمد	Sheshtamad
+D	شفیع آبادسبزوار	Shafiabad
+D	کاهک	Kahak
+D	نقاب	Neqab
+D	سرخس	Sarakhs
+D	فردوس	Ferdows
+D	باغستان	Baghestan
+D	برون	Borun
+D	فریمان	Fariman
+D	سنگ بست	Sang Bast
+D	قائنات	Qaenat
+D	پترگان	Pateregan
+D	سده خراسان	Sadeh
+D	شاهرخت	Shahrokht
+D	قاین	Qaen
+D	کرغند	Karghand
+D	قوچان	Quchan
+D	امام قلی	Imam Qoli
+D	باجگیران	Bajgiran
+D	چویلی	Chuyli
+D	کاشمر	Kashmar
+D	گناباد	Gonabad
+D	بجستان	Bajestan
+D	بیدخت	Bidokht
+D	خضری	Khezri
+D	عمرانی	Omrani
+D	کاخک	Kakhk
+D	یونسی	Yunesi
+D	آبروان	Abravan
+D	امام تقی	Imam Taqi
+D	باغچه	Baghcheh
+D	رباط سفید	Robat-e Sefid
+D	شاندیز	Shandiz
+D	طرقبه	Torqabeh
+D	وکیل آباد خراسان	Vakilabad
+D	میان‌جلگه	Miyan Jolgeh
+D	عشق‌آباد	Eshqabad
+D	فیروزه	Firuzeh
+D	همت‌آباد	Hemmatabad
+D	گرماب	Garmab
+D	نیشابور	Nishapur
+D	بار	Bar
+D	درود خراسان	Dorud
+D	عبدالله گیو	Abdollah Giv
+D	ماروسک	Marusk
+D	چکنه، سرولایت	Chekneh, Sarvelayat
+D	زبرخان	Zebarkhan
+D	قدمگاه	Qadamgah
+D	خرو	Kharv
+D	کلات	Kalat
+D	کلات نادری	Kalat-e Naderi
+D	خراسان شمالی	North Khorasan
+D	اسفراین	Esfarayen
+D	بام	Bam
+D	صفی آباد	Safiabad
+D	گراتی	Garati
+D	راز	Raz
+D	غلامان	Gholaman
+D	جاجرم	Jajarm
+D	رباط قره بیل	Robat-e Qarabil
+D	سنخواست	Sankhast
+D	شوقان	Shoqan
+D	گرمه	Garmeh
+D	مرغزار	Marghzar
+D	شیروان	Shirvan
+D	فاروج	Faruj
+D	مانه و سملقان	Maneh and Samalqan
+D	آشخانه	Ashkhaneh
+D	چمن بید	Chaman Bid
+D	خوزستان	Khuzestan
+D	آبادان	Abadan
+D	اروندکنار	Arvandkenar
+D	چویبده	Chowibdeh
+D	قفاص	Qafas
+D	امیدیه	Omidiyeh
+D	بید بلند	Bid Boland
+D	جایزان	Jayezan
+D	میانکوه	Miankuh
+D	اندیمشک	Andimeshk
+D	پل زال	Pol-e Zal
+D	سددز	Sad-e Dez
+D	مازو	Mazu
+D	حمیدیه	Hamidiyeh
+D	شهرک ویس	Shahrak-e Veys
+D	کوشک	Kushk
+D	ملاثانی	Mollasani
+D	ایذه	Izeh
+D	پیون	Payun
+D	دهدز	Dehdez
+D	سادات حسینی	Sadat Hoseyni
+D	باغ ملک	Baghmalek
+D	باغملک	Baghmalek
+D	صیدون	Seydun
+D	بندرماهشهر	Bandar-e Mahshahr
+D	بندرامام	Bandar-e Imam Khomeini
+D	سربندر	Sarbandar
+D	ماهشهر	Mahshahr
+D	هندیجان	Hendijan
+D	بهبهان	Behbahan
+D	آغاجاری	Aghajari
+D	خرمشهر	Khorramshahr
+D	جزیره مینو	Jazireh-ye Minu
+D	حسینیه	Hoseyniyeh
+D	دزفول	Dezful
+D	سردشت خوزستان	Sardasht
+D	سیاه منصور	Siah Mansur
+D	دشت آزادگان	Dasht-e Azadegan
+D	بستان	Bostan
+D	سوسنگرد	Susangerd
+D	طلائیه	Talaeyeh
+D	کاویان	Kavian
+D	هویزه	Hoveyzeh
+D	یزدنو	Yazd-e Now
+D	رامهرمز	Ramhormoz
+D	رامشیر	Ramshir
+D	نفت سفید	Naft-e Sefid
+D	نمره یک	Nomreh Yek
+D	هفتگل	Haftkel
+D	شادگان	Shadegan
+D	جفال	Jofal
+D	دارخوین	Darkhovin
+D	شا دگان	Shadegan
+D	گرگر	Gargar
+D	شوش	Shush
+D	الوان	Alvan
+D	چغازنبیل	Chogha Zanbil
+D	چنانه	Chananeh
+D	هفت تپه	Haft Tappeh
+D	شوشتر	Shushtar
+D	شلیلی	Shalili
+D	عقیلی	Aqili
+D	گتوند	Gotvand
+D	گوریه	Gurieh
+D	مسجدسلیمان	Masjed Soleyman
+D	سد شهید عباسپور	Shahid Abbaspur Dam
+D	لالی	Lali
+D	ابهر	Abhar
+D	دولت آباد زنجان	Dowlatabad
+D	سلطانیه	Soltaniyeh
+D	صائین قلعه	Sain Qaleh
+D	ایجرود	Ijrud
+D	زرین آباد زنجان	Zarrinabad
+D	خدابنده	Khodabandeh
+D	حصارزنجان	Hesar
+D	سجاس	Sojas
+D	محمودآبادزنجان	Mahmudabad
+D	خرمدره	Khorramdarreh
+D	تهم	Tahm
+D	سرچم	Sarcham
+D	طارم	Tarom
+D	آب بر	Abbar
+D	درام	Daram
+D	گیلوان	Gilvan
+D	ماه نشان	Mahneshan
+D	دندی	Dandi
+D	دامغان	Damghan
+D	آستانه سمنان	Astaneh
+D	دیباج	Dibaj
+D	کلاته رودبار	Kalateh-ye Rudbar
+D	معلمان	Mo'alleman
+D	چاشم	Chashm
+D	سرخه	Sorkheh
+D	شهمیرزاد	Shahmirzad
+D	فولادمحله	Fulad Mahalleh
+D	مهدی شهر	Mahdishahr
+D	شاهرود	Shahrud
+D	بسطام	Bastam
+D	بیارجمند	Biarjomand
+D	علی آباد(گلستان)	Aliabad
+D	کلاته خیج	Kalateh Khij
+D	مجن	Mojen
+D	میامی	Miami
+D	گرمسار	Garmsar
+D	ایوانکی	Eyvanekey
+D	سیستان و بلوچستان	Sistan and Baluchestan
+D	ایرنشهر	Iranshahr
+D	ایرانشهر	Iranshahr
+D	بزمان	Bazman
+D	بمپور	Bampur
+D	چاه بهار	Chabahar
+D	بریس	Beris
+D	چابهار	Chabahar
+D	زرآباد	Zarabad
+D	قصرقند	Qasr-e Qand
+D	کنارک	Konarak
+D	گواتر	Gwatr
+D	نگور	Negur
+D	خاش	Khash
+D	اسکل آباد	Eskelabad
+D	ایرندگان	Irandegan
+D	ده پابید	Deh Pabid
+D	سنگان سیستان و بلوچستان	Sangan
+D	کارواندر	Karvandar
+D	گوهرکوه	Gohar Kuh
+D	راسک	Rask
+D	بندان	Bandan
+D	پیشین	Pishin
+D	جکیگور	Jakigur
+D	سرباز	Sarbaz
+D	کافه بلوچی	Kafeh Baluchi
+D	زابل	Zabol
+D	بنجار	Banjar
+D	تاسوکی	Tasuki
+D	جزینک	Jazinak
+D	دوست محمدخان	Dust Mohammad Khan
+D	زهک	Zahak
+D	سفیدابه	Sefidabeh
+D	لوطک	Lutak
+D	محمدآباد سیستان و بلوچستان	Mohammadabad
+D	محمداباد ادیمی	Mohammadabad Adimi
+D	رزاق زاده	Razzaq Zadeh
+D	لاویز	Laviz
+D	میرجاوه	Mirjaveh
+D	نصرت آباد سیستان و بلوچستان	Nosratabad
+D	سراوان	Saravan
+D	جالق	Jaleq
+D	رحمت آباد سوران	Rahmatabad
+D	زابلی	Zaboli
+D	سراوان سیستان و بلوچستان	Saravan
+D	سوران	Soran
+D	کله گان	Kalehgan
+D	گشت	Gasht
+D	گلپورگان	Golpurgan
+D	ناهوک	Nahuk
+D	نوک آباد	Nukabad
+D	نیکشهر	Nikshahr
+D	اسپکه	Espakeh
+D	بنت	Bent
+D	چانف	Chanef
+D	فنوج	Fanuj
+D	نیک شهر	Nikshahr
+D	فارس	Fars
+D	آباده	Abadeh
+D	ایزدخواست	Izadkhast
+D	جنت آباد	Jannatabad
+D	سورمق	Surmaq
+D	صغاد	Soghad
+D	ارسنجان	Arsanjan
+D	استهبان	Estahban
+D	ایج	Eij
+D	اقلید	Eqlid
+D	آسپاس	Aspas
+D	خسروشیرین	Khosrow Shirin
+D	سده فارس	Sedeh
+D	علی آباد فارس	Aliabad
+D	بوانات	Bavanat
+D	جلیان	Jalian
+D	خوانسار(فارس)	Khansar
+D	سروستان بوانات	Sarvestan
+D	مزایجان	Mazayjan
+D	جهرم	Jahrom
+D	باب انار	Bab Anar
+D	خاوران	Khavaran
+D	سیمکان	Simakan
+D	قطب آباد	Qutbabad
+D	خرم بید	Khorram Bid
+D	صفاشهر	Safashahr
+D	قادرآباد	Qaderabad
+D	داراب	Darab
+D	جنت شهر	Jannat Shahr
+D	دولت آباد فارس	Dowlatabad
+D	رستاق	Rostaq
+D	فورگ	Forg
+D	زردین دشت	Zardin Dasht
+D	حاجی آباد فارس	Hajiabad
+D	خسویه	Khosuyeh
+D	سپیدان	Sepidan
+D	اکبرآباد شیراز	Akbarabad
+D	بندامیر	Bandamir
+D	خانه زنیان	Khaneh Zenyan
+D	خرامه	Khorameh
+D	زرقان	Zarqan
+D	سروستان شیراز	Sarvestan
+D	فتح آباد	Fathabad
+D	قلات	Qalat
+D	کوار	Kavar
+D	کوهمره	Kuhmareh
+D	لپویی	Lapui
+D	فسا	Fasa
+D	دیندارلو	Dindarlu
+D	زاهد شهر	Zahedshahr
+D	ششده	Sheshdeh
+D	فیروزآباد	Firuzabad
+D	دهرم	Dehram
+D	فراشبند	Farashband
+D	فیروزآباد فارس	Firuzabad
+D	قیر	Qir
+D	میمند	Meymand
+D	کازرون	Kazerun
+D	ابوالحیات	Abolhayat
+D	چنارشاهیجان	Chenar Shahijan
+D	دریس	Daris
+D	دشت برم	Dasht-e Barm
+D	کنارتخته	Konartakhteh
+D	لارستان	Larestan
+D	اوز فارس	Evaz
+D	بنارویه	Banaruyeh
+D	بیرم	Beyram
+D	خنج	Khonj
+D	خور	Khur
+D	درز	Dorz
+D	عمادده	Emadeh
+D	فداغ	Fedagh
+D	گراش	Gerash
+D	لار	Lar
+D	منصورآباد(فارس)	Mansurabad
+D	هرمودباغ	Hormud Bagh
+D	لامرد	Lamerd
+D	احشام	Ahsham
+D	اشکنان	Ashkanan
+D	چاه عینی	Chah Eyni
+D	رکن آباد	Ruknabad
+D	مرودشت	Marvdasht
+D	درودزن	Doruzan
+D	سعادت  شهر	Saadat Shahr
+D	ممسنی	Mamasani
+D	باباگوری	Baba Guri
+D	میشان	Mishan
+D	نورآباد ممسنی	Nurabad
+D	نی ریز	Neyriz
+D	آباده طشک	Abadeh Tashk
+D	قطروئیه	Qatruyeh
+D	مشکان	Meshkan
+D	آبیک	Abyek
+D	بوئین زهرا	Buin Zahra
+D	آبگرم	Abgarm
+D	آوج	Avaj
+D	دانسفهان	Danesfahan
+D	شال	Shal
+D	تاکستان	Takestan
+D	اسفرورین	Esfarvarin
+D	ضیاآباد	Ziaabad
+D	نهاوند خرمدشت	Nahavand
+D	اقبالیه	Eqbaliyeh
+D	الوند	Alvand
+D	بهرام آباد زنجان	Bahramabad
+D	سیردان	Sirdan
+D	شهرک صنعتی البرز	Shahrak-e Sanati Alborz
+D	شهرک محمدیه	Shahrak-e Mohammadiyeh
+D	محمودآباد(قزوین)	Mahmudabad
+D	معلم کلایه	Moallem Kalayeh
+D	نیارک	Niarak
+D	باغیک	Baghik
+D	راهجرد	Rahjerd
+D	سلفچگان	Salafchegan
+D	طغرود	Toghrud
+D	کهک	Kahak
+D	گازران	Gazran
+D	نیزار	Nizar
+D	کردستان	Kurdistan
+D	بانه	Baneh
+D	آرمرده	Armardeh
+D	بیجار	Bijar
+D	قزل بلاغ	Qezel Bolagh
+D	یاسوکند	Yasukand
+D	دیواندره	Divandarreh
+D	زرینه	Zarineh
+D	علی آباد کردستان	Aliabad
+D	سروآباد	Sarvabad
+D	سقز	Saqqez
+D	سرا	Sara
+D	سنته	Senteh
+D	سوته	Suteh
+D	تیژ تیژ	Tij Tij
+D	حسین آباد کردستان	Hoseynabad
+D	قروه	Qorveh
+D	داشبلاغ	Dash Bolagh
+D	دهگلان	Dehgolan
+D	سریش آباد	Sarishabad
+D	کامیاران	Kamyaran
+D	دیزگران	Dizgaran
+D	گشکی	Gashki
+D	موچش	Muchesh
+D	مریوان	Marivan
+D	آگجه	Agjeh
+D	باشماق	Bashmaq
+D	بافت	Baft
+D	ارزوئیه	Arzuiyeh
+D	خبر بافت	Khabar
+D	رابر	Rabor
+D	وکیل آباد کرمان	Vakilabad
+D	بردسیر	Bardsir
+D	نگار	Negar
+D	بم	Bam
+D	بروات	Barvat
+D	دارزین	Darzin
+D	دهبکری	Dehbakri
+D	رحمت آباد ریکان	Rahmatabad
+D	رستم آباد کرمان	Rostamabad
+D	جیرفت	Jiroft
+D	بلوک	Baluk
+D	ساردوئیه	Sarduiyeh
+D	عنبرآباد	Anbarabad
+D	راور	Ravar
+D	رفسنجان	Rafsanjan
+D	انار	Anar
+D	بیاض	Biaz
+D	داوران	Davaran
+D	شمش	Shamsh
+D	مانی	Mani
+D	زرند	Zarand
+D	ده علی	Deh Ali
+D	کوهبنان	Kuhbanan
+D	سیرجان	Sirjan
+D	پاریز	Pariz
+D	سرچشمه	Sarcheshmeh
+D	شهر بابک	Shahr-e Babak
+D	جوزم	Juzam
+D	خاتون آباد(شهربابک)	Khatunabad
+D	دهج	Dehaj
+D	شهربابک	Shahr-e Babak
+D	اندوهجرد	Anduhjerd
+D	باغین	Baghin
+D	جوپار	Jupar
+D	جوشان	Jushan
+D	چترود	Chatrud
+D	حسین آباد گروه	Hoseynabad
+D	راین	Rayen
+D	زنگی آباد	Zangiabad
+D	سیرچ	Sirch
+D	شفیع آبادکرمان	Shafiabad
+D	شهداد	Shahdad
+D	کوهپایه	Kuhpayeh
+D	گلباف	Golbaf
+D	ماهان	Mahan
+D	کهنوج	Kahnuj
+D	اسلام آباد جیرفت	Eslamabad
+D	چاه ریگان	Chah Rigan
+D	زهکلوت	Zahkalut
+D	فاریاب کرمان	Faryab
+D	قلعه گنج	Qaleh Ganj
+D	منوجان	Manujan
+D	اسلام آباد غرب	Islamabad-e Gharb
+D	بابا یادگار	Baba Yadegar
+D	حمیل	Homeyl
+D	کرند	Karand
+D	گهواره	Gahvareh
+D	پاوه	Paveh
+D	باینگان	Bayangan
+D	دوآب نوسود	Do Ab Nowsud
+D	نودشه	Nowdeshah
+D	نوسود	Nowsud
+D	ثلاث باباجانی	Salas-e Babajani
+D	تازه آباد کرمانشاه	Tazehabad
+D	شیخ سله	Sheykh Seleh
+D	جوانرود	Javanrud
+D	روانسر	Ravansar
+D	سر پل ذهاب	Sarpol-e Zahab
+D	بزمیرآباد	Bazmirabad
+D	سرآب ذهاب	Sarab-e Zahab
+D	سرپل ذهاب	Sarpol-e Zahab
+D	سنقر	Sonqor
+D	صحنه	Sahneh
+D	آب باریک	Ab Barik
+D	جیحون آباد	Jeyhunabad
+D	میان راهان	Mian Rahan
+D	قصر شیرین	Qasr-e Shirin
+D	خسروی	Khosravi
+D	سومار	Sumar
+D	قصرشیرین	Qasr-e Shirin
+D	نفت شهر	Naftshahr
+D	چهارزبر	Chaharzebar
+D	قزانچی	Qazanchi
+D	قزقبری	Qezqabri
+D	قلعه شاهخانی	Qaleh Shahkhani
+D	کوزران	Kuzaran
+D	ماهیدشت کرمانشاه	Mahidasht
+D	هلشی	Helashi
+D	کنگاور	Kangavar
+D	گیلان غرب	Gilan-e Gharb
+D	سرمست گوار	Sarmast
+D	شیخ جبرئیل	Sheykh Jebraeil
+D	گورسفید	Gur Sefid
+D	گیلانغرب	Gilan-e Gharb
+D	هرسین	Harsin
+D	بیستون	Bisotun
+D	شیرازی سفلی	Shirazi-ye Sofla
+D	کهگیلویه و بویراحمد	Kohgiluyeh and Boyer-Ahmad
+D	بویراحمد	Boyer-Ahmad
+D	مارگون	Margun
+D	دنا	Dena
+D	پاتاوه	Patave
+D	سی سخت	Sisakht
+D	میمند(یاسوج)	Meymand
+D	کهکیلویه	Kohgiluyeh
+D	چرام	Choram
+D	دهدشت	Dehdasht
+D	دیشموک	Dishmok
+D	سادات	Sadat
+D	سرفاریاب	Sarfaryab
+D	سوق	Suq
+D	لنده	Landeh
+D	لیکک	Likak
+D	گچساران	Gachsaran
+D	باشت	Basht
+D	دوگنبدان	Dogonbadan
+D	گلستان	Golestan
+D	آزادشهر	Azadshahr
+D	آق قلا	Aqqala
+D	بندرگز	Bandar-e Gaz
+D	بندر گز	Bandar-e Gaz
+D	نوکنده	Nukandeh
+D	ترکمن	Torkaman
+D	بندر ترکمن	Bandar-e Torkaman
+D	گمیشان	Gomishan
+D	رامیان	Ramian
+D	خان ببین	Khan Bebin
+D	دلند	Delend
+D	علی آباد	Aliabad
+D	علی‌آباد کتول	Aliabad-e Katul
+D	فاضل آباد گلستان	Fazelabad
+D	کردکوی	Kordkuy
+D	کرد کوی	Kordkuy
+D	کلاله	Kalaleh
+D	مراوه تپه	Maravehtappeh
+D	تقی آباد گلستان	Taqiabad
+D	گنبدکاووس	Gonbad-e Kavus
+D	اینچه برون	Incheh Borun
+D	گنبد کاووس	Gonbad-e Kavus
+D	مینودشت	Minudasht
+D	گالیکش	Galikesh
+D	گیلان	Gilan
+D	آستارا	Astara
+D	حیران	Hiran
+D	لوندویل	Lavandvil
+D	آستانه اشرفیه	Astaneh-ye Ashrafiyeh
+D	کناردریا	Kenar Darya
+D	کیاشهر	Kiashahr
+D	املش	Amlash
+D	بندرانزلی	Bandar-e Anzali
+D	آبکنار	Abkenar
+D	بندر انزلی	Bandar-e Anzali
+D	حسن رود	Hasan Rud
+D	کپورچال	Kapurchal
+D	امین آباد گیلان	Aminabad
+D	پیربازار	Pir Bazar
+D	خشک بیجار	Khoshk Bijar
+D	خمام	Khomam
+D	رودبارکی	Rudbaraki
+D	زیباکنار	Zibakenar
+D	سراوان گیلان	Saravan
+D	سنگر	Sangar
+D	شیجان	Shijan
+D	کته سر	Kateh Sar
+D	کوچصفهان	Kuchesfahan
+D	لاکان	Lakan
+D	لشت نشا	Lasht-e Nesha
+D	رضوانشهر	Rezvanshahr
+D	پره سر	Pareh Sar
+D	پونل	Punel
+D	توتکابن	Tutkabon
+D	جیرنده	Jirandeh
+D	رستم آباد گیلان	Rostamabad
+D	کلیشم	Kelisham
+D	لوشان	Lushan
+D	منجیل	Manjil
+D	رودسر	Rudsar
+D	چابکسر	Chaboksar
+D	چینی جان	Chini Jan
+D	دریا وارسر	Darya Varsar
+D	رحیم آباد گیلان	Rahimabad
+D	کلاچای	Kelachay
+D	کلان کلایه	Kalan Kelayeh
+D	گیل کلایه	Gil Kalayeh
+D	سیاهکل	Siahkal
+D	دیلمان	Deylaman
+D	شفت	Shaft
+D	احمد سرگوراب	Ahmad Sargurab
+D	جیرده	Jirdeh
+D	چوبر	Chubar
+D	ملاسرا	Mulasara
+D	نصیرمحله	Nasir Mahalleh
+D	صومعه سرا	Sowme'eh Sara
+D	بازار جمعه	Bazar Jomeh
+D	پیرسرا	Pir Sara
+D	شیخ محله گیلان	Sheykh Mahalleh
+D	ضیابر	Ziabar
+D	طاهر گوراب	Taher Gurab
+D	کسما	Kasma
+D	کلید بر	Kelid Bar
+D	گلسر	Golsar
+D	گوراب زرمیخ	Gurab Zarmikh
+D	طوالش	Tavalesh
+D	اسالم	Asalem
+D	تالش	Talesh
+D	حویق	Haviq
+D	لیسار	Lisar
+D	فومن	Fuman
+D	کردمحله	Kurd Mahalleh
+D	کوریه	Kuriyeh
+D	ماسوله	Masuleh
+D	بازکیاگوراب	Baz Kia Gurab
+D	رودبنه	Rudbaneh
+D	شیرجوپشت	Shirju Posht
+D	لنگرود	Langarud
+D	چاف	Chaf
+D	خرما	Khorma
+D	شلمان	Shalman
+D	کومله	Kumeleh
+D	ماسال	Masal
+D	شاندرمن	Shanderman
+D	لرستان	Lorestan
+D	ازنا	Azna
+D	قاقان	Qaqan
+D	الیگودرز	Aligudarz
+D	بشارت	Besharat
+D	شول آباد	Shulabad
+D	بروجرد	Borujerd
+D	اشترینان	Ashtarinan
+D	قلعه نو	Qaleh Now
+D	پلدختر	Pol-e Dokhtar
+D	بابازید	Baba Zeyd
+D	معمولان	Mamulan
+D	خرم آباد	Khorramabad
+D	چغلوندی	Choghalvandi
+D	سپید دشت	Sepid Dasht
+D	دلفان	Delfan
+D	تمرک	Tamarak
+D	نورآباد لرستان	Nurabad
+D	دورود	Dorud
+D	چالان چولان	Chalan Chulan
+D	سلسله	Selseleh
+D	الشتر	Aleshtar
+D	فیروزآباد لرستان	Firuzabad
+D	کاکارضا	Kaka Reza
+D	کوهدشت	Kuhdasht
+D	چقابل	Chaghabal
+D	شاهزاده محمد	Shahzadeh Mohammad
+D	گراب	Garab
+D	گونانی	Gunani
+D	مازندران	Mazandaran
+D	آمل	Amol
+D	آب اسک	Abesk
+D	آهنگرکلا	Ahangar Kola
+D	امامزاده عبدالله	Emamzadeh Abdollah
+D	امین آباد مازندران	Aminabad
+D	بایجان	Bayjan
+D	پلور	Polur
+D	درویش خیل	Darvish Kheyl
+D	گزنک	Gaznak
+D	ولیسده	Valisadeh
+D	بابل	Babol
+D	امیرکلا	Amirkola
+D	زرگرمحله	Zargar Mahalleh
+D	کلاگرمحله	Kolagar Mahalleh
+D	گلوگاه(بابل)	Galugah (Babol)
+D	مرزیکلا	Marzikola
+D	بابلسر	Babolsar
+D	بهنمیر	Behnamir
+D	دریاکنار	Daryakenar
+D	رودبست	Rudbast
+D	سرخرود	Sorkhrud
+D	فریدونکنار	Fereydunkenar
+D	میربازار	Mir Bazar
+D	بهشهر	Behshahr
+D	رستم کلا	Rostam Kola
+D	زاغمرز	Zaghmarz
+D	سفیدچال	Sefid Chal
+D	گلوگاه	Galugah
+D	تنکابن	Tonekabon
+D	اشکور	Ashkur
+D	پل سرا	Pol Sara
+D	خرم آباد تنکابن	Khorramabad
+D	سلمانشهر	Salmanshahr
+D	عباس آباد مازندران	Abbasabad
+D	کترا	Katra
+D	کلارآباد	Kalarabad
+D	نشتارود	Nashtarud
+D	ولی آباد تنکابن	Valiabad
+D	جویبار	Juybar
+D	کوه خیل	Kuh Kheyl
+D	لاریم	Larim
+D	چالوس	Chalus
+D	دوآب مازندران	Do Ab
+D	سردآبرود	Sardabrud
+D	کلاردشت	Kelardasht
+D	مرزن آباد	Marzanabad
+D	نوشهر	Nowshahr
+D	رامسر	Ramsar
+D	جواهرده	Javaherdeh
+D	چورته	Churteh
+D	سادات محله	Sadat Mahalleh
+D	کتالم	Katalem
+D	تازه آباد مازندران	Tazehabad
+D	تاکام	Takam
+D	خزرآباد	Khazarabad
+D	علی آباد مازندران	Aliabad
+D	محمدآباد مازندران	Mohammadabad
+D	معلم کلا	Moallem Kola
+D	سوادکوه	Savadkuh
+D	آزادمهر	Azadmehr
+D	آلاشت	Alasht
+D	پل سفید	Pol Sefid
+D	زرشک دره	Zereshk Darreh
+D	زیرآب مازندران	Zirab
+D	شارقلت	Shargholat
+D	شیرگاه	Shirgah
+D	کلیج خیل	Kolij Kheyl
+D	لاجیم	Lajim
+D	قائم شهر	Qaem Shahr
+D	سنگتاب	Sangtab
+D	قائمشهر	Qaem Shahr
+D	کیاکلا	Kiakola
+D	محمود آباد	Mahmudabad
+D	سیاهکلا	Siahkola
+D	کلوده	Kaludeh
+D	محمودآباد مازندران	Mahmudabad
+D	نکاء	Neka
+D	اسطلخ پشت	Astalakh Posht
+D	گهرباران	Goharbaran
+D	نکا	Neka
+D	نور	Nur
+D	اوز تهران	Uz
+D	بلده	Baladeh
+D	چمستان	Chamestan
+D	علمده	Alamdeh
+D	گاسکرمحله	Gasker Mahalleh
+D	کجور	Kojur
+D	ونوش	Vanush
+D	مرکزی	Markazi
+D	آشتیان	Ashtian
+D	صالح آباد مرکزی	Salehabad
+D	ابراهیم آباد	Ebrahimabad
+D	کمیجان	Komijan
+D	گلاوند	Galavand
+D	تفرش	Tafresh
+D	شیرین آباد فرمهین	Shirinabad-e Farmahin
+D	فرمهین	Farmahin
+D	خمین	Khomeyn
+D	دهنو	Dehnow
+D	ساوه	Saveh
+D	زاویه	Zavieh
+D	غرق آباد	Gharqabad
+D	مامونیه	Mamuniyeh
+D	نوبران	Nobaran
+D	شازند	Shazand
+D	مالمیر	Malmir
+D	محلات	Mahallat
+D	نیمور	Nimvar
+D	دلیجان	Delijan
+D	دودهک	Dudehak
+D	هرمزگان	Hormozgan
+D	بستک	Bastak
+D	اسکله شهید باهنر	Shahid Bahonar Port
+D	اسکله شهید رجایی	Shahid Rajaee Port
+D	بندر خمیر	Bandar-e Khamir
+D	بندر عباس	Bandar Abbas
+D	تخت	Takht
+D	سیاهو	Siyahu
+D	شمیل	Shamil
+D	فین هرمزگان	Fin
+D	کهورستان	Kahurestan
+D	گنو	Genow
+D	بندرلنگه	Bandar Lengeh
+D	بندر گنگ	Bandar-e Gong
+D	بندر مقام	Bandar-e Moqam
+D	بندرچارک	Bandar-e Charak
+D	پارسیان	Parsian
+D	کیش	Kish
+D	جاسک	Jask
+D	جکدان	Jakdan
+D	کاروان	Karvan
+D	حاجی آباد	Hajiabad
+D	حاجی آباد هرمزگان	Hajiabad
+D	فارغان	Farghan
+D	رودان	Rudan
+D	جغین	Jaghin
+D	دهبارز	Dehbarez
+D	راهدار	Rahdar
+D	زیارتعلی	Ziarat Ali
+D	فاریاب هرمزگان	Faryab
+D	قشم	Qeshm
+D	میناب	Minab
+D	درپهن	Darpahn
+D	سندرک	Sandarak
+D	سیریک	Sirik
+D	کلاهی	Kolahi
+D	اسدآباد	Asadabad
+D	آجین	Ajin
+D	اسدآباد همدان	Asadabad
+D	صالح آباد همدان	Salehabad
+D	لالجین	Lalejin
+D	تویسرکان	Tuyserkan
+D	اشتران	Ashtaran
+D	سرکان	Sarkan
+D	فرسفج	Farsfaj
+D	وردآورد	Vardavard
+D	رزن	Razan
+D	دمق	Damaq
+D	سوزن	Suzan
+D	قروه درجزین	Qorveh-e Darjazin
+D	کبودرآهنگ	Kabudarahang
+D	آقبلاغ	Aqbolagh
+D	اکنلو	Aknlu
+D	اورقین	Owrqin
+D	بشیک تپه	Beshik Tappeh
+D	علی صدر	Ali Sadr
+D	کوریجان	Kurijan
+D	گل تپه	Gol Tappeh
+D	ملایر	Malayer
+D	جوراب	Jurab
+D	جوکار	Jowkar
+D	خردمند	Kheradmand
+D	سامن	Samen
+D	طاسبندی	Tasbandi
+D	گاماسیاب	Gamasiab
+D	نهاوند	Nahavand
+D	برزول	Barzul
+D	فیروزان	Firuzan
+D	گیان	Gian
+D	سیاه کمر	Siah Kamar
+D	فامنین	Famenin
+D	قهاوند	Qahavand
+D	مسلم آباد	Moslemabad
+D	ابرکوه	Abarkuh
+D	مهرآبادیزد	Mehrabad
+D	اردکان	Ardakan
+D	خرانق	Kharanaq
+D	رباط پشت بادام	Robat-e Posht-e Badam
+D	ساغند	Saghand
+D	عقدا	Aqda
+D	هامانه	Hamaneh
+D	بافق	Bafq
+D	بهاباد	Bahabad
+D	تفت	Taft
+D	ده بالا	Deh Bala
+D	دهشیر	Deh Shir
+D	زردین	Zardin
+D	سخوید	Sakhvid
+D	طرزجان	Tarzjan
+D	کهدوئیه	Kahduiyeh
+D	گاریز	Gariz
+D	نیر یزد	Nir
+D	خاتم	Khatam
+D	توتک	Tutak
+D	مروست	Marvast
+D	هرات یزد	Herat
+D	صدوق	Saduq
+D	خضرآباد	Khezrabad
+D	ندوشن	Nadushan
+D	طبس	Tabas
+D	جعفرآباد قوچان	Jafarabad
+D	جوخواه	Jukhvah
+D	ده محمد	Deh Mohammad
+D	دیهوک	Dehuk
+D	رباط خان	Robat Khan
+D	عرب آباد	Arababad
+D	عشق آباد	Eshqabad
+D	نای بند	Nayband
+D	مهریز	Mehriz
+D	تنگ چنار	Tang Chenar
+D	علی آباد چهل گزی	Aliabad-e Chehel Gazi
+D	میبد	Meybod
+D	فهرج	Fahraj
+D	تا	until
+T	{1n} کیلومتر	{1} km
+T	{1n} روز (~{2n} هفته یا {3n} ماه) از آغاز سال	{1} days (~{2} weeks or {3} months) since the start of the year
+T	{1n} روز (~{2n} هفته یا {3n} ماه) تا پایان سال	{1} days (~{2} weeks or {3} months) until the end of the year
+T	{1n} روز، {2n} ساعت، {3n} دقیقه، {4n} ثانیه	{1} days, {2} hours, {3} minutes, {4} seconds
+T	{1n} روز	{1} days
+T	{1n} سال	{1} years
+T	{1n} ماه	{1} months
+T	{1n} هفته	{1} weeks
+T	{1n} ساعت	{1} h
+T	{1n} دقیقه	{1} min
+T	{1n} ثانیه	{1} s
+T	فاصله: {1}	Difference: {1}
+T	عدد: {1}	Count: {1}
+T	هدف: {1}	Goal: {1}
+T	آیا ذخیره «{1a}» حذف شود؟	Delete the save "{1}"?
+T	تنظیمات {1}	{1} settings
+T	عدد فعلی: {1}	Current number: {1}
+T	عدد فعلی {1} به هدف جدید منتقل می‌شود.	The current number {1} is carried over to the new goal.
+T	عدد فعلی {1}	Current number {1}
+T	عدد فعلی همین ویجت؛ {1} هنگام ساخت هدف جدید منتقل می‌شود	This widget's current number; {1} is carried over when creating a new goal
+T	{1} — عدد فعلی {2}	{1} — current number {2}
+T	ضریب اندازه: {1}×	Scale factor: {1}×
+T	اصلاح تاریخ هجری قمری: {1}	Lunar Hijri date adjustment: {1}
+T	{1a}\nارتفاع: {2a} متر	{1}\nAltitude: {2} m
+T	چند دقیقه پیش از اذان، هشدار به صدا درآید: {1}	How many minutes before Athan the alert should sound: {1}
+T	اذان {1}، {2} ساعت {3}	{1} Athan, {2} at {3}
+T	اذان {1}	{1} Athan
+T	خط {1n}	Line {1}
+T	توضیح: {1}	Description: {1}
+T	انتقال به خط {1n}	Move to line {1}
+T	آیتم‌های خط {1n}	Items of line {1}
+T	این آیتم در خط {1} فعال است؛ برای جابه‌جایی از گزینهٔ «انتقال به خط دیگر» استفاده کنید.	This item is active on line {1}; use "Move to another line" to move it.
+T	{1} منبع فعال	{1} active sources
+T	{1}٪ — فقط آسمان نقشه	{1}% — map sky only
+T	{1}٪ — میزان شفافیت زمینهٔ ویجت	{1}% — widget background opacity
+T	{1}٪ دیده می‌شود	{1}% visible
+T	دلخواه · {1}	Custom · {1}
+T	قمر در {1} عقرب	Moon in {1} Scorpio
+T	ورود {1}	Enters {1}
+T	خروج {1}	Exits {1}
+T	نام سال: {1a}	Year name: {1}
+T	{1a} (شمسی)	{1} (Solar Hijri)
+T	{1a} (چینی، {2a})	{1} (Chinese, {2})
+T	سن ماه: {1} روز • روشنایی: {2}%	Moon age: {1} days • Illumination: {2}%
+T	روز {1} خمسهٔ	Day {1} of the Khamse
+T	روز {1n}	Day {1}
+T	هفته {1n}	Week {1}
+T	{1} جلالی	{1} Jalali
+T	{1} رومی	{1} Seleucid
+T	{1n}~ یزدگردی	{1}~ Yazdegerdi
+T	{1n}س {2n}د	{1}h {2}m
+T	طول روز: {1}	Day length: {1}
+T	باقی‌مانده: {1}	Remaining: {1}
+T	اوقات در ماه {1a}	Times in {1}
+T	جستجو در رویدادهای سال {1}	Search events of year {1}
+T	قمر در عقرب، {1a}	Moon in Scorpio, {1}
+T	لحظهٔ تحویل سال {1}، {2}، شمسی در {3}	Moment of the {1} new year, {2}, Solar Hijri, in {3}
+T	{1} میلادی، {2} قمری	{1} Gregorian, {2} Lunar Hijri
+T	{1} شمسی	{1} Solar Hijri
+T	شروع شیفت‌کاری از روز انتخاب‌شده در تقویم، {1} خواهد بود.	The shift schedule starts from the day selected in the calendar, {1}.
+T	شروع شیفت‌کاری از روز تعیین‌شده‌ در قبل، {1} خواهد بود.	The shift schedule starts from the previously set day, {1}.
+T	{1n} تا {2n}	{1} to {2}
+T	مزبوره: {1}\nمذکوره: {2}	Aforementioned: {1}\nMentioned: {2}
+T	{1a} معادل با {2a}	{1} equals {2}
+T	اختلاف UTC: {1}	UTC offset: {1}
+T	منطقه زمانی اول: {1}\nمنطقه زمانی دوم: {2}\nاختلاف: {3} دقیقه	First time zone: {1}\nSecond time zone: {2}\nDifference: {3} minutes
+T	عرض جغرافیایی: {1}°\nطول جغرافیایی: {2}°	Latitude: {1}°\nLongitude: {2}°
+T	صبح {1} • ظهر {2} • مغرب {3}	Fajr {1} • Dhuhr {2} • Maghrib {3}
+T	{1} بعدی: 	Next {1}: 
+T	تعطیلی رسمی به مناسبت {1a}	Official holiday for {1}
+T	{1} ویجت فعال	{1} widgets active
+T	{1} و {2} ماه	{1} and {2} month
+T	{1} بعدی: {2a}	Next {1}: {2}
+T	برج شمسی: {1a}	Solar sign: {1}
+T	برج قمر: {1a}	Moon sign: {1}
+T	{1a}، به افق {2a}	{1}, {2}
+T	{1n} دقیقه پیش از {2a}	{1} min before {2}
+T	{1n} ه.ش	{1} SH
+T	{1n} ه.ق	{1} AH
+T	{1n} م	{1} CE
+T	{1n} ساعت و {2n} دقیقه	{1} h {2} min
+T	طول روز: {1a}	Day length: {1}
+T	باقی‌مانده: {1a}	Remaining: {1}
+T	{1a} تا {2a}	{1} until {2}
+T	شفافیت پس‌زمینهٔ ویجت، {1n} درصد	Widget background transparency, {1} percent
+T	بازگرداندن آخرین موقعیت{1a}	Restore last location{1}
+T	{1a} ، {2a}\\nارتفاع: {3a} متر	{1} , {2}\\nElevation: {3} m
+T	ضریب اندازه: {1a}	Size factor: {1}
+T	{1a} — عدد فعلی {2n} از هدف {3n}	{1} — current count {2} of target {3}
+T	{1a} — عدد فعلی {2n}	{1} — current count {2}
+T	عدد فعلی همین ویجت؛ {1n} هنگام ساخت هدف جدید منتقل می‌شود	This widget's current count; {1} is moved when a new target is created
+T	عدد فعلی: {1n} — هدف {2n}	Current count: {1} — target {2}
+T	عدد فعلی: {1n}	Current count: {1}
+T	عدد فعلی {1n} به هدف جدید منتقل می‌شود.	The current count {1} is moved to the new target.
+T	عدد هدف باید بین ۱ تا {1n} باشد	The target number must be between 1 and {1}
+T	{1n}٪ — فقط آسمان نقشه	{1}% — map sky only

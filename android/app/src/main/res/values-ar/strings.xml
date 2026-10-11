@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_name">التقويم الفارسي</string>
+    <string name="widget_mini_name">التقويم الفارسي</string>
+    <string name="cancel">إلغاء</string>
+    <string name="save">حفظ</string>
+    <string name="shortcut_calendar">التقويم</string>
+    <string name="shortcut_converter">محوّل التاريخ</string>
+    <string name="shortcut_compass">البوصلة</string>
+    <string name="shortcut_level">ميزان التسوية</string>
+    <string name="shortcut_astronomy">علم الفلك</string>
+    <string name="shortcut_map">الخريطة</string>
+    <string name="widget_moon_name">القمر</string>
+    <string name="widget_sun_view_name">مسار الشمس</string>
+    <string name="widget_map_name">الخريطة</string>
+    <string name="widget_counter_name">العداد</string>
+</resources>

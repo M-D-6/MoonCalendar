@@ -1,0 +1,156 @@
+name: Build
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_CHANNEL: stable
+
+jobs:
+  analyze:
+    name: Analyze & test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, cache: true }
+      - run: flutter pub get
+      - run: flutter analyze --no-fatal-infos --no-fatal-warnings
+      - run: flutter test
+        continue-on-error: true   # the project has no tests yet
+
+  android:
+    name: Android (APK)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, cache: true }
+      - run: flutter pub get
+      - run: flutter build apk --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MoonCalendar-android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+  windows:
+    name: Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, cache: true }
+      - run: flutter pub get
+      - run: flutter build windows --release
+      - name: Zip
+        shell: pwsh
+        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath MoonCalendar-windows-x64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MoonCalendar-windows-x64
+          path: MoonCalendar-windows-x64.zip
+
+  linux:
+    name: Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev \
+            libayatana-appindicator3-dev libkeybinder-3.0-dev libsecret-1-dev
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, cache: true }
+      - run: bash tool/ci_prepare_platforms.sh
+      - run: flutter pub get
+      - run: flutter build linux --release
+      - name: Pack
+        run: tar -C build/linux/x64/release/bundle -czf MoonCalendar-linux-x64.tar.gz .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MoonCalendar-linux-x64
+          path: MoonCalendar-linux-x64.tar.gz
+
+  macos:
+    name: macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, cache: true }
+      - run: bash tool/ci_prepare_platforms.sh
+      - run: flutter pub get
+      - run: flutter build macos --release
+      - name: Zip the app
+        run: |
+          cd build/macos/Build/Products/Release
+          ditto -c -k --sequesterRsrc --keepParent *.app "$GITHUB_WORKSPACE/MoonCalendar-macos.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MoonCalendar-macos
+          path: MoonCalendar-macos.zip
+
+  ios:
+    name: iOS (unsigned)
+    runs-on: macos-latest
+    continue-on-error: true   # needs signing to install; kept as a compile check + unsigned .ipa
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, cache: true }
+      - run: bash tool/ci_prepare_platforms.sh
+      - run: flutter pub get
+      - run: flutter build ios --release --no-codesign
+      - name: Unsigned IPA
+        run: |
+          mkdir -p Payload && cp -R build/ios/iphoneos/Runner.app Payload/
+          zip -qr MoonCalendar-ios-unsigned.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MoonCalendar-ios-unsigned
+          path: MoonCalendar-ios-unsigned.ipa
+
+  web:
+    name: Web
+    runs-on: ubuntu-latest
+    continue-on-error: true   # some desktop-only plugins may not compile for the web yet
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, cache: true }
+      - run: bash tool/ci_prepare_platforms.sh
+      - run: flutter pub get
+      - run: flutter build web --release
+      - run: tar -C build/web -czf MoonCalendar-web.tar.gz .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MoonCalendar-web
+          path: MoonCalendar-web.tar.gz
+
+  release:
+    name: Publish release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [android, windows, linux, macos]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true

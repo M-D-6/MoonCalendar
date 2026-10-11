@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+    android:layoutDirection="rtl" xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Remaining-time row: the sentence and the refresh arrow live in one horizontal row so the
+         arrow always sits on the same line as the text (never wrapped below it). The text size is
+         fitted in code (Widget4x2.fitRemainingText) so the whole sentence stays on a single line. -->
+    <LinearLayout
+        android:id="@+id/remaining_row_4x2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:baselineAligned="false"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textPlaceholder2_4x2"
+            style="@style/WidgetTextStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textAlignment="center" />
+
+        <ImageView
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_marginStart="3dp"
+            android:importantForAccessibility="no"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_widget_refresh" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/holiday_4x2"
+        style="@style/WidgetTextStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:gravity="center_horizontal"
+        android:maxLines="8"
+        android:textColor="@color/remote_view_holiday_color"
+        android:textSize="13sp" />
+
+    <TextView
+        android:id="@+id/event_4x2"
+        style="@style/WidgetTextStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:gravity="center_horizontal"
+        android:maxLines="1"
+        android:textSize="13sp" />
+
+</merge>

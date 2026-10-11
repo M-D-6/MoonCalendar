@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+: same icon as the system splash, finished (with the "M"), so nothing jumps when the system splash ends. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#F7F8F8" />
+        </shape>
+    </item>
+    <item android:width="288dp" android:height="288dp" android:gravity="center" android:drawable="@drawable/splash_icon_vector" />
+</layer-list>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_name">تقویم فارسی</string>
+    <string name="widget_config_title">تنظیم ویجت ۴×۲</string>
+    <string name="widget_config_summary">ویجت تقویم فارسی با همان چیدمان نسخهٔ اصلی Android</string>
+    <string name="widget_config_text_size">اندازهٔ متن</string>
+    <string name="widget_config_global_note">تنظیمات ساعت، تقویم‌های دیگر، اوقات شرعی، رنگ‌ها، موقعیت و شفافیت از داخل تنظیمات برنامه کنترل می‌شوند.</string>
+    <string name="widget_config_scale_value">%1$.2f×</string>
+    <string name="cancel">انصراف</string>
+    <string name="save">ذخیره</string>
+    <string name="widget_moon_name">ماه</string>
+    <string name="widget_sun_view_name">مسیر خورشید</string>
+    <string name="widget_map_name">نقشه</string>
+</resources>

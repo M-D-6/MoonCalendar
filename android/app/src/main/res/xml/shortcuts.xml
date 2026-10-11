@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <shortcut
+        android:shortcutId="calendar"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_calendar">
+        <intent
+            android:action="com.md6.Mooncalendar.SHORTCUT_CALENDAR"
+            android:targetPackage="com.md6.Mooncalendar"
+            android:targetClass="com.md6.mooncalendar.MainActivity" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="converter"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_converter">
+        <intent
+            android:action="com.md6.Mooncalendar.SHORTCUT_CONVERTER"
+            android:targetPackage="com.md6.Mooncalendar"
+            android:targetClass="com.md6.mooncalendar.MainActivity" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="compass"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_compass">
+        <intent
+            android:action="com.md6.Mooncalendar.SHORTCUT_COMPASS"
+            android:targetPackage="com.md6.Mooncalendar"
+            android:targetClass="com.md6.mooncalendar.MainActivity" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="level"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_level">
+        <intent
+            android:action="com.md6.Mooncalendar.SHORTCUT_LEVEL"
+            android:targetPackage="com.md6.Mooncalendar"
+            android:targetClass="com.md6.mooncalendar.MainActivity" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="astronomy"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_astronomy">
+        <intent
+            android:action="com.md6.Mooncalendar.SHORTCUT_ASTRONOMY"
+            android:targetPackage="com.md6.Mooncalendar"
+            android:targetClass="com.md6.mooncalendar.MainActivity" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="map"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_map">
+        <intent
+            android:action="com.md6.Mooncalendar.SHORTCUT_MAP"
+            android:targetPackage="com.md6.Mooncalendar"
+            android:targetClass="com.md6.mooncalendar.MainActivity" />
+    </shortcut>
+
+</shortcuts>
