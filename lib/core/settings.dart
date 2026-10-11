@@ -1,4 +1,5 @@
 import 'platform_info.dart';
+import 'windows_autostart.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -103,6 +104,7 @@ class AppSettings extends ChangeNotifier {
   static const _athanCustomUri = 'athan_custom_uri';
   static const _athanCustomName = 'athan_custom_name';
   static const _runInBackground = 'run_in_background';
+  static const _startWithWindows = 'start_with_windows';
   static const _showDesktopWidgets = 'show_desktop_widgets';
   static const _showTrayIcon = 'show_tray_icon';
   static const _dayNumberAppIcon = 'day_number_app_icon';
@@ -397,6 +399,7 @@ class AppSettings extends ChangeNotifier {
   String? athanCustomUri;
   String? athanCustomName;
   bool runInBackground = false;
+  bool startWithWindows = false;
   bool showDesktopWidgets = true;
   bool showTrayIcon = false;
   bool dayNumberAppIcon = false;
@@ -522,6 +525,7 @@ class AppSettings extends ChangeNotifier {
     athanCustomUri = p.getString(_athanCustomUri);
     athanCustomName = p.getString(_athanCustomName);
     runInBackground = p.getBool(_runInBackground) ?? PlatformInfo.isWindows;
+    startWithWindows = p.getBool(_startWithWindows) ?? false;
     showDesktopWidgets = p.getBool(_showDesktopWidgets) ?? true;
     showTrayIcon = p.getBool(_showTrayIcon) ?? PlatformInfo.isWindows;
     dayNumberAppIcon = p.getBool(_dayNumberAppIcon) ?? false;
@@ -639,6 +643,10 @@ class AppSettings extends ChangeNotifier {
   Future<void> setLargeDayNumberNotification(bool value) => _setBool(_largeDayNumberNotification, value, (v) => largeDayNumberNotification = v);
   Future<void> setAthanVibration(bool value) => _setBool(_athanVibration, value, (v) => athanVibration = v);
   Future<void> setRunInBackground(bool value) => _setBool(_runInBackground, value, (v) => runInBackground = v);
+  Future<void> setStartWithWindows(bool value) async {
+    await WindowsAutostart.setEnabled(value);
+    await _setBool(_startWithWindows, value, (v) => startWithWindows = v);
+  }
   Future<void> setShowDesktopWidgets(bool value) => _setBool(_showDesktopWidgets, value, (v) => showDesktopWidgets = v);
   Future<void> setDayNumberAppIcon(bool value) => _setBool(_dayNumberAppIcon, value, (v) => dayNumberAppIcon = v);
   Future<void> setShowTrayIcon(bool value) => _setBool(_showTrayIcon, value, (v) => showTrayIcon = v);

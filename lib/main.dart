@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'core/athan/athan_service.dart';
 import 'core/event_repository.dart';
 import 'core/settings.dart';
+import 'core/windows_autostart.dart';
 import 'core/windows_desktop_service.dart';
 import 'core/desktop_widgets/desktop_widget_service.dart';
 import 'ui/screens/desktop_widgets_screen.dart';
@@ -20,7 +21,11 @@ import 'core/platform.dart';
 import 'ui/app.dart';
 import 'ui/widgets/startup_splash.dart';
 
+/// True when Windows launched the app at sign-in (see WindowsAutostart): it then stays in the tray.
+bool _startedAtLogin = false;
+
 Future<void> main(List<String> args) async {
+  _startedAtLogin = args.contains('--startup');
   WidgetsFlutterBinding.ensureInitialized();
   if (PlatformInfo.isWindows) {
     await windowManager.ensureInitialized();
@@ -120,8 +125,13 @@ Future<void> _finishWindowsStartup(AppSettings settings) async {
   } catch (_) {}
   try {
     if (!PlatformInfo.isWindows) return;
-    await windowManager.show();
-    await windowManager.focus();
+    // Keeps the Run entry pointing at the current executable (e.g. after the app was reinstalled elsewhere).
+    if (settings.startWithWindows) unawaited(WindowsAutostart.setEnabled(true));
+    // Opened at sign-in: keep the window hidden when a tray icon exists to bring it back.
+    if (!(_startedAtLogin && settings.showTrayIcon)) {
+      await windowManager.show();
+      await windowManager.focus();
+    }
   } catch (_) {}
   AthanService.instance.attach(settings);
 }

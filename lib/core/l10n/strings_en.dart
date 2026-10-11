@@ -1508,6 +1508,8 @@ const Map<String, String> enStrings = <String, String>{
   'بُرنا تصویر رسانه': 'Borna Tasvir Resaneh',
   'مطابق پروژهٔ مرجع': 'As in the original project',
   'صدا و انیمیشن اذان': 'Athan sound and animation',
+  'شروع با ویندوز': 'Start with Windows',
+  'اجرای خودکار برنامه (در ناحیهٔ اعلان) هنگام ورود به ویندوز': 'Starts the app automatically (in the notification area) when you sign in to Windows',
 };
 
 const Map<String, String> enTemplates = <String, String>{

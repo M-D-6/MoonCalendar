@@ -250,7 +250,7 @@ class AboutScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                 decoration: BoxDecoration(color: scheme.primaryContainer.withValues(alpha: .7), borderRadius: BorderRadius.circular(20)),
-                child: Text('نسخه ۱.۰.۰', style: text.labelLarge?.copyWith(color: scheme.onPrimaryContainer)),
+                child: Text('نسخه ۱.۱.۱', style: text.labelLarge?.copyWith(color: scheme.onPrimaryContainer)),
               ),
               const SizedBox(height: 16),
               Text(

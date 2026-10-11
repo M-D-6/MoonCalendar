@@ -215,12 +215,23 @@ class DesktopWidgetService extends ChangeNotifier {
 
   Map<String, dynamic> _widgetDefaults() => _settings?.widgetSnapshot() ?? <String, dynamic>{};
 
-  Map<String, dynamic> _mergeWidgetSettings(Map<String, dynamic>? saved) => <String, dynamic>{
-        ..._widgetDefaults(),
-        ...?saved,
-        // Always the app's current language (a saved per-widget snapshot would be stale).
-        'appLanguage': _settings?.language.code,
-      };
+  Map<String, dynamic> _mergeWidgetSettings(Map<String, dynamic>? saved) {
+    final defaults = _widgetDefaults();
+    final merged = <String, dynamic>{
+      ...defaults,
+      ...?saved,
+      // Always the app's current language (a saved per-widget snapshot would be stale).
+      'appLanguage': _settings?.language.code,
+    };
+    // A widget created before any city was chosen saved an empty location. Without a location of its
+    // own it follows the app's current one, so prayer times appear as soon as a city is selected.
+    if (saved?['latitude'] is! num || saved?['longitude'] is! num) {
+      for (final key in const <String>['latitude', 'longitude', 'elevation', 'locationName']) {
+        merged[key] = defaults[key];
+      }
+    }
+    return merged;
+  }
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
@@ -235,7 +246,15 @@ class DesktopWidgetService extends ChangeNotifier {
           decoded.whereType<Map>().map(
                 (e) {
                   final instance = DesktopWidgetInstance.fromJson(Map<String, dynamic>.from(e));
-                  instance.widgetSettings = _mergeWidgetSettings(instance.widgetSettings);
+                  final saved = instance.widgetSettings;
+                  final merged = _mergeWidgetSettings(saved);
+                  if (saved?['latitude'] is! num || saved?['longitude'] is! num) {
+                    // Keep "no location of its own" stored, so the widget keeps following the app's city.
+                    for (final key in const <String>['latitude', 'longitude', 'elevation', 'locationName']) {
+                      merged[key] = saved?[key];
+                    }
+                  }
+                  instance.widgetSettings = merged;
                   return instance;
                 },
               ),

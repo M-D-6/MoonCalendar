@@ -37,6 +37,22 @@ jobs:
       - uses: subosito/flutter-action@v2
         with: { channel: stable, cache: true }
       - run: flutter pub get
+      # A fixed signing key lets each APK update the previous one. Secret: ANDROID_KEYSTORE_BASE64.
+      - name: Android signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::warning::ANDROID_KEYSTORE_BASE64 is not set: the APK is signed with a temporary debug key and cannot update an installed release."
+            exit 0
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/release.jks
+          {
+            echo "storeFile=release.jks"
+            echo "storePassword=mooncalendar"
+            echo "keyAlias=mooncalendar"
+            echo "keyPassword=mooncalendar"
+          } > android/key.properties
       - name: Build one APK per CPU architecture
         run: flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/symbols
       - name: Rename

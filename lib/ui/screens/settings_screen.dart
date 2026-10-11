@@ -369,6 +369,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
           ]),
           if (PlatformInfo.isWindows)
             _section('ویندوز', [
+              _switch('شروع با ویندوز', 'اجرای خودکار برنامه (در ناحیهٔ اعلان) هنگام ورود به ویندوز', settings.startWithWindows, settings.setStartWithWindows, Icons.power_settings_new_rounded),
               _switch('فعال ماندن در پس‌زمینه', 'با بستن پنجره، برنامه به‌جای خروج در پس‌زمینه می‌ماند', settings.runInBackground, settings.setRunInBackground, Icons.energy_savings_leaf_outlined),
               _switch('نمایش آیکون Tray', 'نمایش آیکون Mooncalendar در ناحیهٔ اعلان ویندوز', settings.showTrayIcon, settings.setShowTrayIcon, Icons.notifications_none_outlined),
             ]),

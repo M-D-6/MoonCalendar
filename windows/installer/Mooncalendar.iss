@@ -4,7 +4,7 @@
 #define MyAppVersion GetEnv("MOONCALENDAR_VERSION")
 #if MyAppVersion == ""
   #undef MyAppVersion
-  #define MyAppVersion "1.0.0"
+  #define MyAppVersion "1.1.1"
 #endif
 
 ; Flutter build folder: build\windows\<arch>\runner\Release.
@@ -58,7 +58,8 @@ SetupArchitecture=x64
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 
-PrivilegesRequired=admin
+; Per-user install: no administrator rights; {autopf} resolves to %LocalAppData%\Programs.
+PrivilegesRequired=lowest
 MinVersion=10.0
 
 WizardStyle=modern windows11 dynamic includetitlebar
@@ -181,6 +182,19 @@ begin
     SW_HIDE, ewWaitUntilTerminated, ResultCode);
   Exec(ExpandConstant('{sys}\schtasks.exe'), '/Delete /TN "MoonCalendarDateNotification" /F', '',
     SW_HIDE, ewWaitUntilTerminated, ResultCode);
+end;
+
+
+{ Start-with-Windows entry written by the app. It is removed only when it points to this installation. }
+procedure RemoveStartupEntry;
+var
+  Command: String;
+begin
+  if RegQueryStringValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', 'Mooncalendar', Command) then
+  begin
+    if Pos(Lowercase(ExpandConstant('{app}\{#MyAppExeName}')), Lowercase(Command)) > 0 then
+      RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', 'Mooncalendar');
+  end;
 end;
 
 
@@ -358,6 +372,7 @@ begin
 
     CloseRunningMoonCalendar();
     RemoveScheduledTasks();
+    RemoveStartupEntry();
     RemoveNotificationRegistration();
 
     Result := True;

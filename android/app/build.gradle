@@ -12,8 +12,9 @@ android {
         applicationId 'com.md6.Mooncalendar'
         minSdkVersion = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        versionCode = 1
-        versionName = '1.0.0'
+        // Taken from `version:` in pubspec.yaml (name+build number).
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
         // Only the languages the app really has (drops the translations that
         // Material / AndroidX / plugins ship for dozens of languages).
         androidResources.localeFilters += ['en', 'fa', 'ar']
