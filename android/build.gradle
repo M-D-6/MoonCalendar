@@ -1,0 +1,13 @@
+allprojects { repositories { google(); mavenCentral() } }
+rootProject.buildDir = '../build'
+subprojects { project.buildDir = "${rootProject.buildDir}/${project.name}" }
+subprojects { project.evaluationDependsOn(':app') }
+tasks.register('clean', Delete) { delete rootProject.buildDir }
+
+// Plugins (for example geolocator_android) still compile with Java 8 options; silence the harmless
+// "source/target value 8 is obsolete" notice without touching their code.
+subprojects {
+    tasks.withType(JavaCompile).configureEach {
+        options.compilerArgs += ['-Xlint:-options', '-XDsuppressNotes']
+    }
+}

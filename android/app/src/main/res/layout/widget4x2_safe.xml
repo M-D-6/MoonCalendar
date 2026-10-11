@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:layoutDirection="rtl" xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_safe_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/widget_safe_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:includeFontPadding="true"
+        android:maxLines="1"
+        android:textSize="32sp"
+        android:textStyle="normal" />
+
+    <TextView
+        android:id="@+id/widget_safe_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:maxLines="3"
+        android:paddingTop="2dp"
+        android:textSize="13sp" />
+
+    <TextView
+        android:id="@+id/widget_safe_events"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="4"
+        android:paddingTop="4dp"
+        android:textSize="12sp" />
+</LinearLayout>

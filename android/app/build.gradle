@@ -1,0 +1,80 @@
+plugins {
+    id 'com.android.application'
+    id 'dev.flutter.flutter-gradle-plugin'
+}
+
+android {
+    namespace 'com.md6.mooncalendar'
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = "30.0.16248370"
+
+    defaultConfig {
+        applicationId 'com.md6.Mooncalendar'
+        minSdkVersion = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = 1
+        versionName = '1.0.0'
+        // Only the languages the app really has (drops the translations that
+        // Material / AndroidX / plugins ship for dozens of languages).
+        androidResources.localeFilters += ['en', 'fa', 'ar']
+    }
+
+    packaging {
+        // Metadata files nobody reads at run time.
+        resources.excludes += ['DebugProbesKt.bin', '/META-INF/{AL2.0,LGPL2.1}']
+    }
+
+    bundle {
+        // Language is chosen inside the app, so Play must not split it away.
+        language.enableSplit = false
+    }
+
+    // Release signing: android/key.properties (kept out of the repository) when present,
+    // otherwise the debug key so that CI builds stay installable.
+    def keystoreProperties = new Properties()
+    def keystorePropertiesFile = rootProject.file('key.properties')
+    if (keystorePropertiesFile.exists()) {
+        keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
+    }
+    signingConfigs {
+        release {
+            if (keystorePropertiesFile.exists()) {
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+                storePassword keystoreProperties['storePassword']
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig keystorePropertiesFile.exists() ? signingConfigs.release : signingConfigs.debug
+            // R8 shrinking + resource shrinking make the release APK smaller
+            // and start faster.
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+}
+
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.work:work-runtime-ktx:2.11.2'
+}
+
+flutter { source '../..' }

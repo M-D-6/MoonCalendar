@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_name">Persian Calendar</string>
+    <string name="widget_mini_name">Persian Calendar</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="shortcut_calendar">Calendar</string>
+    <string name="shortcut_converter">Date converter</string>
+    <string name="shortcut_compass">Compass</string>
+    <string name="shortcut_level">Level</string>
+    <string name="shortcut_astronomy">Astronomy</string>
+    <string name="shortcut_map">Map</string>
+    <string name="widget_moon_name">Moon</string>
+    <string name="widget_sun_view_name">Sun path</string>
+    <string name="widget_map_name">Map</string>
+    <string name="widget_counter_name">Counter</string>
+</resources>

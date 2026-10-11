@@ -1,0 +1,72 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IDE
+*.iml
+*.ipr
+*.iws
+.idea/
+.vscode/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+/coverage/
+app.*.symbols
+app.*.map.json
+**/generated_plugin_registrant.*
+**/generated_plugins.cmake
+
+# Android
+android/.gradle/
+android/captures/
+android/local.properties
+android/key.properties
+android/app/debug/
+android/app/profile/
+android/app/release/
+android/**/GeneratedPluginRegistrant.java
+*.jks
+*.keystore
+
+# iOS / macOS
+**/ios/**/DerivedData/
+**/ios/**/Pods/
+**/ios/**/xcuserdata/
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/macos/**/Pods/
+**/macos/**/xcuserdata/
+**/macos/Flutter/ephemeral/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+
+# Windows / Linux
+**/windows/flutter/ephemeral/
+**/linux/flutter/ephemeral/
+
+# Secrets
+.env
+.env.*
+
+# Installer
+windows/installer/Output/

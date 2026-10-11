@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Prayer-times block. Up to 9 times (imsak included) in one row, or split over two rows when a
+     single row would make the text too small. Which cells are visible, their text and size are set
+     in code (Widget4x2.renderPrayerTimes). -->
+<LinearLayout
+    android:layoutDirection="rtl" xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget4x2_times"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="4dp"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/times_row1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/textPlaceholder4times_1_4x2"
+        style="@style/WidgetTextStyle"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:maxLines="2"
+        android:text="@string/not_set_time" />
+
+    <FrameLayout
+        android:id="@+id/times_div_1"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:background="@color/widget_divider" />
+
+    <TextView
+        android:id="@+id/textPlaceholder4times_2_4x2"
+        style="@style/WidgetTextStyle"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:maxLines="2"
+        android:text="@string/not_set_time" />
+
+    <FrameLayout
+        android:id="@+id/times_div_2"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:background="@color/widget_divider" />
+
+    <TextView
+        android:id="@+id/textPlaceholder4times_3_4x2"
+        style="@style/WidgetTextStyle"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:maxLines="2"
+        android:text="@string/not_set_time" />
+
+    <FrameLayout
+        android:id="@+id/times_div_3"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:background="@color/widget_divider" />
+
+    <TextView
+        android:id="@+id/textPlaceholder4times_4_4x2"
+        style="@style/WidgetTextStyle"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:maxLines="2"
+        android:text="@string/not_set_time" />
+
+    <FrameLayout
+        android:id="@+id/times_div_4"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:background="@color/widget_divider" />
+
+    <TextView
+        android:id="@+id/textPlaceholder4times_5_4x2"
+        style="@style/WidgetTextStyle"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:maxLines="2"
+        android:text="@string/not_set_time" />
+
+    <FrameLayout
+        android:id="@+id/times_div_5"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:background="@color/widget_divider" />
+
+    <TextView
+        android:id="@+id/textPlaceholder4times_6_4x2"
+        style="@style/WidgetTextStyle"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:maxLines="2"
+        android:text="@string/not_set_time" />
+
+    <FrameLayout
+        android:id="@+id/times_div_6"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:background="@color/widget_divider" />
+
+    <TextView
+        android:id="@+id/textPlaceholder4times_7_4x2"
+        style="@style/WidgetTextStyle"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:maxLines="2"
+        android:text="@string/not_set_time" />
+
+    <FrameLayout
+        android:id="@+id/times_div_7"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:background="@color/widget_divider" />
+
+    <TextView
+        android:id="@+id/textPlaceholder4times_8_4x2"
+        style="@style/WidgetTextStyle"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:maxLines="2"
+        android:text="@string/not_set_time" />
+
+    <FrameLayout
+        android:id="@+id/times_div_8"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:background="@color/widget_divider" />
+
+    <TextView
+        android:id="@+id/textPlaceholder4times_9_4x2"
+        style="@style/WidgetTextStyle"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:maxLines="2"
+        android:text="@string/not_set_time" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/times_row2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+    <TextView
+        android:id="@+id/textPlaceholder4times_r2_1_4x2"
+        style="@style/WidgetTextStyle"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:maxLines="2"
+        android:text="@string/not_set_time" />
+
+    <FrameLayout
+        android:id="@+id/times_div_r2_1"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:background="@color/widget_divider" />
+
+    <TextView
+        android:id="@+id/textPlaceholder4times_r2_2_4x2"
+        style="@style/WidgetTextStyle"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:maxLines="2"
+        android:text="@string/not_set_time" />
+
+    <FrameLayout
+        android:id="@+id/times_div_r2_2"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:background="@color/widget_divider" />
+
+    <TextView
+        android:id="@+id/textPlaceholder4times_r2_3_4x2"
+        style="@style/WidgetTextStyle"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:maxLines="2"
+        android:text="@string/not_set_time" />
+
+    <FrameLayout
+        android:id="@+id/times_div_r2_3"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:background="@color/widget_divider" />
+
+    <TextView
+        android:id="@+id/textPlaceholder4times_r2_4_4x2"
+        style="@style/WidgetTextStyle"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:maxLines="2"
+        android:text="@string/not_set_time" />
+
+    </LinearLayout>
+
+</LinearLayout>

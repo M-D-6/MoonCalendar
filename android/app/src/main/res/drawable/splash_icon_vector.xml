@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Splash icon on a 288dp canvas: 132dp maroon rounded square, calendar frame and the "M" (path "m"). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="288dp"
+    android:height="288dp"
+    android:viewportWidth="288"
+    android:viewportHeight="288">
+    <path
+        android:fillColor="#3B000D"
+        android:pathData="M108,78 L180,78 A30,30 0 0 1 210,108 L210,180 A30,30 0 0 1 180,210 L108,210 A30,30 0 0 1 78,180 L78,108 A30,30 0 0 1 108,78 Z" />
+    <group
+        android:translateX="78"
+        android:translateY="78"
+        android:scaleX="0.30556"
+        android:scaleY="0.30556">
+        <path
+            android:pathData="M152,137 A27.5,27.5 0 0 0 124.5,164.5 L124.5,271 A27.5,27.5 0 0 0 152,298.5 L279,298.5 A27.5,27.5 0 0 0 306.5,271 L306.5,164.5 A27.5,27.5 0 0 0 279,137"
+            android:strokeColor="#F9ECEA"
+            android:strokeWidth="16"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M172.5,120.5 L172.5,142.5 M259,120.5 L259,142.5"
+            android:strokeColor="#F9ECEA"
+            android:strokeWidth="19"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M199.5,135 L231.5,135"
+            android:strokeColor="#F9ECEA"
+            android:strokeWidth="15"
+            android:strokeLineCap="round" />
+        <path
+            android:name="m"
+            android:pathData="M171,254 L171,181 L215.5,226 L260,181 L260,254"
+            android:strokeColor="#F9ECEA"
+            android:strokeWidth="17"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+    </group>
+</vector>

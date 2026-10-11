@@ -1,0 +1,92 @@
+name: mooncalendar
+publish_to: "none"
+description: Mooncalendar — a Persian calendar built with Flutter, based on the Android Persian Calendar project.
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.9.0 <4.0.0"
+  flutter: ">=3.47.3"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  shared_preferences: ^2.5.6
+  geolocator: ^14.1.1
+  tray_manager: 0.5.3
+  window_manager: 0.5.2
+  desktop_multi_window: ^0.3.1
+  desktop_context_menu: ^0.1.1
+  material_color_utilities: ^0.13.0
+  astronomia: ^1.1.1
+  qr: ^3.0.2
+  share_plus: ^13.3.1
+  timezone: ^0.10.1
+  http: ^1.6.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: 6.0.0
+
+# Keep Android/iOS implementations on the pre-native-assets variants.
+# The newer platform implementations pull jni/objective_c build hooks into
+# the dependency graph; that is unnecessary for this app and can break the
+# Windows native-assets stage on Flutter 3.47+.
+dependency_overrides:
+  path_provider_android: 2.2.23
+  path_provider_foundation: 2.5.1
+
+flutter:
+  uses-material-design: true
+  shaders:
+    - shaders/globe.frag
+  fonts:
+    # Vazirmatn (Regular) is bundled; bold weights are synthesised from it.
+    - family: Vazirmatn
+      fonts:
+        - asset: assets/fonts/Vazirmatn-Regular.ttf
+    - family: CalendarZodiacSymbols
+      fonts:
+        - asset: assets/fonts/notosanssymbolsregularzodiacsubset.ttf
+    - family: AstronomyPlanetSymbols
+      fonts:
+        - asset: assets/fonts/astronomy_planet_symbols.ttf
+    - family: TallySegment7
+      fonts:
+        - asset: assets/fonts/segment7.ttf
+  assets:
+    - assets/images/branding/mooncalendar_icon.png
+    - assets/images/branding/mooncalendar_icon_round.png
+    - assets/images/tally_counter/counter_screen.png
+    - assets/images/tally_counter/body.png
+    - assets/images/tally_counter/main_button.png
+    - assets/images/tally_counter/reset_button.png
+    - assets/data/events.json
+    - assets/data/cities.json
+    - assets/data/place_names.json
+    - assets/data/districts.json
+    - assets/audio/special.mp3
+    - assets/audio/abdulbasit.mp3
+    - assets/audio/moazzenzadeh.mp3
+    - assets/audio/entezar.mp3
+    - assets/images/seasons/spring.webp
+    - assets/images/seasons/summer.webp
+    - assets/images/seasons/autumn.webp
+    - assets/images/seasons/winter.webp
+    - assets/images/android_astronomy/widget_moon.webp
+    - assets/images/android_astronomy/widget_sunview_preview.webp
+    - assets/images/android_astronomy/brightness4.webp
+    - assets/images/android_astronomy/brightness7.webp
+    - assets/images/android_astronomy/ic_moon.png
+    - assets/images/android_astronomy/ic_sun.png
+    - assets/images/android_astronomy/ic_sun_small.png
+    - assets/images/android_astronomy/ic_earth.png
+    - assets/images/planets/
+    - assets/images/planet_badges/
+    - assets/tray_icon.ico
+    - assets/day_icons/
+    - assets/map/worldmap.txt
+    - assets/map/timezones.txt
+    - assets/map/tectonicplates.txt
