@@ -525,7 +525,7 @@ class AppSettings extends ChangeNotifier {
     athanCustomUri = p.getString(_athanCustomUri);
     athanCustomName = p.getString(_athanCustomName);
     runInBackground = p.getBool(_runInBackground) ?? PlatformInfo.isWindows;
-    startWithWindows = p.getBool(_startWithWindows) ?? false;
+    startWithWindows = p.getBool(_startWithWindows) ?? PlatformInfo.isWindows;
     showDesktopWidgets = p.getBool(_showDesktopWidgets) ?? true;
     showTrayIcon = p.getBool(_showTrayIcon) ?? PlatformInfo.isWindows;
     dayNumberAppIcon = p.getBool(_dayNumberAppIcon) ?? false;

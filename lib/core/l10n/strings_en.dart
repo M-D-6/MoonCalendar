@@ -1510,6 +1510,10 @@ const Map<String, String> enStrings = <String, String>{
   'صدا و انیمیشن اذان': 'Athan sound and animation',
   'شروع با ویندوز': 'Start with Windows',
   'اجرای خودکار برنامه (در ناحیهٔ اعلان) هنگام ورود به ویندوز': 'Starts the app automatically (in the notification area) when you sign in to Windows',
+  'توسعه‌دهندگان': 'Developers',
+  'برای کپی پیوند گیت‌هاب هر فرد، روی نام او بزنید.': 'Tap a name to copy that person\'s GitHub link.',
+  'با تشکر از': 'With thanks to',
+  'با تشکر از (ترتیب تصادفی)': 'With thanks to (random order)',
 };
 
 const Map<String, String> enTemplates = <String, String>{

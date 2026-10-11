@@ -84,14 +84,12 @@ flutter build windows --release
 
 ---
 
-## 🛠️ Notes · نکات
+## 🙏 With thanks to · با تشکر از
 
-- The launcher icon can show the current day number (Settings). Icons live in
-  `android/app/src/main/res`; the day-number font is `android/app/src/main/assets/fonts/day_icon_font.ttf`.
-- Windows tray / day icons are in `assets/day_icons`.
-- The Windows installer installs per user (no administrator rights, `%LocalAppData%\Programs`).
-- Windows installers are not code-signed, so SmartScreen may warn on first run (*More info → Run anyway*).
-- Translations: Flutter side in `lib/core/l10n`, Android widgets in `android/app/src/main/assets/tr_*.tsv`.
+* [Ebrahim Byagowi](https://github.com/ebraminio)
+* [Muhammadhussein Ammari](https://github.com/xmha97)
+
+---
 
 ## 📄 License · مجوز
 

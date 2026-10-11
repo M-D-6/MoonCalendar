@@ -2012,7 +2012,7 @@ class _MiniMonthPainter extends CustomPainter {
     final int firstOffset = (dayOfWeekFromJdn(startJdn) - weekStart + 7) % 7;
     final double cellW = (size.width - padX * 2) / 7;
     final double top = headH + 3;
-    final double cellH = cellW; // square cells, like the previous grid
+    final double cellH = cellW; // square cells
     // Never larger than the cell, otherwise neighbouring day circles overlap in the narrow mini months.
     final double circle = (cellW - 2).clamp(8.0, 44.0).toDouble();
     final double fontSize = (circle * .52).clamp(6.5, 20.0).toDouble();

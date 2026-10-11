@@ -5,7 +5,7 @@
 -keepclassmembers class * extends android.widget.RemoteViews { *; }
 # (The old blanket "-keep class com.md6.mooncalendar.**" is gone: it stopped R8 from shrinking, optimising and
 # renaming the app's own code. Manifest components are kept automatically by the AGP/aapt rules.)
-# Reference app: strip debug/info logging from release builds.
+# Strip debug/info/verbose logging from release builds.
 -assumenosideeffects class android.util.Log {
     public static *** d(...);
     public static *** i(...);

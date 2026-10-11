@@ -1,5 +1,7 @@
 import 'platform_info.dart';
 import 'dart:async';
+import 'dart:convert';
+import 'web_compass_stub.dart' if (dart.library.js_interop) 'web_compass_web.dart' as web_compass;
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -53,7 +55,58 @@ class PlatformServices {
     return SystemThemeData(seedColor: SystemThemeData.fallback.seedColor, dark: WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark);
   }
 
-  static Stream<double> compassHeading() => !PlatformInfo.isAndroid ? const Stream<double>.empty() : _compass.receiveBroadcastStream().map((v) => (v as num).toDouble());
+  // ---- Windows compass: the WinRT Windows.Devices.Sensors.Compass sensor, read through PowerShell ----
+  static const String _winSensorType = '[Windows.Devices.Sensors.Compass,Windows.Devices.Sensors,ContentType=WindowsRuntime]';
+
+  static Future<bool> _windowsHasCompass() async {
+    try {
+      final r = await Process.run('powershell', <String>[
+        '-NoProfile', '-NonInteractive', '-Command',
+        '[void]$_winSensorType; if ($_winSensorType::GetDefault()) { "1" } else { "0" }',
+      ]).timeout(const Duration(seconds: 10));
+      return r.exitCode == 0 && r.stdout.toString().trim() == '1';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Process? _winCompassProcess;
+  static late final StreamController<double> _windowsCompass = StreamController<double>.broadcast(
+    onListen: _startWindowsCompass,
+    onCancel: _stopWindowsCompass,
+  );
+
+  static Future<void> _startWindowsCompass() async {
+    if (_winCompassProcess != null) return;
+    const script = '[void]$_winSensorType; \$c = $_winSensorType::GetDefault(); if (-not \$c) { exit 2 }; '
+        '\$c.ReportInterval = [Math]::Max(\$c.MinimumReportInterval, 100); '
+        'while (\$true) { \$r = \$c.GetCurrentReading(); '
+        'if (\$r) { [Console]::Out.WriteLine([string]::Format([Globalization.CultureInfo]::InvariantCulture, "{0:F2}", \$r.HeadingMagneticNorth)); [Console]::Out.Flush() }; '
+        'Start-Sleep -Milliseconds 100 }';
+    try {
+      final process = await Process.start('powershell', <String>['-NoProfile', '-NonInteractive', '-Command', script]);
+      _winCompassProcess = process;
+      process.stdout.transform(const SystemEncoding().decoder).transform(const LineSplitter()).listen((line) {
+        final value = double.tryParse(line.trim());
+        if (value != null && !_windowsCompass.isClosed) _windowsCompass.add(value);
+      });
+      process.stderr.drain<void>();
+    } catch (_) {
+      _winCompassProcess = null;
+    }
+  }
+
+  static void _stopWindowsCompass() {
+    _winCompassProcess?.kill();
+    _winCompassProcess = null;
+  }
+
+  static Stream<double> compassHeading() {
+    if (PlatformInfo.isWeb) return web_compass.webCompassStream();
+    if (PlatformInfo.isWindows) return _windowsCompass.stream;
+    if (!PlatformInfo.isAndroid) return const Stream<double>.empty();
+    return _compass.receiveBroadcastStream().map((v) => (v as num).toDouble());
+  }
   static Stream<LevelReading> levelReadings() {
     if (!PlatformInfo.isAndroid) return const Stream<LevelReading>.empty();
     return _level.receiveBroadcastStream().map((dynamic v) {
@@ -77,9 +130,17 @@ class PlatformServices {
   static Future<void> setTitleBarColors({required int backgroundArgb, required int foregroundArgb}) async { if (PlatformInfo.isWindows) { try { await _method.invokeMethod('setTitleBarColors', {'background': backgroundArgb, 'foreground': foregroundArgb}); } catch (_) {} } }
   static Future<void> dismissNativeContextMenu() async { if (PlatformInfo.isWindows) { try { await _method.invokeMethod('dismissNativeContextMenu'); } catch (_) {} } }
   static Future<void> setWidgetStayBehind({required bool enabled}) async { if (PlatformInfo.isWindows) { try { await _method.invokeMethod('setWidgetStayBehind', {'enabled': enabled}); } catch (_) {} } }
-  static Future<bool> hasCompass() async { if (!PlatformInfo.isAndroid) return false; return (await _method.invokeMethod<bool>('hasCompass')) ?? false; }
+  static Future<bool> hasCompass() async {
+    if (PlatformInfo.isWeb) return web_compass.webCompassAvailable();
+    if (PlatformInfo.isWindows) return _windowsHasCompass();
+    if (!PlatformInfo.isAndroid) return false;
+    return (await _method.invokeMethod<bool>('hasCompass')) ?? false;
+  }
   static Future<bool> hasLevel() async { if (!PlatformInfo.isAndroid) return false; return (await _method.invokeMethod<bool>('hasLevel')) ?? false; }
-  static Future<void> startCompass() async { if (PlatformInfo.isAndroid) await _method.invokeMethod('startCompass'); }
+  static Future<void> startCompass() async {
+    if (PlatformInfo.isWeb) await web_compass.webCompassStart();
+    if (PlatformInfo.isAndroid) await _method.invokeMethod('startCompass');
+  }
   static Future<void> stopCompass() async { if (PlatformInfo.isAndroid) await _method.invokeMethod('stopCompass'); }
   static Future<void> startLevel() async { if (PlatformInfo.isAndroid) await _method.invokeMethod('startLevel'); }
   static Future<void> stopLevel() async { if (PlatformInfo.isAndroid) await _method.invokeMethod('stopLevel'); }

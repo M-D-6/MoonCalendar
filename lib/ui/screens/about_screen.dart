@@ -125,6 +125,15 @@ const List<_UsedProject> _kUsedProjects = <_UsedProject>[
   ),
 ];
 
+/// GitHub account and display name of the people thanked in the About screen.
+const List<(String, String)> _kDevelopers = <(String, String)>[
+  ('ebraminio', 'Ebrahim Byagowi'),
+  ('xmha97', 'Muhammadhussein Ammari'),
+];
+
+/// Shuffled once per app run, so the order is random but does not change while the screen is rebuilt.
+final List<(String, String)> _shuffledDevelopers = List<(String, String)>.of(_kDevelopers)..shuffle();
+
 const List<(IconData, String)> _kFeatures = <(IconData, String)>[
   (Icons.calendar_month_rounded, 'تقویم و تبدیل تاریخ'),
   (Icons.celebration_rounded, 'مناسبت‌ها و تعطیلات'),
@@ -250,7 +259,7 @@ class AboutScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                 decoration: BoxDecoration(color: scheme.primaryContainer.withValues(alpha: .7), borderRadius: BorderRadius.circular(20)),
-                child: Text('نسخه ۱.۱.۱', style: text.labelLarge?.copyWith(color: scheme.onPrimaryContainer)),
+                child: Text('نسخه ۱.۱.۲', style: text.labelLarge?.copyWith(color: scheme.onPrimaryContainer)),
               ),
               const SizedBox(height: 16),
               Text(
@@ -320,6 +329,26 @@ class AboutScreen extends StatelessWidget {
             'از تمامی پروژه‌های یادشده و توسعه‌دهندگان آن‌ها سپاسگزاریم و به‌ویژه از پروژهٔ تقویم فارسی اندروید (Persian Calendar) و همهٔ توسعه‌دهندگان، مترجمان و مشارکت‌کنندگان آن تشکر و قدردانی می‌کنیم؛ بدون زحمت آن‌ها این برنامه وجود نداشت.',
             textAlign: TextAlign.center,
             style: text.bodyMedium?.copyWith(height: 1.9, color: scheme.onSurfaceVariant),
+          ),
+        ),
+        _sectionTitle(context, 'با تشکر از (ترتیب تصادفی)'),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+          child: Text('برای کپی پیوند گیت‌هاب هر فرد، روی نام او بزنید.', style: text.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+        ),
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              for (final (user, name) in _shuffledDevelopers)
+                ActionChip(
+                  avatar: const Icon(Icons.person_rounded, size: 18),
+                  label: PlainText(name),
+                  onPressed: () => _copy(context, 'https://github.com/$user'),
+                ),
+            ],
           ),
         ),
         const SizedBox(height: 6),

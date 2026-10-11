@@ -69,7 +69,7 @@ class _MapAssets {
         _tectonicPlatesText = tectonicPlatesText;
 
   // Parsed only when that map type is first shown (like the Persian Calendar app's lazy paths): most visits never
-  // open them, and parsing these two big path files used to delay every map start.
+  // open them, and parsing these two big path files would delay every map start.
   late final MapGeometry timeZones = parseMapPath(
     _timeZonesText,
     transform: (x, y) => ui.Offset(x * 0.17586713 * 16, 2880 - y * 0.08793366 * 16),

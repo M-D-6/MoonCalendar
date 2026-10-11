@@ -233,7 +233,7 @@ class _DesktopWidgetsScreenState extends State<DesktopWidgetsScreen> {
   }
 
   Future<void> _openSettings(DesktopWidgetInstance instance) async {
-    // The app's own settings action stays in this window (the previous UI).
+    // The app's own settings action stays in this window.
     // If the same widget already has a separate right-click settings window,
     // hide it first so both editors can never coexist.
     await service.hideSettingsWindow(instance.id);

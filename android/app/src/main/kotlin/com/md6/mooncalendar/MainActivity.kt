@@ -99,7 +99,7 @@ class MainActivity : FlutterActivity(), SensorEventListener {
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, methodName).setMethodCallHandler { call, result ->
             when (call.method) {
-                "hasCompass" -> result.success(sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null && sensorManager?.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null)
+                "hasCompass" -> result.success(hasMagneticSensors() || sensorManager?.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) != null)
                 "startCompass" -> { compassWanted = true; syncSensors(); result.success(null) }
                 "stopCompass" -> { compassWanted = false; syncSensors(); result.success(null) }
                 "hasLevel" -> result.success(sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null)
@@ -236,6 +236,10 @@ class MainActivity : FlutterActivity(), SensorEventListener {
         if (wanted && !sensorsOn) {
             sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.let { sm.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME) }
             sm.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)?.let { sm.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME) }
+            // Devices that report orientation only through the fused rotation-vector sensor.
+            if (!hasMagneticSensors()) {
+                sm.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)?.let { sm.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME) }
+            }
             sensorsOn = true
         } else if (!wanted && sensorsOn) {
             sm.unregisterListener(this)
@@ -253,6 +257,13 @@ class MainActivity : FlutterActivity(), SensorEventListener {
                 magnetometer = event.values.clone()
                 updateCompass()
             }
+            Sensor.TYPE_ROTATION_VECTOR -> {
+                val rotation = FloatArray(9)
+                SensorManager.getRotationMatrixFromVector(rotation, event.values)
+                val orientation = FloatArray(3)
+                SensorManager.getOrientation(rotation, orientation)
+                publishHeading(Math.toDegrees(orientation[0].toDouble()).toFloat())
+            }
         }
     }
 
@@ -264,7 +275,14 @@ class MainActivity : FlutterActivity(), SensorEventListener {
         if (!SensorManager.getRotationMatrix(rotation, inclination, gravity, magnetic)) return
         val orientation = FloatArray(3)
         SensorManager.getOrientation(rotation, orientation)
-        val raw = Math.toDegrees(orientation[0].toDouble()).toFloat()
+        publishHeading(Math.toDegrees(orientation[0].toDouble()).toFloat())
+    }
+
+    private fun hasMagneticSensors(): Boolean =
+        sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null &&
+            sensorManager?.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null
+
+    private fun publishHeading(raw: Float) {
         var target = (raw + displayRotationDegrees()) % 360f
         if (target < 0f) target += 360f
         val delta = ((target - smoothedCompass + 540f) % 360f) - 180f
