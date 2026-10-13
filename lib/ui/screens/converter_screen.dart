@@ -1,5 +1,6 @@
 import '../../core/l10n/l10n.dart';
 import '../widgets/tr_text.dart';
+import 'dart:async';
 import 'dart:math' as math;
 
 
@@ -12,6 +13,7 @@ import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../widgets/page_frame.dart';
+import 'astronomy_dialogs.dart' show showAstronomyDatePickerDialog;
 import '../../core/astronomy_math.dart';
 import '../../core/calendar_math.dart';
 import '../../core/nepali_math.dart';
@@ -154,7 +156,10 @@ class _ConverterScreenState extends State<ConverterScreen> {
 
   String _linear(DateParts d) => '${toPersianDigits(d.year)}/${toPersianDigits(d.month)}/${toPersianDigits(d.day)}';
 
-  String _fullDate(CalendarKind k, DateParts d) => '${toPersianDigits(d.day)} ${_monthName(k, d.month)} ${toPersianDigits(d.year)}';
+  /// Digits of a date number: Latin for the Gregorian calendar when that setting is on, otherwise Persian.
+  String _dg(CalendarKind k, Object v) => k == CalendarKind.gregorian ? L10n.latin(v) : toPersianDigits(v);
+
+  String _fullDate(CalendarKind k, DateParts d) => '${_dg(k, d.day)} ${_monthName(k, d.month)} ${_dg(k, d.year)}';
 
   int _weekdayOf(int jdn) => dayOfWeekFromJdn(jdn);
 
@@ -321,6 +326,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
                     icon: Icon(_isBackspaceMode ? Icons.backspace_outlined : Icons.restore),
                   ),
                 IconButton(tooltip: tr('اشتراک‌گذاری'), onPressed: _shareCurrent, icon: const Icon(Icons.share)),
+                if (_mode == ConverterMode.date || _mode == ConverterMode.distance) _dateMenu(),
               ],
             ),
             ),
@@ -328,6 +334,46 @@ class _ConverterScreenState extends State<ConverterScreen> {
         ),
       ),
     );
+  }
+
+  /// Three-dots menu: pick the date in the same dialog as the calendar page (wheels, tap a value to type it).
+  Widget _dateMenu() {
+    return GlassPopupMenuButton<int>(
+      tooltip: tr('گزینه‌های بیشتر'),
+      onSelected: (which) => unawaited(_pickDateDialog(which)),
+      itemBuilder: (_) => [
+        if (_mode == ConverterMode.date)
+          GlassMenuItem<int>(value: 1, child: Text('گزینش تاریخ'))
+        else ...[
+          GlassMenuItem<int>(value: 1, child: Text('گزینش تاریخ اول')),
+          GlassMenuItem<int>(value: 2, child: Text('گزینش تاریخ دوم')),
+        ],
+      ],
+    );
+  }
+
+  Future<void> _pickDateDialog(int which) async {
+    final jdn = which == 2 ? _jdn2 : _jdn;
+    final g = gregorianFromJdn(jdn);
+    final picked = await showAstronomyDatePickerDialog(
+      context,
+      initial: DateTime(g.year, g.month, g.day),
+      localDigits: widget.settings.localDigits,
+      initialTab: switch (_calendar) {
+        CalendarKind.gregorian => 1,
+        CalendarKind.islamic => 2,
+        _ => 0,
+      },
+    );
+    if (picked == null || !mounted) return;
+    final next = gregorianToJdn(picked.year, picked.month, picked.day);
+    setState(() {
+      if (which == 2) {
+        _jdn2 = next;
+      } else {
+        _jdn = next;
+      }
+    });
   }
 
   Widget _modesDropDown(Color fg, Color bar) {
@@ -479,15 +525,18 @@ class _ConverterScreenState extends State<ConverterScreen> {
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 220),
-      child: Row(
+      // The order day | month | year (from the right) is the same in every language.
+      child: Directionality(
         key: ValueKey<CalendarKind>(k),
+        textDirection: TextDirection.rtl,
+        child: Row(
         children: [
           Expanded(
             child: _Wheel(
               value: d.day,
               min: 1,
               max: monthLen,
-              label: (i) => '${toPersianDigits(i)} / ${persianWeekdayNames[_weekdayOf(monthStart + i - 1)]}',
+              label: (i) => '${_dg(k, i)} / ${persianWeekdayNames[_weekdayOf(monthStart + i - 1)]}',
               onChanged: (v) => set(d.year, d.month, v),
             ),
           ),
@@ -497,7 +546,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
               value: d.month,
               min: 1,
               max: 12,
-              label: (i) => '${toPersianDigits(i)} / ${_monthName(k, i)}',
+              label: (i) => '${_dg(k, i)} / ${_monthName(k, i)}',
               onChanged: (v) => set(d.year, v, d.day),
             ),
           ),
@@ -507,11 +556,12 @@ class _ConverterScreenState extends State<ConverterScreen> {
               value: _ci(d.year, yearMin, yearMax),
               min: yearMin,
               max: yearMax,
-              label: (i) => toPersianDigits(i),
+              label: (i) => _dg(k, i),
               onChanged: (v) => set(v, d.month, d.day),
             ),
           ),
         ],
+      ),
       ),
     );
   }
@@ -966,30 +1016,61 @@ class _ConverterScreenState extends State<ConverterScreen> {
 
   Widget _qrMode() {
     final qr = _makeQrImage();
+    final media = MediaQuery.sizeOf(context);
+    final wide = media.width >= 760;
+    // The code always fits the window: no scrolling is needed to see (and scan) all of it.
+    final availableHeight = media.height - MediaQuery.paddingOf(context).top - kTopBarHeight - 12 - 24 - 24;
+
+    Widget input({required int minLines, required int maxLines}) => TextField(
+          controller: qrInput,
+          minLines: minLines,
+          maxLines: maxLines,
+          textDirection: TextDirection.ltr,
+          textAlign: TextAlign.left,
+          decoration: InputDecoration(labelText: tr('متن یا لینک'), border: const OutlineInputBorder()),
+          onChanged: (_) => setState(() {}),
+        );
+
+    Widget code(double side) => qr == null
+        ? const Card(child: Padding(padding: EdgeInsets.all(20), child: Text('این متن برای QR بیش از ظرفیت نسخه ۴۰ است.', textDirection: TextDirection.rtl, textAlign: TextAlign.center)))
+        : Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: SizedBox(width: side, height: side, child: CustomPaint(painter: _QrPainter(qrImage: qr))),
+            ),
+          );
+
+    if (wide) {
+      final side = math.min(availableHeight, media.width * 0.4).clamp(160.0, 460.0).toDouble();
+      return Row(
+        key: const ValueKey('qr'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                input(minLines: 6, maxLines: 10),
+                const SizedBox(height: 10),
+                OutlinedButton(onPressed: _setQrSample, child: const Text('نمونه‌های QR')),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          code(side),
+        ],
+      );
+    }
+    // Text field (3-4 lines), the sample button and the spacing take roughly 200 px.
+    final side = math.min(media.width - 32 - 24, availableHeight - 200).clamp(140.0, 420.0).toDouble();
     return Column(
       key: const ValueKey('qr'),
       children: [
-        TextField(
-          controller: qrInput,
-          minLines: 7,
-          maxLines: 11,
-          textDirection: TextDirection.ltr,
-          textAlign: TextAlign.left,
-          decoration: InputDecoration(labelText: tr('متن یا لینک'), border: OutlineInputBorder()),
-          onChanged: (_) => setState(() {}),
-        ),
+        input(minLines: 3, maxLines: 4),
         const SizedBox(height: 10),
         OutlinedButton(onPressed: _setQrSample, child: const Text('نمونه‌های QR')),
-        const SizedBox(height: 16),
-        if (qr == null)
-          const Card(child: Padding(padding: EdgeInsets.all(20), child: Text('این متن برای QR بیش از ظرفیت نسخه ۴۰ است.', textDirection: TextDirection.rtl, textAlign: TextAlign.center)))
-        else
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: AspectRatio(aspectRatio: 1, child: CustomPaint(painter: _QrPainter(qrImage: qr))),
-            ),
-          ),
+        const SizedBox(height: 12),
+        code(side),
       ],
     );
   }

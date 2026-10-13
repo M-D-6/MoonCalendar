@@ -505,8 +505,15 @@ public static class LnkAumidHelper
 
         $programs = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs'
         New-Item -ItemType Directory -Path $programs -Force | Out-Null
-        $shortcut = Join-Path $programs 'Mooncalendar (اعلان).lnk'
-        if (Test-Path -LiteralPath $shortcut) { return }
+        $old = Join-Path $programs 'Mooncalendar (اعلان).lnk'
+        if (Test-Path -LiteralPath $old) { Remove-Item -LiteralPath $old -Force -ErrorAction SilentlyContinue }
+        $common = Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs'
+        $folderLink = Join-Path $programs 'Mooncalendar\Mooncalendar.lnk'
+        $commonLink = Join-Path $common 'Mooncalendar.lnk'
+        $commonFolderLink = Join-Path $common 'Mooncalendar\Mooncalendar.lnk'
+        $shortcut = Join-Path $programs 'Mooncalendar.lnk'
+        # One Start-menu entry only: the installer's shortcut already carries the notification identity.
+        if ((Test-Path -LiteralPath $shortcut) -or (Test-Path -LiteralPath $folderLink) -or (Test-Path -LiteralPath $commonLink) -or (Test-Path -LiteralPath $commonFolderLink)) { return }
         [LnkAumidHelper]::WriteShortcutWithAumid($shortcut, $exe, $Aumid)
         Write-Log ('toast shortcut ready: ' + $shortcut)
     } catch {

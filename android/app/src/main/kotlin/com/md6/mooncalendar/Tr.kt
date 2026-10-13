@@ -23,7 +23,7 @@ object Tr {
     private const val AR = "٠١٢٣٤٥٦٧٨٩"
     private val hasLetters = Regex("[ء-يٮ-ۓۺ-ۿ]")
     private val separators = Regex("(\\s*[،,•·|/]\\s*|\\n| – | - | — )")
-    private val edgePunct = Regex("^([«»(\\[“\"⁦]*)(.*?)([»)\\]”\":؛،.⁩!؟?]*)$", RegexOption.DOT_MATCHES_ALL)
+    private val edgePunct = Regex("^([«»(\\[“\"⁦\u2067\u2068]*)(.*?)([»)\\]”\":؛،.⁩!؟?]*)$", RegexOption.DOT_MATCHES_ALL)
     private val slot = Regex("\\{(\\d)([na]?)\\}")
 
     private var appCtx: Context? = null
@@ -92,13 +92,40 @@ object Tr {
     fun digits(context: Context, s: String): String =
         convertDigits(s, lang(context) != "en" && localDigits(context))
 
+    /** Invisible marker put before a digit run that must stay 0-9 (Gregorian dates with the "Latin digits" setting). */
+    const val LATIN_MARK = '\u2060'
+
+    /** The "Latin digits for Gregorian dates" setting of the app. */
+    fun latinGregorian(): Boolean = ctx()?.let { c ->
+        runCatching { prefs(c).getBoolean("flutter.latin_gregorian_digits", false) }.getOrDefault(false)
+    } ?: false
+
+    private val digitRun = Regex("[0-9\u06F0-\u06F9\u0660-\u0669]+")
+
+    /** [s] with every number as 0-9, shielded from the numeral conversion of [t] / [digits]. */
+    fun latin(s: String): String = digitRun.replace(s) { m ->
+        val sb = StringBuilder().append(LATIN_MARK)
+        for (ch in m.value) {
+            var d = FA.indexOf(ch)
+            if (d < 0) d = AR.indexOf(ch)
+            sb.append(if (d >= 0) ('0' + d) else ch)
+        }
+        sb.toString()
+    }
+
+    /** Isolates a date so it keeps its own direction inside a right-to-left (or left-to-right) text. */
+    fun isolate(s: String): String =
+        if (isRtl()) "\u2067$s\u2069" else "\u2066$s\u2069"
+
     private fun convertDigits(s: String, persian: Boolean): String {
         val sb = StringBuilder(s.length)
+        var keepLatin = false
         for (ch in s) {
+            if (ch == LATIN_MARK) { keepLatin = true; continue }
             var d = FA.indexOf(ch)
             if (d < 0) d = AR.indexOf(ch)
             if (d < 0 && ch in '0'..'9') d = ch - '0'
-            if (d < 0) sb.append(ch) else sb.append(if (persian) FA[d] else ('0' + d))
+            if (d < 0) { keepLatin = false; sb.append(ch) } else sb.append(if (persian && !keepLatin) FA[d] else ('0' + d))
         }
         return sb.toString()
     }

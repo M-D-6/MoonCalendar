@@ -1,6 +1,8 @@
 import 'platform_info.dart';
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:convert';
+import 'windows_sensors.dart';
 import 'web_compass_stub.dart' if (dart.library.js_interop) 'web_compass_web.dart' as web_compass;
 import 'dart:io';
 import 'package:flutter/services.dart';
@@ -30,7 +32,24 @@ class LevelReading {
   const LevelReading({required this.pitch, required this.roll, required this.balance});
 }
 
+/// Pitch, roll and balance (degrees) from a gravity direction, with the same maths as the Android sensor path
+/// (rotation matrix from the accelerometer only, device held in portrait).
+LevelReading levelFromGravity(double ax, double ay, double az) {
+  final n = math.sqrt(ax * ax + ay * ay + az * az);
+  if (n == 0) return const LevelReading(pitch: 0, roll: 0, balance: 0);
+  final x = ax / n, y = ay / n, z = az / n;
+  final planar = math.sqrt(x * x + y * y);
+  final balance = planar == 0 ? 0.0 : math.asin(x / planar) * 180 / math.pi;
+  return LevelReading(
+    pitch: math.asin((-y).clamp(-1.0, 1.0)) * 180 / math.pi,
+    roll: math.atan2(x, z) * 180 / math.pi,
+    balance: balance,
+  );
+}
+
 class PlatformServices {
+  static void closeWebPage() => web_compass.webCloseWindow();
+
   static const MethodChannel _method = MethodChannel('com.md6.Mooncalendar/platform');
   static const EventChannel _compass = EventChannel('com.md6.Mooncalendar/compass');
   static const EventChannel _level = EventChannel('com.md6.Mooncalendar/level');
@@ -55,59 +74,24 @@ class PlatformServices {
     return SystemThemeData(seedColor: SystemThemeData.fallback.seedColor, dark: WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark);
   }
 
-  // ---- Windows compass: the WinRT Windows.Devices.Sensors.Compass sensor, read through PowerShell ----
-  static const String _winSensorType = '[Windows.Devices.Sensors.Compass,Windows.Devices.Sensors,ContentType=WindowsRuntime]';
+  static final Stream<double> _windowsCompass =
+      WindowsSensors.stream('Compass', <String>[r'$r.HeadingMagneticNorth']).map((v) => v[0]);
 
-  static Future<bool> _windowsHasCompass() async {
-    try {
-      final r = await Process.run('powershell', <String>[
-        '-NoProfile', '-NonInteractive', '-Command',
-        '[void]$_winSensorType; if ($_winSensorType::GetDefault()) { "1" } else { "0" }',
-      ]).timeout(const Duration(seconds: 10));
-      return r.exitCode == 0 && r.stdout.toString().trim() == '1';
-    } catch (_) {
-      return false;
-    }
-  }
-
-  static Process? _winCompassProcess;
-  static late final StreamController<double> _windowsCompass = StreamController<double>.broadcast(
-    onListen: _startWindowsCompass,
-    onCancel: _stopWindowsCompass,
-  );
-
-  static Future<void> _startWindowsCompass() async {
-    if (_winCompassProcess != null) return;
-    const script = '[void]$_winSensorType; \$c = $_winSensorType::GetDefault(); if (-not \$c) { exit 2 }; '
-        '\$c.ReportInterval = [Math]::Max(\$c.MinimumReportInterval, 100); '
-        'while (\$true) { \$r = \$c.GetCurrentReading(); '
-        'if (\$r) { [Console]::Out.WriteLine([string]::Format([Globalization.CultureInfo]::InvariantCulture, "{0:F2}", \$r.HeadingMagneticNorth)); [Console]::Out.Flush() }; '
-        'Start-Sleep -Milliseconds 100 }';
-    try {
-      final process = await Process.start('powershell', <String>['-NoProfile', '-NonInteractive', '-Command', script]);
-      _winCompassProcess = process;
-      process.stdout.transform(const SystemEncoding().decoder).transform(const LineSplitter()).listen((line) {
-        final value = double.tryParse(line.trim());
-        if (value != null && !_windowsCompass.isClosed) _windowsCompass.add(value);
-      });
-      process.stderr.drain<void>();
-    } catch (_) {
-      _winCompassProcess = null;
-    }
-  }
-
-  static void _stopWindowsCompass() {
-    _winCompassProcess?.kill();
-    _winCompassProcess = null;
-  }
+  /// Gravity direction (x, y, z; Android axis convention, z points out of the screen) on Windows.
+  /// Windows reports the opposite sign, hence the negation.
+  static final Stream<(double, double, double)> _windowsGravity =
+      WindowsSensors.stream('Accelerometer', <String>[r'$r.AccelerationX', r'$r.AccelerationY', r'$r.AccelerationZ'])
+          .map((v) => (-v[0], -v[1], -v[2]));
 
   static Stream<double> compassHeading() {
     if (PlatformInfo.isWeb) return web_compass.webCompassStream();
-    if (PlatformInfo.isWindows) return _windowsCompass.stream;
+    if (PlatformInfo.isWindows) return _windowsCompass;
     if (!PlatformInfo.isAndroid) return const Stream<double>.empty();
     return _compass.receiveBroadcastStream().map((v) => (v as num).toDouble());
   }
   static Stream<LevelReading> levelReadings() {
+    if (PlatformInfo.isWeb) return web_compass.webGravityStream().map((g) => levelFromGravity(g.$1, g.$2, g.$3));
+    if (PlatformInfo.isWindows) return _windowsGravity.map((g) => levelFromGravity(g.$1, g.$2, g.$3));
     if (!PlatformInfo.isAndroid) return const Stream<LevelReading>.empty();
     return _level.receiveBroadcastStream().map((dynamic v) {
       final map = Map<Object?, Object?>.from(v as Map);
@@ -132,17 +116,25 @@ class PlatformServices {
   static Future<void> setWidgetStayBehind({required bool enabled}) async { if (PlatformInfo.isWindows) { try { await _method.invokeMethod('setWidgetStayBehind', {'enabled': enabled}); } catch (_) {} } }
   static Future<bool> hasCompass() async {
     if (PlatformInfo.isWeb) return web_compass.webCompassAvailable();
-    if (PlatformInfo.isWindows) return _windowsHasCompass();
+    if (PlatformInfo.isWindows) return WindowsSensors.has('Compass');
     if (!PlatformInfo.isAndroid) return false;
     return (await _method.invokeMethod<bool>('hasCompass')) ?? false;
   }
-  static Future<bool> hasLevel() async { if (!PlatformInfo.isAndroid) return false; return (await _method.invokeMethod<bool>('hasLevel')) ?? false; }
+  static Future<bool> hasLevel() async {
+    if (PlatformInfo.isWeb) return web_compass.webLevelAvailable();
+    if (PlatformInfo.isWindows) return WindowsSensors.has('Accelerometer');
+    if (!PlatformInfo.isAndroid) return false;
+    return (await _method.invokeMethod<bool>('hasLevel')) ?? false;
+  }
   static Future<void> startCompass() async {
     if (PlatformInfo.isWeb) await web_compass.webCompassStart();
     if (PlatformInfo.isAndroid) await _method.invokeMethod('startCompass');
   }
   static Future<void> stopCompass() async { if (PlatformInfo.isAndroid) await _method.invokeMethod('stopCompass'); }
-  static Future<void> startLevel() async { if (PlatformInfo.isAndroid) await _method.invokeMethod('startLevel'); }
+  static Future<void> startLevel() async {
+    if (PlatformInfo.isWeb) await web_compass.webCompassStart();
+    if (PlatformInfo.isAndroid) await _method.invokeMethod('startLevel');
+  }
   static Future<void> stopLevel() async { if (PlatformInfo.isAndroid) await _method.invokeMethod('stopLevel'); }
   /// Physical (xdpi, ydpi) of the screen, used by the level ruler. Null when unknown.
   static Future<(double, double)?> screenDpi() async {

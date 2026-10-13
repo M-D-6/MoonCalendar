@@ -34,6 +34,8 @@ class WindowsDesktopService with WindowListener, tray.TrayListener {
   static const double _mobileBreakpointWidth = 700;
   static const String _widthKey = 'windows_window_width';
   static const String _heightKey = 'windows_window_height';
+  static const String _maximizedKey = 'windows_window_maximized';
+  bool _restoring = false;
 
   Future<void> initialize(AppSettings settings) async {
     if (!PlatformInfo.isWindows || _initialized) return;
@@ -64,29 +66,52 @@ class WindowsDesktopService with WindowListener, tray.TrayListener {
   }
 
   Future<void> _restoreWindowSize() async {
-    final prefs = await SharedPreferences.getInstance();
-    final width = prefs.getDouble(_widthKey);
-    final height = prefs.getDouble(_heightKey);
-    if (width == null || height == null) return;
-    final safeWidth = width.clamp(_minWindowWidth, 100000.0).toDouble();
-    final minHeight = width <= _mobileBreakpointWidth ? _mobileMinWindowHeight : _desktopMinWindowHeight;
-    final safeHeight = height.clamp(minHeight, 100000.0).toDouble();
-    await windowManager.setSize(ui.Size(safeWidth, safeHeight), animate: false);
+    _restoring = true;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final width = prefs.getDouble(_widthKey);
+      final height = prefs.getDouble(_heightKey);
+      if (width != null && height != null && width.isFinite && height.isFinite) {
+        final safeWidth = width.clamp(_minWindowWidth, 100000.0).toDouble();
+        final minHeight = width <= _mobileBreakpointWidth ? _mobileMinWindowHeight : _desktopMinWindowHeight;
+        final safeHeight = height.clamp(minHeight, 100000.0).toDouble();
+        await windowManager.setSize(ui.Size(safeWidth, safeHeight), animate: false);
+      }
+      if (prefs.getBool(_maximizedKey) == true) await windowManager.maximize();
+    } finally {
+      // Resize events caused by the restore itself must not be saved back as "user" sizes.
+      Future<void>.delayed(const Duration(milliseconds: 800), () => _restoring = false);
+    }
   }
 
   void _scheduleSaveWindowSize() {
+    if (_restoring || _exiting) return;
     _saveSizeTimer?.cancel();
     _saveSizeTimer = Timer(const Duration(milliseconds: 350), () => unawaited(_persistWindowSize()));
   }
 
+  /// Remembers the normal (restored) size of the window and whether it was maximized. A minimized,
+  /// maximized or full-screen window never overwrites the stored size, so the size the user chose survives
+  /// minimizing, maximizing, closing to the tray, a restart or a reboot.
   Future<void> _persistWindowSize() async {
     try {
-      final size = await windowManager.getSize();
       final prefs = await SharedPreferences.getInstance();
+      if (await windowManager.isMinimized()) return;
+      final maximized = await windowManager.isMaximized();
+      await prefs.setBool(_maximizedKey, maximized);
+      if (maximized || await windowManager.isFullScreen()) return;
+      final size = await windowManager.getSize();
+      if (!size.width.isFinite || !size.height.isFinite || size.width < _minWindowWidth || size.height < _desktopMinWindowHeight - 1) return;
       await prefs.setDouble(_widthKey, size.width);
       await prefs.setDouble(_heightKey, size.height);
     } catch (_) {}
   }
+
+  @override
+  void onWindowMaximize() => _scheduleSaveWindowSize();
+
+  @override
+  void onWindowUnmaximize() => _scheduleSaveWindowSize();
 
   Future<void> applyWindowPreset({required bool mobile}) async {
     if (!PlatformInfo.isWindows) return;
@@ -96,8 +121,12 @@ class WindowsDesktopService with WindowListener, tray.TrayListener {
         ui.Size(_minWindowWidth, mobile ? _mobileMinWindowHeight : _desktopMinWindowHeight),
       );
       _mobileConstraintsApplied = mobile;
+      if (await windowManager.isMaximized()) await windowManager.unmaximize();
       await windowManager.setSize(size, animate: true);
-      await _persistWindowSize();
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_maximizedKey, false);
+      await prefs.setDouble(_widthKey, size.width);
+      await prefs.setDouble(_heightKey, size.height);
     } catch (_) {}
   }
 
@@ -172,8 +201,8 @@ class WindowsDesktopService with WindowListener, tray.TrayListener {
     var asset = 'assets/tray_icon.ico';
     if (settings.dayNumberAppIcon) {
       final now = DateTime.now();
-      final day = persianFromJdn(gregorianToJdn(now.year, now.month, now.day)).day;
-      asset = 'assets/day_icons/day_${day.toString().padLeft(2, '0')}.ico';
+      final day = settings.iconDay(now);
+      asset = 'assets/day_icons/${settings.iconLatinDigits ? 'latin' : 'day'}_${day.toString().padLeft(2, '0')}.ico';
     }
     if (force || asset != _trayIconAsset) {
       try {
@@ -268,6 +297,12 @@ class WindowsDesktopService with WindowListener, tray.TrayListener {
     } else {
       unawaited(exitApp());
     }
+  }
+
+  /// Hides the main window; the app keeps running from the tray icon.
+  Future<void> hideWindow() async {
+    if (!PlatformInfo.isWindows) return;
+    try { await windowManager.hide(); } catch (_) {}
   }
 
   Future<void> exitApp() async {

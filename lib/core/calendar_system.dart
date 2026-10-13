@@ -1,4 +1,5 @@
 import 'calendar_math.dart';
+import 'l10n/l10n.dart';
 
 /// The calendars the app can show, like the Persian Calendar app's `Calendar` enum (SHAMSI, GREGORIAN, ISLAMIC).
 enum CalendarSystem { shamsi, gregorian, hijri }
@@ -26,7 +27,7 @@ extension CalendarSystemInfo on CalendarSystem {
   /// Digits follow the app's numeral setting for every calendar (Gregorian keeps Latin digits).
   String digits(Object value, {bool local = true}) {
     final s = value.toString();
-    return this == CalendarSystem.gregorian ? s : (local ? toPersianDigits(s) : s);
+    return this == CalendarSystem.gregorian ? L10n.latin(s) : (local ? toPersianDigits(s) : s);
   }
 
   /// [hijriOffset] only matters for the Hijri calendar (the app's "lunar calendar correction").

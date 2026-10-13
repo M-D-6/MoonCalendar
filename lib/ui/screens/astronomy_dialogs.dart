@@ -173,17 +173,19 @@ Future<DateTime?> showAstronomyDatePickerDialog(
   BuildContext context, {
   required DateTime initial,
   required bool localDigits,
+  int initialTab = 0,
 }) {
   return showDialog<DateTime>(
     context: context,
-    builder: (context) => _DatePickerDialog(initial: initial, localDigits: localDigits),
+    builder: (context) => _DatePickerDialog(initial: initial, localDigits: localDigits, initialTab: initialTab),
   );
 }
 
 class _DatePickerDialog extends StatefulWidget {
-  const _DatePickerDialog({required this.initial, required this.localDigits});
+  const _DatePickerDialog({required this.initial, required this.localDigits, this.initialTab = 0});
   final DateTime initial;
   final bool localDigits;
+  final int initialTab;
 
   @override
   State<_DatePickerDialog> createState() => _DatePickerDialogState();
@@ -197,11 +199,13 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   late int _day;
   late int _yearBase;
   static const int _yearSpan = 300;
+  int _rev = 0;
 
   @override
   void initState() {
     super.initState();
     _jdn = gregorianToJdn(widget.initial.year, widget.initial.month, widget.initial.day);
+    _tab = widget.initialTab.clamp(0, 2);
     _loadTab();
   }
 
@@ -251,6 +255,79 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   }
 
   String _digits(Object v) => astroDigits(v, localDigits: widget.localDigits);
+
+  static int? _parseNumber(String text) {
+    final b = StringBuffer();
+    for (final r in text.runes) {
+      if (r >= 0x06F0 && r <= 0x06F9) {
+        b.writeCharCode(r - 0x06F0 + 48);
+      } else if (r >= 0x0660 && r <= 0x0669) {
+        b.writeCharCode(r - 0x0660 + 48);
+      } else {
+        b.writeCharCode(r);
+      }
+    }
+    return int.tryParse(b.toString().trim());
+  }
+
+  /// Tapping the selected day / month / year lets the user type it. [kind]: 0 day, 1 month, 2 year.
+  Future<void> _typeValue(int kind, int max) async {
+    final current = kind == 0 ? _day : kind == 1 ? _month : _year;
+    final controller = TextEditingController(text: _digits(current));
+    controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
+    final title = kind == 0 ? 'روز' : kind == 1 ? 'شمارهٔ ماه' : 'سال';
+    String? error;
+    final value = await showDialog<int>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setLocal) {
+          void submit() {
+            final v = _parseNumber(controller.text);
+            final ok = v != null && (kind == 2 ? v >= 1 && v <= 9999 : v >= 1 && v <= max);
+            if (ok) {
+              Navigator.pop(dialogContext, v);
+            } else {
+              setLocal(() => error = 'مقدار معتبر نیست');
+            }
+          }
+
+          return Directionality(
+            textDirection: L10n.direction,
+            child: AlertDialog(
+              title: Text(title),
+              content: TextField(
+                controller: controller,
+                autofocus: true,
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.done,
+                textAlign: TextAlign.center,
+                decoration: InputDecoration(errorText: error == null ? null : tr(error!)),
+                onSubmitted: (_) => submit(),
+              ),
+              actions: <Widget>[
+                TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text('لغو')),
+                TextButton(onPressed: submit, child: Text('تأیید')),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+    controller.dispose();
+    if (value == null || !mounted) return;
+    setState(() {
+      if (kind == 0) {
+        _day = value;
+      } else if (kind == 1) {
+        _month = value;
+      } else {
+        _year = value;
+        _yearBase = value;
+      }
+      _commit();
+      _rev++;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -312,11 +389,14 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
                 const SizedBox(height: 16),
                 SizedBox(
                   height: 132,
-                  child: Row(
+                  child: Directionality(
+                    // The order day | month | year (from the right) is the same in every language.
+                    textDirection: TextDirection.rtl,
+                    child: Row(
                     children: <Widget>[
                       Expanded(
                         child: _Wheel(
-                          key: ValueKey<String>('d$_tab-$dayCount'),
+                          key: ValueKey<String>('d$_tab-$dayCount-$_rev'),
                           count: dayCount,
                           selected: _day - 1,
                           label: (i) {
@@ -327,11 +407,12 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
                             _day = i + 1;
                             _commit();
                           }),
+                          onTapSelected: () => _typeValue(0, dayCount),
                         ),
                       ),
                       Expanded(
                         child: _Wheel(
-                          key: ValueKey<String>('m$_tab'),
+                          key: ValueKey<String>('m$_tab-$_rev'),
                           count: 12,
                           selected: _month - 1,
                           label: (i) => '${_digits(i + 1)} / ${_monthNames[i]}',
@@ -339,11 +420,12 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
                             _month = i + 1;
                             _commit();
                           }),
+                          onTapSelected: () => _typeValue(1, 12),
                         ),
                       ),
                       Expanded(
                         child: _Wheel(
-                          key: ValueKey<String>('y$_tab-$_yearBase'),
+                          key: ValueKey<String>('y$_tab-$_yearBase-$_rev'),
                           count: _yearSpan * 2 + 1,
                           selected: _year - (_yearBase - _yearSpan),
                           label: (i) => _digits(_yearBase - _yearSpan + i),
@@ -351,9 +433,11 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
                             _year = _yearBase - _yearSpan + i;
                             _commit();
                           }),
+                          onTapSelected: () => _typeValue(2, 0),
                         ),
                       ),
                     ],
+                  ),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -384,11 +468,13 @@ class _Wheel extends StatefulWidget {
     required this.selected,
     required this.label,
     required this.onChanged,
+    this.onTapSelected,
   });
   final int count;
   final int selected;
   final String Function(int index) label;
   final ValueChanged<int> onChanged;
+  final VoidCallback? onTapSelected;
 
   @override
   State<_Wheel> createState() => _WheelState();
@@ -447,11 +533,17 @@ class _WheelState extends State<_Wheel> {
               if (i < 0 || i >= widget.count) return null;
               return GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: () => _controller.animateToItem(
-                  i,
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeOut,
-                ),
+                onTap: () {
+                  if (i == _current && widget.onTapSelected != null) {
+                    widget.onTapSelected!();
+                    return;
+                  }
+                  _controller.animateToItem(
+                    i,
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeOut,
+                  );
+                },
                 child: Center(
                   child: Text(
                     widget.label(i),

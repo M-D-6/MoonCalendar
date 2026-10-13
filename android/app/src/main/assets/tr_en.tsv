@@ -1511,6 +1511,120 @@ D	توسعه‌دهندگان	Developers
 D	برای کپی پیوند گیت‌هاب هر فرد، روی نام او بزنید.	Tap a name to copy that person's GitHub link.
 D	با تشکر از	With thanks to
 D	با تشکر از (ترتیب تصادفی)	With thanks to (random order)
+D	هوا	Weather
+D	شهرها	Cities
+D	داده و حریم خصوصی	Data & privacy
+D	اکنون	Now
+D	مشاهده‌ی ایستگاه	Station observation
+D	موقعیت فعلی	Current location
+D	جست‌وجوی شهر	Search city
+D	تازه‌سازی	Refresh
+D	در حال تازه‌سازی…	Refreshing…
+D	آفلاین • آخرین داده نمایش داده می‌شود	Offline • showing cached data
+D	جزئیات	Details
+D	دمای حس‌شده	Feels like
+D	رطوبت	Humidity
+D	فشار	Pressure
+D	دید	Visibility
+D	کیفیت هوا	Air quality
+D	فاز ماه	Moon phase
+D	طول روز	Daylight
+D	بارش	Precipitation
+D	احتمال	Probability
+D	بیشینه	High
+D	کمینه	Low
+D	اعتماد	Confidence
+D	مدل‌ها	Models
+D	افق پیش‌بینی	Forecast window
+D	تم	Theme
+D	سیستم	System
+D	تیره	Dark
+D	هر دو	Both
+D	واحدها	Units
+D	انیمیشن	Animation
+D	کاهش حرکت و مصرف باتری	Reduce motion & battery use
+D	بازخورد لمسی	Haptics
+D	اعلان‌ها	Notifications
+D	حالت ویجت دسکتاپ	Desktop widget mode
+D	تماشای منظره (پنهان کردن اطلاعات)	Landscape view (hide information)
+D	نمایش اطلاعات	Show information
+D	برآیند	Consensus
+D	آخرین دریافت	Last fetch
+D	برای این زمان داده ندارد	no data for this time
+D	به‌روزرسانی	updated
+D	منابع داده	Data sources
+D	بدون ردیابی و تبلیغات	No tracking or ads
+D	درخواست‌ها مستقیم از دستگاه شما به سرویس‌ها ارسال می‌شوند.	Requests go directly from your device to the providers.
+D	سرویس‌ها ممکن است IP و مختصات را در لاگ خود نگه‌داری کنند.	Providers may retain IP addresses and coordinates in their logs.
+D	رادار دقیقه‌ای در این نسخه ادعا نمی‌شود.	This release makes no minute-level radar claim.
+D	ساختار ثبت پیش‌بینی و مشاهده برای وزن‌دهی آینده آماده است.	Forecast/observation logging is ready for future adaptive weighting.
+D	شهر	City
+D	شهر فعلی	Make current
+D	هنوز شهری اضافه نشده.	No cities yet.
+D	خطا	Error
+D	پیش‌بینی فعلاً در دسترس نیست.	Forecast is unavailable right now.
+D	زمان انتخاب‌شده	Selected time
+D	دیروز	Yesterday
+D	منبع	sources
+D	برای فعالیت بیرون مناسب	Good for outdoor activity
+D	احتیاط برای فعالیت طولانی	Use caution for long exposure
+D	قرارگیری طولانی در بیرون را کاهش دهید	Reduce prolonged outdoor exposure
+D	خلاصه صبح	Morning summary
+D	شروع بارش	Rain starting
+D	هوای ناسالم	Poor air
+D	حالت جمع‌وجور	Compact
+D	حریم خصوصی	Privacy
+D	صاف	Clear
+D	نیمه‌ابری	Partly cloudy
+D	ابری	Cloudy
+D	نم‌نم باران	Drizzle
+D	باران	Rain
+D	برف	Snow
+D	رعدوبرق	Thunderstorm
+D	برو به تاریخ	Go to date
+D	داده‌ای نیست	No data
+D	برای این تاریخ پیش‌بینی یا داده‌ای نداریم؛ منظره، فصل و حالت ماه را می‌بینید.	No forecast or data for this date. You can still see the landscape, the season and the moon.
+D	ساعت	Time
+D	برو	Go
+D	ماه نو	New moon
+D	هلال افزایشی	Waxing crescent
+D	تربیع اول	First quarter
+D	محدب افزایشی	Waxing gibbous
+D	ماه کامل	Full moon
+D	محدب کاهشی	Waning gibbous
+D	تربیع آخر	Last quarter
+D	هلال کاهشی	Waning crescent
+D	بالا	High
+D	متوسط	Medium
+D	کم	Low
+D	آب و هوا	Weather
+D	مکان‌ها و گزینه‌ها	Places and options
+D	افق شرعی	prayer-times location
+D	افزودن مکان	Add place
+D	مدیریت مکان‌ها	Manage places
+D	تماشای منظره	Landscape view
+D	نام شهر را بنویسید	Type a city name
+D	جست‌وجو ممکن نشد؛ اتصال اینترنت را بررسی کنید.	Search failed; check your internet connection.
+D	نتیجه‌ای پیدا نشد.	No results found.
+D	مکان اضافه‌شده‌ای نیست.	No places added.
+D	داده‌ها: Open-Meteo (CC BY 4.0)، MET Norway (CC BY 4.0)، DWD Bright Sky، NWS و METAR	Data: Open-Meteo (CC BY 4.0), MET Norway (CC BY 4.0), DWD Bright Sky, NWS and METAR
+D	پیش‌بینی آب‌وهوا، کیفیت هوا و جست‌وجوی مکان	Weather forecast, air quality and place search
+D	پیش‌بینی آب‌وهوا	Weather forecast
+D	شمارهٔ ماه	Month number
+D	مقدار معتبر نیست	Invalid value
+D	برنامه کاملاً بسته شود یا در ناحیهٔ اعلان (Tray) بماند؟	Close the app completely or keep it in the notification area (tray)?
+D	این انتخاب را به خاطر بسپار	Remember this choice
+D	بستن به Tray	Close to tray
+D	بستن کامل	Close completely
+D	هر بار بپرس	Ask every time
+D	دکمهٔ خروج	Exit button
+D	رقم‌های لاتین برای میلادی	Latin digits for Gregorian
+D	در تاریخ میلادی، رقم‌ها همیشه به‌صورت 0-9 نمایش داده شوند	Always show digits as 0-9 in Gregorian dates
+D	گزینش تاریخ اول	Pick first date
+D	گزینش تاریخ دوم	Pick second date
+D	رقم‌های آیکون	Icon digits
+D	طبق تنظیمات برنامه	Follow app settings
+D	انگلیسی	English
 D	کمتر از ۱ دقیقه	Less than 1 min
 D	ابتدا موقعیت جغرافیایی را برای نمایش اوقات شرعی تنظیم کنید	Set your location first to show prayer times
 D	اعلان همیشگی تقویم	Persistent calendar notification

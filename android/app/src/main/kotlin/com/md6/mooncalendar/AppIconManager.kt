@@ -15,14 +15,16 @@ object AppIconManager {
     private const val PREFS = "mooncalendar_app_icon"
     private const val KEY_ENABLED = "enabled"
     private const val KEY_TABLE = "table"
+    private const val KEY_LATIN = "latin"
     private const val PKG = "com.md6.mooncalendar"
 
     private fun alias(context: Context, suffix: String) = ComponentName(context, "$PKG.$suffix")
 
-    fun sync(context: Context, enabled: Boolean, table: String) {
+    fun sync(context: Context, enabled: Boolean, table: String, latin: Boolean = false) {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
             .putBoolean(KEY_ENABLED, enabled)
             .putString(KEY_TABLE, table)
+            .putBoolean(KEY_LATIN, latin)
             .apply()
         refresh(context)
     }
@@ -53,10 +55,11 @@ object AppIconManager {
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         val enabled = prefs.getBoolean(KEY_ENABLED, false)
         val day = if (enabled) todayDay(prefs.getString(KEY_TABLE, "").orEmpty())?.takeIf { it in 1..31 } else null
-        val target = if (day != null) "LauncherDay%02d".format(day) else "LauncherDefault"
+        val latin = prefs.getBoolean(KEY_LATIN, false)
+        val target = if (day != null) (if (latin) "LauncherDayLatin%02d" else "LauncherDay%02d").format(day) else "LauncherDefault"
         val pm = context.packageManager
         // Enable the new alias first, then disable the others, so the launcher entry never disappears.
-        val all = listOf("LauncherDefault") + (1..31).map { "LauncherDay%02d".format(it) }
+        val all = listOf("LauncherDefault") + (1..31).map { "LauncherDay%02d".format(it) } + (1..31).map { "LauncherDayLatin%02d".format(it) }
         val targetComponent = alias(context, target)
         if (pm.getComponentEnabledSetting(targetComponent) != PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
             pm.setComponentEnabledSetting(targetComponent, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)

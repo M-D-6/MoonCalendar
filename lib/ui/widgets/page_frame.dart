@@ -38,7 +38,7 @@ class TopBarBackdrop extends StatelessWidget {
 
   final Widget child;
 
-  static const double fade = 22;
+  static const double fade = 12;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +58,7 @@ class TopBarBackdrop extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: <Color>[Colors.black, Colors.black, Colors.transparent],
-                stops: <double>[0, .72, 1],
+                stops: <double>[0, .8, 1],
               ).createShader(rect),
               child: ClipRect(
                 child: BackdropFilter(
@@ -75,6 +75,15 @@ class TopBarBackdrop extends StatelessWidget {
   }
 }
 
+class _MaybeBackdrop extends StatelessWidget {
+  const _MaybeBackdrop({required this.enabled, required this.child});
+  final bool enabled;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => enabled ? TopBarBackdrop(child: child) : child;
+}
+
 /// Top bar shared by every page opened from the side menu - the same look as the main calendar page:
 /// no rectangular bar, every control sits in its own rounded frame (circle buttons and a pill title)
 /// on the page background.
@@ -88,7 +97,11 @@ class PageTopBar extends StatelessWidget {
     this.onBack,
     this.actions = const <Widget>[],
     this.trailing,
+    this.backdrop = true,
   });
+
+  /// Whether the full-width frosted band is drawn behind the bar (off for pages with their own picture behind it).
+  final bool backdrop;
 
   /// Pill text (ignored when [titleWidget] is given).
   final String? title;
@@ -169,7 +182,8 @@ class PageTopBar extends StatelessWidget {
         iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(foregroundColor: fg)),
         popupMenuTheme: theme.popupMenuTheme.copyWith(iconColor: fg),
       ),
-      child: TopBarBackdrop(
+      child: _MaybeBackdrop(
+       enabled: backdrop,
        child: SafeArea(
         bottom: false,
         child: Padding(

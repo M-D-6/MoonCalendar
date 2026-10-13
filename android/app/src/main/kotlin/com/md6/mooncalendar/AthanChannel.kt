@@ -107,7 +107,7 @@ class AthanChannel(private val activity: Activity) : MethodChannel.MethodCallHan
             "syncAppIcon" -> {
                 val enabled = call.argument<Boolean>("enabled") ?: false
                 val table = call.argument<String>("table").orEmpty()
-                AppIconManager.sync(activity, enabled, table)
+                AppIconManager.sync(activity, enabled, table, call.argument<Boolean>("latin") ?: false)
                 result.success(null)
             }
 

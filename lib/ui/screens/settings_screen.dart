@@ -36,6 +36,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProviderStateMixin {
   late final TabController _tabController;
+  final List<ScrollController> _scrolls = List.generate(3, (_) => ScrollController());
   int tab = 0;
 
   @override
@@ -52,6 +53,9 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
   @override
   void dispose() {
     _tabController.dispose();
+    for (final c in _scrolls) {
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -74,16 +78,23 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
     final double barH = MediaQuery.paddingOf(context).top;
     return AnimatedBuilder(
       animation: settings,
-      builder: (context, _) => Stack(
+      // The scrollbar is painted above the fades and the glass bar (it wraps the whole stack), so those
+      // effects never tint it; its track starts below the tab bar.
+      builder: (context, _) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(padding: MediaQuery.paddingOf(context).copyWith(top: barH + 84)),
+        child: Scrollbar(
+        key: ValueKey(tab),
+        controller: _scrolls[tab],
+        child: Stack(
         children: [
           // The pages scroll underneath the glass tab bar (their top padding leaves room for it).
-          Positioned.fill(child: _buildTab(context, tab)),
+          Positioned.fill(child: ScrollConfiguration(behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false), child: _buildTab(context, tab))),
           // Soft fade just below the glass frame, so the texts melt away elegantly as they slide under it.
           Positioned(
             top: barH + 74,
             left: 0,
             right: 0,
-            height: 34,
+            height: 24,
             child: IgnorePointer(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -129,6 +140,8 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
           ),
         ],
       ),
+      ),
+      ),
     );
   }
 
@@ -144,6 +157,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
   }
 
   Widget _interfaceAndCalendar() => ListView(
+        controller: _scrolls[0],
         padding: EdgeInsets.fromLTRB(10, MediaQuery.paddingOf(context).top + 84, 10, 28),
         children: [
           _section('رابط کاربری', [
@@ -204,6 +218,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
             _switch('تعطیلات به رنگ قرمز', 'نمایش تعطیلات با رنگ قرمز', settings.redHolidays, settings.setRedHolidays, Icons.event_busy_outlined),
             _switch('نوشتار پررنگ', 'افزایش وزن نوشتار رابط', settings.bold, settings.setBold, Icons.format_bold_outlined),
             _switch('رقم‌های فارسی', 'نمایش رقم‌ها به فارسی', settings.localDigits, settings.setLocalDigits, Icons.pin_outlined),
+            _switch('رقم‌های لاتین برای میلادی', 'در تاریخ میلادی، رقم‌ها همیشه به‌صورت 0-9 نمایش داده شوند', settings.latinGregorianDigits, settings.setLatinGregorianDigits, Icons.looks_one_outlined),
             _switch('نام انگلیسی ماه‌های میلادی', 'در متن فارسی، نام ماه‌های میلادی مثل June و July نمایش داده شود', settings.englishGregorianPersianMonths, settings.setEnglishGregorianPersianMonths, Icons.translate_outlined),
           ]),
           _section('تقویم', [
@@ -236,10 +251,27 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
             if (settings.astronomicalFeatures)
               _switch('قمر در عقرب', 'نمایش وضعیت قمر در عقرب', settings.showMoonInScorpio, settings.setShowMoonInScorpio, Icons.brightness_3_outlined),
           ]),
+          if (PlatformInfo.isWindows)
+            _section('ویندوز', [
+              _switch('شروع با ویندوز', 'اجرای خودکار برنامه (در ناحیهٔ اعلان) هنگام ورود به ویندوز', settings.startWithWindows, settings.setStartWithWindows, Icons.power_settings_new_rounded),
+              _switch('فعال ماندن در پس‌زمینه', 'با بستن پنجره، برنامه به‌جای خروج در پس‌زمینه می‌ماند', settings.runInBackground, settings.setRunInBackground, Icons.energy_savings_leaf_outlined),
+              ListTile(
+                leading: const Icon(Icons.exit_to_app_rounded),
+                title: const Text('دکمهٔ خروج', textDirection: TextDirection.rtl),
+                subtitle: Text(const {'ask': 'هر بار بپرس', 'quit': 'بستن کامل', 'tray': 'بستن به Tray'}[settings.exitAction]!, textDirection: TextDirection.rtl),
+                trailing: Icon(L10n.chevron),
+                onTap: () async {
+                  final v = await _showSingleChoice<String>('دکمهٔ خروج', const ['ask', 'quit', 'tray'], settings.exitAction, (e) => const {'ask': 'هر بار بپرس', 'quit': 'بستن کامل', 'tray': 'بستن به Tray'}[e]!);
+                  if (v != null) await settings.setExitAction(v);
+                },
+              ),
+              _switch('نمایش آیکون Tray', 'نمایش آیکون Mooncalendar در ناحیهٔ اعلان ویندوز', settings.showTrayIcon, settings.setShowTrayIcon, Icons.notifications_none_outlined),
+            ]),
         ],
       );
 
   Widget _notificationAndWidget() => ListView(
+        controller: _scrolls[1],
         padding: EdgeInsets.fromLTRB(10, MediaQuery.paddingOf(context).top + 84, 10, 28),
         children: [
           _section('اعلان', [
@@ -265,6 +297,17 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
               _switch('عدد بزرگ در نوار اعلان', 'نمایش روز ماه به صورت عددی بزرگ', settings.largeDayNumberNotification, settings.setLargeDayNumberNotification, Icons.format_size_outlined),
               if (PlatformInfo.isAndroid || PlatformInfo.isWindows)
                 _switch('آیکون برنامه با عدد روز', PlatformInfo.isAndroid ? 'به‌جای حرف M، عدد روز ماه روی آیکون برنامه نمایش داده می‌شود و هر روز عوض می‌شود' : 'به‌جای حرف M، عدد روز ماه روی آیکون Tray نمایش داده می‌شود', settings.dayNumberAppIcon, settings.setDayNumberAppIcon, Icons.calendar_today_outlined),
+              if ((PlatformInfo.isAndroid || PlatformInfo.isWindows) && settings.dayNumberAppIcon)
+                ListTile(
+                  leading: const Icon(Icons.pin_outlined),
+                  title: const Text('رقم‌های آیکون', textDirection: TextDirection.rtl),
+                  subtitle: Text(const {'app': 'طبق تنظیمات برنامه', 'en': 'انگلیسی', 'fa': 'فارسی'}[settings.appIconDigits]!, textDirection: TextDirection.rtl),
+                  trailing: Icon(L10n.chevron),
+                  onTap: () async {
+                    final v = await _showSingleChoice<String>('رقم‌های آیکون', const ['app', 'en', 'fa'], settings.appIconDigits, (e) => const {'app': 'طبق تنظیمات برنامه', 'en': 'انگلیسی', 'fa': 'فارسی'}[e]!);
+                    if (v != null) await settings.setAppIconDigits(v);
+                  },
+                ),
             if (settings.notifyDate)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -367,12 +410,6 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
               ),
             ],
           ]),
-          if (PlatformInfo.isWindows)
-            _section('ویندوز', [
-              _switch('شروع با ویندوز', 'اجرای خودکار برنامه (در ناحیهٔ اعلان) هنگام ورود به ویندوز', settings.startWithWindows, settings.setStartWithWindows, Icons.power_settings_new_rounded),
-              _switch('فعال ماندن در پس‌زمینه', 'با بستن پنجره، برنامه به‌جای خروج در پس‌زمینه می‌ماند', settings.runInBackground, settings.setRunInBackground, Icons.energy_savings_leaf_outlined),
-              _switch('نمایش آیکون Tray', 'نمایش آیکون Mooncalendar در ناحیهٔ اعلان ویندوز', settings.showTrayIcon, settings.setShowTrayIcon, Icons.notifications_none_outlined),
-            ]),
         ],
       );
 
@@ -383,6 +420,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
     final isJafari = settings.prayerMethod == PrayerMethod.jafari;
     final highLatitude = hasLocation && settings.latitude!.abs() > 48;
     return ListView(
+      controller: _scrolls[2],
       padding: EdgeInsets.fromLTRB(10, MediaQuery.paddingOf(context).top + 84, 10, 28),
       children: [
         _section('موقعیت', [

@@ -126,7 +126,7 @@ class AthanService with WidgetsBindingObserver {
       s.prayerMethod.name, s.highLatitudeMethod.name, s.asrMethod.name, s.midnightMethod?.name,
       s.athanGap, (s.athanAlarms.toList()..sort()).join(','),
       s.athanSound, s.athanCustomUri, s.athanVibration, s.iranTime, s.localDigits,
-      s.notifyDate, s.notifyDateLockScreen, s.largeDayNumberNotification, s.notifyDirection, L10n.lang.index, s.numericalDate, s.dayNumberAppIcon,
+      s.notifyDate, s.notifyDateLockScreen, s.largeDayNumberNotification, s.notifyDirection, L10n.lang.index, s.numericalDate, s.latinGregorianDigits, s.dayNumberAppIcon, s.appIconDigits, s.iconLatinDigits, s.mainCalendar.name,
       s.hijriOffset, s.englishGregorianPersianMonths,
       s.notificationRows.map((row) => row.join(',')).join(' / '),
       List<String>.generate(s.notificationRows.length, (i) => notificationLineStyleKeys.where(s.notificationStyleAt(i).contains).join(',')).join(' / '),
@@ -159,12 +159,12 @@ class AthanService with WidgetsBindingObserver {
           final start = DateTime.now();
           for (var i = 0; i < 400; i++) {
             final d = DateTime(start.year, start.month, start.day + i);
-            final day = persianFromJdn(gregorianToJdn(d.year, d.month, d.day)).day;
+            final day = s.iconDay(d);
             if (i > 0) iconTable.write(',');
             iconTable.write('${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}:$day');
           }
         }
-        await AthanAndroid.syncAppIcon(enabled: s.dayNumberAppIcon, table: iconTable.toString());
+        await AthanAndroid.syncAppIcon(enabled: s.dayNumberAppIcon, table: iconTable.toString(), latin: s.iconLatinDigits);
         final dateNotifications = s.notifyDate
             ? WindowsDateNotificationPlanner.build(s, days: 370)
             : const <WindowsDateNotification>[];
@@ -179,7 +179,7 @@ class AthanService with WidgetsBindingObserver {
             final rawTitle = entry.lines.isEmpty ? 'Mooncalendar' : entry.lines.first;
             final title = rawTitle.replaceFirst(RegExp(r'^[0-9۰-۹]+\s*[—–-]\s*'), '');
             final body = entry.lines.skip(1).join('\n');
-            return <String, String>{'date': entry.dateKey, 'title': title, 'body': body, 'day': entry.persianDay.toString(), 'styles': entry.stylesEncoded};
+            return <String, String>{'date': entry.dateKey, 'title': title, 'body': body, 'day': entry.iconDay.toString(), 'latin': entry.latinIcon ? '1' : '0', 'styles': entry.stylesEncoded};
           }).toList(growable: false),
         );
         } else if (PlatformInfo.isWindows) {

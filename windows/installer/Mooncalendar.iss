@@ -4,7 +4,7 @@
 #define MyAppVersion GetEnv("MOONCALENDAR_VERSION")
 #if MyAppVersion == ""
   #undef MyAppVersion
-  #define MyAppVersion "1.1.2"
+  #define MyAppVersion "1.1.3"
 #endif
 
 ; Flutter build folder: build\windows\<arch>\runner\Release.
@@ -128,11 +128,18 @@ Source: "{#MyPublishDir}\*"; \
 Type: filesandordirs; Name: "{app}"
 
 
+[InstallDelete]
+
+Type: filesandordirs; Name: "{autoprograms}\{#MyAppName}"
+Type: files; Name: "{userprograms}\Mooncalendar (اعلان).lnk"
+
+
 [Icons]
 
-Name: "{autoprograms}\{#MyAppName}\{#MyAppName}"; \
+Name: "{autoprograms}\{#MyAppName}"; \
     Filename: "{app}\{#MyAppExeName}"; \
     WorkingDir: "{app}"; \
+    AppUserModelID: "MoonCalendar.Athan"; \
     Tasks: startmenuicon
 
 Name: "{autodesktop}\{#MyAppName}"; \
@@ -233,6 +240,12 @@ begin
   StartMenuFolder := ExpandConstant('{autoprograms}\{#MyAppName}');
   if DirExists(StartMenuFolder) then
     DelTree(StartMenuFolder, True, True, True);
+  Shortcut := ExpandConstant('{autoprograms}\{#MyAppName}.lnk');
+  if FileExists(Shortcut) then
+    DeleteFile(Shortcut);
+  Shortcut := ExpandConstant('{userprograms}\{#MyAppName}.lnk');
+  if FileExists(Shortcut) then
+    DeleteFile(Shortcut);
 
   { Shortcut written by the app for toast notifications (it carries the notification identity). }
   Shortcut := ExpandConstant('{userprograms}\Mooncalendar (اعلان).lnk');

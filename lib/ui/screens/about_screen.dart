@@ -117,6 +117,20 @@ const List<_UsedProject> _kUsedProjects = <_UsedProject>[
     <String>['مرز صفحات زمین‌ساخت'],
   ),
   _UsedProject(
+    Icons.cloud_outlined,
+    'Open-Meteo',
+    'CC BY 4.0',
+    'https://open-meteo.com',
+    <String>['پیش‌بینی آب‌وهوا، کیفیت هوا و جست‌وجوی مکان'],
+  ),
+  _UsedProject(
+    Icons.air_rounded,
+    'MET Norway',
+    'CC BY 4.0',
+    'https://api.met.no',
+    <String>['پیش‌بینی آب‌وهوا'],
+  ),
+  _UsedProject(
     Icons.volume_up_rounded,
     'بُرنا تصویر رسانه',
     'مطابق پروژهٔ مرجع',
@@ -259,7 +273,7 @@ class AboutScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                 decoration: BoxDecoration(color: scheme.primaryContainer.withValues(alpha: .7), borderRadius: BorderRadius.circular(20)),
-                child: Text('نسخه ۱.۱.۲', style: text.labelLarge?.copyWith(color: scheme.onPrimaryContainer)),
+                child: Text('نسخه ۱.۱.۳', style: text.labelLarge?.copyWith(color: scheme.onPrimaryContainer)),
               ),
               const SizedBox(height: 16),
               Text(

@@ -30,13 +30,35 @@ class L10n {
 
   static AppLanguage lang = AppLanguage.fa;
   static bool localDigits = true;
+
+  /// "Latin digits for Gregorian dates": Gregorian numbers are tagged with [latinMark] (an invisible
+  /// character) so the numeral conversion of [translate] leaves them as 0-9.
+  static bool gregorianLatin = false;
+  static const String latinMark = '\u2060';
+
+  static void setGregorianLatin(bool value) {
+    if (value == gregorianLatin) return;
+    gregorianLatin = value;
+    _cache.clear();
+    revision.value++;
+  }
+
+  /// [text] (a number or a string of numbers) shielded from the numeral conversion when the setting is on.
+  static String latin(Object text) => gregorianLatin ? markLatin(text) : text.toString();
+
+  /// [text] with every number as 0-9, shielded from the numeral conversion regardless of the setting.
+  static String markLatin(Object text) {
+    final s = latinDigits(text.toString());
+    return s.replaceAllMapped(RegExp(r'[0-9]+'), (m) => '$latinMark${m[0]}');
+  }
   static final ValueNotifier<int> revision = ValueNotifier<int>(0);
 
   static bool get rtl => lang.direction == TextDirection.rtl;
   static bool get isPersian => lang == AppLanguage.fa;
   static TextDirection get direction => lang.direction;
-  static IconData get chevron => rtl ? Icons.chevron_left : Icons.chevron_right;
-  static IconData get chevronBack => rtl ? Icons.chevron_right : Icons.chevron_left;
+  /// Material's chevron icons mirror themselves in right-to-left layouts, so no language check is needed here.
+  static IconData get chevron => Icons.chevron_right;
+  static IconData get chevronBack => Icons.chevron_left;
 
   /// The desktop-widget window always stays Persian / right-to-left.
   static bool persianOnly = false;
@@ -143,6 +165,26 @@ class L10n {
     return any ? out.toString() : fa;
   }
 
+  /// [text] as a unit with its own direction (so a Latin date inside a Persian line, or the other way round,
+  /// is not scrambled by the bidirectional algorithm).
+  static String isolate(String text) => rtl ? '\u2067$text\u2069' : '\u2066$text\u2069';
+
+  /// Like [isolate] but with the classic embedding controls (RLE / LRE ... PDF), which even old text engines
+  /// (Windows toasts) honour; isolates are ignored there and the line comes out scrambled.
+  static String embed(String text) => rtl ? '\u202B$text\u202C' : '\u202A$text\u202C';
+
+  /// Every Persian / Arabic-Indic digit of [text] as 0-9.
+  static String latinDigits(String text) {
+    final buf = StringBuffer();
+    for (final c in text.runes) {
+      final ch = String.fromCharCode(c);
+      var d = _fa.indexOf(ch);
+      if (d < 0) d = _arD.indexOf(ch);
+      buf.write(d < 0 ? ch : '$d');
+    }
+    return buf.toString();
+  }
+
   static final RegExp _edgePunct = RegExp(r'^([«»(\[“"\u2066]*)(.*?)([»)\]”":؛،.\u2069!؟?]*)$', dotAll: true);
 
   /// "شنبه ۵ فروردین ۱۴۰۵" or "🐎 اسب «یونت ئیل»": every Persian word/phrase is a known name (numbers, symbols
@@ -196,15 +238,21 @@ class L10n {
   static String _digits(String s) {
     final persianDigits = lang != AppLanguage.en && localDigits;
     final buf = StringBuffer();
+    var keepLatin = false;
     for (final c in s.runes) {
       final ch = String.fromCharCode(c);
+      if (ch == latinMark) {
+        keepLatin = true;
+        continue;
+      }
       var d = _fa.indexOf(ch);
       if (d < 0) d = _arD.indexOf(ch);
       if (d < 0 && c >= 0x30 && c <= 0x39) d = c - 0x30;
       if (d < 0) {
+        keepLatin = false;
         buf.write(ch);
       } else {
-        buf.write(persianDigits ? _fa[d] : '$d');
+        buf.write(persianDigits && !keepLatin ? _fa[d] : '$d');
       }
     }
     return buf.toString();

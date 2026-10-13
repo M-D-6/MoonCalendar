@@ -12,6 +12,7 @@ import '../core/athan/athan_service.dart';
 import '../core/desktop_widgets/desktop_widget_service.dart';
 import '../core/counter_service.dart';
 import '../core/platform.dart';
+import '../core/windows_desktop_service.dart';
 
 import '../core/calendar_math.dart';
 import '../core/calendar_system.dart';
@@ -32,6 +33,8 @@ import 'screens/settings_screen.dart';
 import 'screens/desktop_widgets_screen.dart';
 import 'screens/basic_screens.dart';
 import 'screens/level_screen.dart';
+import '../weather/weather_controller.dart';
+import '../weather/weather_screen.dart';
 import 'theme.dart';
 import 'widgets/app_drawer.dart';
 import 'widgets/glass.dart';
@@ -232,7 +235,7 @@ enum AppPage {
   about,
   licenses,
   device,
-  counter,
+  weather, counter,
 }
 
 class HomeShell extends StatefulWidget {
@@ -261,6 +264,10 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
   StreamSubscription<String>? _launchSubscription;
   Timer? _widgetTimer;
   bool _levelFullscreen = false;
+
+  /// Created on the first visit of the weather page and kept, so the forecast survives page switches.
+  WeatherController? _weatherCtl;
+  WeatherController get _weatherController => _weatherCtl ??= WeatherController(widget.settings);
 
   @override
   void initState() {
@@ -563,6 +570,7 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
     _widgetTimer?.cancel();
     _widgetSyncDebounce?.cancel();
     _midnightTimer?.cancel();
+    _weatherCtl?.dispose();
     super.dispose();
   }
 
@@ -581,6 +589,7 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
         AppPage.about => 'درباره',
         AppPage.licenses => 'مجوزها',
         AppPage.device => 'اطلاعات دستگاه',
+        AppPage.weather => 'آب و هوا',
         AppPage.counter => 'شمارنده',
       };
 
@@ -680,7 +689,13 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
           ),
         AppPage.licenses => const LicensesScreen(),
         AppPage.device => const DeviceScreen(),
-         AppPage.counter => const CounterScreen(),
+        AppPage.weather => WeatherScreen(
+            controller: _weatherController,
+            settings: widget.settings,
+            onOpenMenu: MediaQuery.sizeOf(context).width >= 920 ? null : () => _scaffoldKey.currentState?.openDrawer(),
+            onBack: _history.isNotEmpty ? _back : null,
+          ),
+        AppPage.counter => const CounterScreen(),
       };
 
   Widget _animatedBody() {
@@ -733,6 +748,7 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
         AppPage.compass,
         AppPage.level,
         AppPage.astronomy,
+        AppPage.weather,
         AppPage.settings,
         AppPage.about,
         AppPage.counter,
@@ -806,9 +822,60 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
     });
   }
 
-  void _exitApp() {
+  Future<void> _exitApp() async {
     _scaffoldKey.currentState?.closeDrawer();
-    SystemNavigator.pop();
+    if (PlatformInfo.isWeb) {
+      PlatformServices.closeWebPage();
+      return;
+    }
+    if (!PlatformInfo.isWindows) {
+      SystemNavigator.pop();
+      return;
+    }
+    var action = widget.settings.exitAction;
+    if (action == 'ask') {
+      final choice = await _askExitAction();
+      if (choice == null) return;
+      action = choice.$1;
+      if (choice.$2) await widget.settings.setExitAction(action);
+    }
+    if (action == 'tray') {
+      await widget.settings.setShowTrayIcon(true);
+      await WindowsDesktopService.instance.hideWindow();
+    } else {
+      await WindowsDesktopService.instance.exitApp();
+    }
+  }
+
+  Future<(String, bool)?> _askExitAction() {
+    var remember = false;
+    return showDialog<(String, bool)>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('خروج', textDirection: TextDirection.rtl),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text('برنامه کاملاً بسته شود یا در ناحیهٔ اعلان (Tray) بماند؟', textDirection: TextDirection.rtl),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                value: remember,
+                onChanged: (v) => setState(() => remember = v ?? false),
+                title: const Text('این انتخاب را به خاطر بسپار', textDirection: TextDirection.rtl),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('انصراف')),
+            TextButton(onPressed: () => Navigator.pop(dialogContext, ('tray', remember)), child: const Text('بستن به Tray')),
+            FilledButton(onPressed: () => Navigator.pop(dialogContext, ('quit', remember)), child: const Text('بستن کامل')),
+          ],
+        ),
+      ),
+    );
   }
 
   void _back() {
@@ -841,7 +908,7 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
           child: ClipRect(
             child: Column(
               children: [
-                if (!_levelFullscreen && !{AppPage.calendar, AppPage.converter, AppPage.astronomy, AppPage.map, AppPage.compass, AppPage.level}.contains(_page) && !_framedPages.contains(_page) && (!wide || !_isRootPage)) _topBar(wide),
+                if (!_levelFullscreen && !{AppPage.calendar, AppPage.converter, AppPage.astronomy, AppPage.map, AppPage.compass, AppPage.level, AppPage.weather}.contains(_page) && !_framedPages.contains(_page) && (!wide || !_isRootPage)) _topBar(wide),
                 Expanded(child: ClipRect(child: _animatedBody())),
               ],
             ),
@@ -946,6 +1013,7 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
         const DrawerEntry(Icons.swap_vert_circle_outlined, Icons.swap_vert_circle, 'تبدیل تاریخ', AppPage.converter),
         const DrawerEntry(Icons.explore_outlined, Icons.explore, 'قطب‌نما', AppPage.compass),
         const DrawerEntry(Icons.auto_awesome_outlined, Icons.auto_awesome, 'ستاره‌شناسی', AppPage.astronomy),
+        const DrawerEntry(Icons.wb_sunny_outlined, Icons.wb_sunny, 'آب و هوا', AppPage.weather),
         const DrawerEntry(Icons.touch_app_outlined, Icons.touch_app, 'شمارنده', AppPage.counter),
         const DrawerEntry(Icons.settings_outlined, Icons.settings, 'تنظیمات', AppPage.settings),
         if (PlatformInfo.isWindows) const DrawerEntry(Icons.widgets_outlined, Icons.widgets, 'ویجت‌های دسکتاپ', AppPage.desktopWidgets),

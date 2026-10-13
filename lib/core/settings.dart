@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'calendar_math.dart';
 import 'calendar_system.dart';
 import 'l10n/l10n.dart';
 import 'pray_times.dart';
@@ -58,6 +59,7 @@ class AppSettings extends ChangeNotifier {
   static const _redHolidays = 'red_holidays';
   static const _bold = 'bold';
   static const _localDigits = 'local_digits';
+  static const _latinGregorianDigits = 'latin_gregorian_digits';
   static const _language = 'app_language';
   static const _iranTime = 'iran_time';
   static const _weekStart = 'week_start';
@@ -104,10 +106,12 @@ class AppSettings extends ChangeNotifier {
   static const _athanCustomUri = 'athan_custom_uri';
   static const _athanCustomName = 'athan_custom_name';
   static const _runInBackground = 'run_in_background';
+  static const _exitAction = 'exit_action';
   static const _startWithWindows = 'start_with_windows';
   static const _showDesktopWidgets = 'show_desktop_widgets';
   static const _showTrayIcon = 'show_tray_icon';
   static const _dayNumberAppIcon = 'day_number_app_icon';
+  static const _appIconDigits = 'app_icon_digits';
   static const _widgetDynamicColors = 'widget_dynamic_colors';
   static const _widgetTransparency = 'widget_transparency';
   static const _widgetWhatToShow = 'widget_what_to_show';
@@ -125,6 +129,8 @@ class AppSettings extends ChangeNotifier {
   bool redHolidays = false;
   bool bold = false;
   bool localDigits = true;
+  /// Gregorian dates always use 0-9, whatever the "Persian digits" setting says.
+  bool latinGregorianDigits = false;
   AppLanguage language = AppLanguage.fa;
   bool iranTime = false;
   int weekStart = 0;
@@ -399,10 +405,16 @@ class AppSettings extends ChangeNotifier {
   String? athanCustomUri;
   String? athanCustomName;
   bool runInBackground = false;
+  /// What the Exit button does on desktop: 'ask', 'quit' or 'tray'.
+  String exitAction = 'ask';
   bool startWithWindows = false;
   bool showDesktopWidgets = true;
   bool showTrayIcon = false;
   bool dayNumberAppIcon = false;
+
+  /// Numerals on the day-number icons (Android launcher, Windows tray): 'app' follows the app's numeral
+  /// settings, 'en' is always 0-9, 'fa' is always Persian.
+  String appIconDigits = 'app';
   bool widgetDynamicColors = true;
   double widgetTransparency = 0.0;
   String widgetTextColor = '#FFFFFFFF';
@@ -446,6 +458,8 @@ class AppSettings extends ChangeNotifier {
     final savedLanguage = p.getString(_language);
     language = savedLanguage == null ? AppLanguage.fromDevice() : AppLanguage.fromCode(savedLanguage);
     L10n.set(language, digits: localDigits);
+    latinGregorianDigits = p.getBool(_latinGregorianDigits) ?? false;
+    L10n.setGregorianLatin(latinGregorianDigits);
     iranTime = p.getBool(_iranTime) ?? false;
     weekStart = (p.getInt(_weekStart) ?? 0).clamp(0, 6).toInt();
     weekEnds = (p.getStringList(_weekEnds) ?? const <String>['6']).map(int.tryParse).whereType<int>().where((e) => e >= 0 && e <= 6).toSet();
@@ -525,10 +539,12 @@ class AppSettings extends ChangeNotifier {
     athanCustomUri = p.getString(_athanCustomUri);
     athanCustomName = p.getString(_athanCustomName);
     runInBackground = p.getBool(_runInBackground) ?? PlatformInfo.isWindows;
+    exitAction = const {'ask', 'quit', 'tray'}.contains(p.getString(_exitAction)) ? p.getString(_exitAction)! : 'ask';
     startWithWindows = p.getBool(_startWithWindows) ?? PlatformInfo.isWindows;
     showDesktopWidgets = p.getBool(_showDesktopWidgets) ?? true;
     showTrayIcon = p.getBool(_showTrayIcon) ?? PlatformInfo.isWindows;
     dayNumberAppIcon = p.getBool(_dayNumberAppIcon) ?? false;
+    appIconDigits = const {'app', 'en', 'fa'}.contains(p.getString(_appIconDigits)) ? p.getString(_appIconDigits)! : 'app';
     widgetDynamicColors = p.getBool(_widgetDynamicColors) ?? true;
     widgetTransparency = (p.getDouble(_widgetTransparency) ?? 0.0).clamp(0.0, 1.0);
     widgetTextColor = p.getString(_widgetTextColor) ?? '#FFFFFFFF';
@@ -587,6 +603,11 @@ class AppSettings extends ChangeNotifier {
   Future<void> setGradient(bool value) => _setBool(_gradient, value, (v) => gradient = v);
   Future<void> setRedHolidays(bool value) => _setBool(_redHolidays, value, (v) => redHolidays = v);
   Future<void> setBold(bool value) => _setBool(_bold, value, (v) => bold = v);
+  Future<void> setLatinGregorianDigits(bool value) => _setBool(_latinGregorianDigits, value, (v) {
+        latinGregorianDigits = v;
+        L10n.setGregorianLatin(v);
+      });
+
   Future<void> setLocalDigits(bool value) => _setBool(_localDigits, value, (v) {
         localDigits = v;
         L10n.set(language, digits: v);
@@ -642,12 +663,28 @@ class AppSettings extends ChangeNotifier {
   Future<void> setNotifyDateLockScreen(bool value) => _setBool(_notifyDateLockScreen, value, (v) => notifyDateLockScreen = v);
   Future<void> setLargeDayNumberNotification(bool value) => _setBool(_largeDayNumberNotification, value, (v) => largeDayNumberNotification = v);
   Future<void> setAthanVibration(bool value) => _setBool(_athanVibration, value, (v) => athanVibration = v);
+  Future<void> setExitAction(String value) => _setString(_exitAction, value, (v) => exitAction = v);
   Future<void> setRunInBackground(bool value) => _setBool(_runInBackground, value, (v) => runInBackground = v);
   Future<void> setStartWithWindows(bool value) async {
     await WindowsAutostart.setEnabled(value);
     await _setBool(_startWithWindows, value, (v) => startWithWindows = v);
   }
   Future<void> setShowDesktopWidgets(bool value) => _setBool(_showDesktopWidgets, value, (v) => showDesktopWidgets = v);
+  Future<void> setAppIconDigits(String value) => _setString(_appIconDigits, value, (v) => appIconDigits = v);
+
+  /// True when the day-number icons should use Latin digits.
+  bool get iconLatinDigits => switch (appIconDigits) {
+        'en' => true,
+        'fa' => false,
+        _ => L10n.lang == AppLanguage.en || !localDigits || (mainCalendar == CalendarSystem.gregorian && latinGregorianDigits),
+      };
+
+  /// Day of the month, in the main calendar, shown on the icons for [date].
+  int iconDay(DateTime date) {
+    final day = mainCalendar.fromJdn(gregorianToJdn(date.year, date.month, date.day), hijriOffset: hijriOffset).day;
+    return day.clamp(1, 31);
+  }
+
   Future<void> setDayNumberAppIcon(bool value) => _setBool(_dayNumberAppIcon, value, (v) => dayNumberAppIcon = v);
   Future<void> setShowTrayIcon(bool value) => _setBool(_showTrayIcon, value, (v) => showTrayIcon = v);
   Future<void> setWidgetDynamicColors(bool value) => _setBool(_widgetDynamicColors, value, (v) => widgetDynamicColors = v);
@@ -823,6 +860,7 @@ class AppSettings extends ChangeNotifier {
         'elevation': elevation,
         'locationName': locationName,
         'localDigits': localDigits,
+        'latinGregorianDigits': latinGregorianDigits,
         'iranTime': iranTime,
         'numericalDate': numericalDate,
         'hijriOffset': hijriOffset,
@@ -855,6 +893,8 @@ class AppSettings extends ChangeNotifier {
     elevation = n('elevation') ?? 0;
     locationName = str('locationName');
     localDigits = b('localDigits', localDigits);
+    latinGregorianDigits = b('latinGregorianDigits', latinGregorianDigits);
+    L10n.setGregorianLatin(latinGregorianDigits);
     final langCode = str('appLanguage');
     if (langCode != null) {
       final next = AppLanguage.values.firstWhere((l) => l.code == langCode, orElse: () => language);

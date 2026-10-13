@@ -93,10 +93,10 @@ class AthanAndroid {
 
   /// Tells the platform whether the launcher icon should show today's day number.
   /// [table] is "yyyy-MM-dd:day,..." so the icon can also switch at midnight while the app is closed.
-  static Future<void> syncAppIcon({required bool enabled, required String table}) async {
+  static Future<void> syncAppIcon({required bool enabled, required String table, bool latin = false}) async {
     if (!isSupported) return;
     try {
-      await _channel.invokeMethod<void>('syncAppIcon', <String, dynamic>{'enabled': enabled, 'table': table});
+      await _channel.invokeMethod<void>('syncAppIcon', <String, dynamic>{'enabled': enabled, 'table': table, 'latin': latin});
     } catch (_) {}
   }
 

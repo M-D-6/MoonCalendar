@@ -14,6 +14,7 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import '../widgets/page_frame.dart';
+import '../widgets/sensor_unavailable.dart';
 import '../../core/astronomy_math.dart';
 import '../../core/calendar_math.dart';
 import '../../core/platform.dart';
@@ -50,6 +51,7 @@ class _CompassScreenState extends State<CompassScreen> with TickerProviderStateM
   double _declination = 0;
   double _timeShift = 0;
   bool _available = false;
+  bool _availabilityKnown = false;
   bool _stopped = false;
   bool _sliderVisible = false;
   int _lastShownAngle = -1;
@@ -105,17 +107,15 @@ class _CompassScreenState extends State<CompassScreen> with TickerProviderStateM
 
   Future<void> _start() async {
     if (!mounted) return;
+    // The declination is looked up while the sensor probe runs, so the screen never waits for the probe.
+    final declination = _refreshDeclination();
     _available = await PlatformServices.hasCompass();
+    _availabilityKnown = true;
     if (!mounted) return;
-    await _refreshDeclination();
-    if (!mounted) return;
-    if (_available) await _listen();
     if (mounted) setState(() {});
-    if (mounted && !_available && widget.settings.latitude != null && widget.settings.longitude != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _showHelp(context);
-      });
-    }
+    if (_available) await _listen();
+    await declination;
+    if (mounted) setState(() {});
   }
 
   Future<void> _listen() async {
@@ -425,11 +425,7 @@ class _CompassScreenState extends State<CompassScreen> with TickerProviderStateM
                             ),
                             ),
                           ),
-                          if (!_available)
-                            const Padding(
-                              padding: EdgeInsets.only(top: 8),
-                              child: Text('حسگر قطب‌نما در این دستگاه در دسترس نیست', textAlign: TextAlign.center),
-                            ),
+                          if (_availabilityKnown && !_available) const SensorUnavailableBadge('حسگر قطب‌نما در این دستگاه در دسترس نیست'),
                         ],
                       ),
                     ),
@@ -516,9 +512,7 @@ class _CompassScreenState extends State<CompassScreen> with TickerProviderStateM
       ..showSnackBar(SnackBar(
         duration: const Duration(seconds: 10),
         content: Text(
-          _available
-              ? 'برای دقت بیشتر از اجسام فلزی و میدان‌های مغناطیسی دور شوید و دستگاه را چند بار بچرخانید.'
-              : 'حسگر قطب‌نما در این دستگاه در دسترس نیست',
+          'برای دقت بیشتر از اجسام فلزی و میدان‌های مغناطیسی دور شوید و دستگاه را چند بار بچرخانید.',
           textDirection: TextDirection.rtl,
         ),
       ));

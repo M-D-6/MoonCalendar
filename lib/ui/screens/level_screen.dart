@@ -1,4 +1,3 @@
-import '../../core/platform_info.dart';
 // Level (bubble level) screen.
 //
 // Faithful port of the Persian Calendar (Android) implementation:
@@ -23,6 +22,7 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import '../widgets/page_frame.dart';
+import '../widgets/sensor_unavailable.dart';
 import '../../core/calendar_math.dart' show toPersianDigits;
 import '../../core/platform.dart';
 
@@ -730,10 +730,6 @@ class _LevelScreenState extends State<LevelScreen>
   // -- sensor handling ------------------------------------------------------
   Future<void> _startListening() async {
     if (_subscription != null) return;
-    if (!PlatformInfo.isAndroid) {
-      if (mounted) setState(() => _available = false);
-      return;
-    }
     final available = await PlatformServices.hasLevel();
     if (!mounted) return;
     if (!available) {
@@ -963,19 +959,7 @@ class _LevelScreenState extends State<LevelScreen>
                   ),
                 ),
               ),
-              if (!_available)
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: Align(
-                      alignment: const Alignment(0, -.7),
-                      child: Text(
-                        'حسگر شتاب‌سنج در این دستگاه در دسترس نیست',
-                        textDirection: TextDirection.rtl,
-                        style: TextStyle(color: scheme.onSurfaceVariant),
-                      ),
-                    ),
-                  ),
-                ),
+              if (!_available) const Positioned.fill(child: SensorUnavailableBadge('حسگر شتاب‌سنج در این دستگاه در دسترس نیست')),
               // Exit-fullscreen FAB (ShrinkingFloatingActionButton)
               Align(
                 alignment: Alignment.topCenter,

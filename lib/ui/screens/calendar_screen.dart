@@ -1046,7 +1046,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
               child: Padding(
                   padding: const EdgeInsets.fromLTRB(8, 8, 8, 14),
                   child: Row(
-                    textDirection: TextDirection.ltr,
+                    // The calendar is on the reading-start side: right in Persian / Arabic, left in English.
+                    textDirection: L10n.rtl ? TextDirection.ltr : TextDirection.rtl,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(

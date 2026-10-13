@@ -38,6 +38,8 @@
 | [Level](https://github.com/avianey/Level) | GPLv3 | Bubble level |
 | [Natural Earth](https://www.naturalearthdata.com) | Public domain | World map and time zones |
 | [Tectonic plates](https://github.com/fraxen/tectonicplates) (fraxen) | ODC-By 1.0 | Tectonic plate boundaries |
+| [Open-Meteo](https://open-meteo.com) | CC BY 4.0 | Weather forecast, air quality, place search |
+| [MET Norway](https://api.met.no) | CC BY 4.0 | Weather forecast |
 | Borna Tasvir Resaneh | as in the original project | Athan sound and animation |
 | Dart / Flutter packages (`astronomia`, `geolocator`, `window_manager`, `tray_manager`, `desktop_multi_window`, `share_plus`, `shared_preferences`, `timezone`, `qr`, `http`, …) | various | Astronomy, location, windowing, sharing, storage |
 
@@ -56,6 +58,7 @@
 | 🕌 | Prayer times (Athan), qibla compass | اوقات شرعی، اذان و قبله‌نما |
 | 🌙 | Astronomy: moon phase, zodiac, planets, sun view | ستاره‌شناسی: فاز ماه، برج‌ها، سیارات و مسیر خورشید |
 | 🗺️ | World map with day / night | نقشهٔ جهان با شب و روز |
+| ⛅ | Weather: multi-model forecast, live landscape, saved places | آب‌وهوا: پیش‌بینی چندمدلی، منظرهٔ زنده و مکان‌های ذخیره‌شده |
 | 🧮 | Tally counter, level tool | شمارنده و تراز |
 | 🧩 | Home-screen and desktop widgets | ویجت صفحهٔ اصلی و دسکتاپ |
 | 🔔 | Persistent date notification with a day-number icon | اعلان همیشگی تاریخ با آیکون عدد روز |

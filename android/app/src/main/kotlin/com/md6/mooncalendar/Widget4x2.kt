@@ -555,7 +555,7 @@ class Widget4x2 : AppWidgetProvider() {
             showOtherCalendars: Boolean,
         ): String {
             val numerical = bool(prefs, PREF_NUMERICAL_DATE, false)
-            if (!numerical) {
+            if (!numerical && !Tr.latinGregorian()) {
                 val synced = if (syncIsCurrent) prefs.getString(KEY_GREGORIAN, null).orEmpty() else ""
                 if (synced.isNotBlank()) return synced
             }
@@ -1535,6 +1535,7 @@ private data class GregorianDateValue(val year: Int, val month: Int, val day: In
         } else {
             "$day ${WidgetCalendarData.gregorianMonth(month)} $year"
         }
+        if (Tr.latinGregorian()) return Tr.isolate(Tr.latin(value))
         return if (localDigits) WidgetCalendarData.persianDigits(value) else value
     }
 }

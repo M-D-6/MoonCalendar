@@ -479,9 +479,12 @@ class _CalendarDesktopWidgetState extends State<CalendarDesktopWidget> {
     String persianText() => s.numericalDate
         ? dig('${persian.year}/${persian.month}/${persian.day}') + (other ? ' شمسی' : '')
         : dig('${persian.day} ${persianMonthNames[persian.month - 1]} ${persian.year}');
-    String gregorianText() => s.numericalDate
-        ? dig('${greg.year}/${greg.month}/${greg.day}') + (other ? ' میلادی' : '')
-        : dig('${greg.day} ${gregorianMonthName(greg.month, english: s.englishGregorianPersianMonths)} ${greg.year}');
+    String gregorianText() {
+      final text = s.numericalDate
+          ? dig('${greg.year}/${greg.month}/${greg.day}') + (other ? ' میلادی' : '')
+          : dig('${greg.day} ${gregorianMonthName(greg.month, english: s.englishGregorianPersianMonths)} ${greg.year}');
+      return L10n.isolate(s.latinGregorianDigits ? L10n.markLatin(text) : text);
+    }
     String islamicText() => s.numericalDate
         ? dig('${islamic.year}/${islamic.month}/${islamic.day}') + (other ? ' قمری' : '')
         : dig('${islamic.day} ${islamicMonthNames[islamic.month - 1]} ${islamic.year}');

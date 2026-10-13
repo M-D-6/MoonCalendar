@@ -162,7 +162,7 @@ internal object DateNotificationStore {
         val day = item.optString("day").toIntOrNull()?.takeIf { it in 1..31 }
             ?: item.optString("title").takeIf { it.isNotBlank() }?.let { extractDayNumber(it) }
             ?: return fallback
-        return createDayIcon(context, day)
+        return createDayIcon(context, day, item.optString("latin") == "1")
     }
 
     /** Applies the per-line style flags (heading / bold / light / underline). */
@@ -202,7 +202,7 @@ internal object DateNotificationStore {
     private const val FRAME_STROKE = 30f / 384f
     private const val DIGIT_FILL = 0.78f
 
-    private fun dayIconBitmap(context: Context, day: Int): Bitmap {
+    private fun dayIconBitmap(context: Context, day: Int, latin: Boolean): Bitmap {
         val size = (48f * context.resources.displayMetrics.density).roundToInt().coerceAtLeast(96)
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
@@ -224,7 +224,7 @@ internal object DateNotificationStore {
             size * FRAME_IN_RIGHT, size * FRAME_IN_BOTTOM,
         )
 
-        val text = Tr.init(context).let { Tr.digits(context, day.toString()) }
+        val text = Tr.init(context).let { if (latin) day.toString() else Tr.digits(context, day.toString()) }
         val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
             style = Paint.Style.FILL
@@ -263,7 +263,7 @@ internal object DateNotificationStore {
         return face
     }
 
-    private fun createDayIcon(context: Context, day: Int): IconCompat = IconCompat.createWithBitmap(dayIconBitmap(context, day))
+    private fun createDayIcon(context: Context, day: Int, latin: Boolean = false): IconCompat = IconCompat.createWithBitmap(dayIconBitmap(context, day, latin))
 
     private fun persianDigits(value: Int): String {
         val western = value.toString()

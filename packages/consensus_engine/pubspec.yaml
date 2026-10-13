@@ -1,0 +1,10 @@
+name: consensus_engine
+description: Pure Dart multi-model weather consensus and forecast skill engine.
+publish_to: none
+version: 1.0.0
+
+environment:
+  sdk: ">=3.9.0 <4.0.0"
+
+dependencies:
+  timezone: ">=0.10.1 <0.12.0"

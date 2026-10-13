@@ -14,11 +14,17 @@ class WindowsDateNotification {
   final List<List<String>> lineStyles;
   final int persianDay;
 
+  /// Day number drawn in the status-bar icon (main calendar) and whether it uses Latin digits.
+  final int iconDay;
+  final bool latinIcon;
+
   const WindowsDateNotification({
     required this.dateKey,
     required this.lines,
     this.lineStyles = const <List<String>>[],
     this.persianDay = 1,
+    this.iconDay = 1,
+    this.latinIcon = false,
   });
 
   /// "heading,bold;;light" style encoding, one ';'-separated group per line.
@@ -85,17 +91,23 @@ class WindowsDateNotificationPlanner {
       // DateTime.weekday: Monday = 1 ... Sunday = 7.
       const weekdayNames = <String>['دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه', 'یکشنبه'];
 
+      // Each date is its own isolated unit, so Persian and Latin parts never scramble each other.
+      String persianDate = tr(s.numericalDate
+          ? '$numericPersian ه.ش'
+          : '${_digits(s, persian.day)} ${persianMonthNames[persian.month - 1]} ${_digits(s, persian.year)}');
+      String islamicDate = tr(s.numericalDate
+          ? '$numericIslamic ه.ق'
+          : '${_digits(s, islamic.day)} ${islamicMonthNames[islamic.month - 1]} ${_digits(s, islamic.year)}');
+      String gregorianDate = tr(s.numericalDate
+          ? '$numericGregorian م'
+          : '${_digits(s, gregorian.day)} ${gregorianMonthName(gregorian.month, english: s.englishGregorianPersianMonths)} ${_digits(s, gregorian.year)}');
+      if (s.latinGregorianDigits) gregorianDate = L10n.latinDigits(gregorianDate);
+
       final dateValues = <String, String>{
         'weekday': tr(weekdayNames[date.weekday - 1]),
-        'persian_date': tr(s.numericalDate
-            ? '$numericPersian ه.ش'
-            : '${_digits(s, persian.day)} ${persianMonthNames[persian.month - 1]} ${_digits(s, persian.year)}'),
-        'islamic_date': tr(s.numericalDate
-            ? '$numericIslamic ه.ق'
-            : '${_digits(s, islamic.day)} ${islamicMonthNames[islamic.month - 1]} ${_digits(s, islamic.year)}'),
-        'gregorian_date': tr(s.numericalDate
-            ? '$numericGregorian م'
-            : '${_digits(s, gregorian.day)} ${gregorianMonthName(gregorian.month, english: s.englishGregorianPersianMonths)} ${_digits(s, gregorian.year)}'),
+        'persian_date': L10n.embed(persianDate),
+        'islamic_date': L10n.embed(islamicDate),
+        'gregorian_date': L10n.embed(gregorianDate),
       };
 
       final values = <String, String>{...dateValues};
@@ -127,8 +139,10 @@ class WindowsDateNotificationPlanner {
       final lineStyles = <List<String>>[];
       for (var rowIndex = 0; rowIndex < rows.length; rowIndex++) {
         final row = rows[rowIndex];
-        final text = row.where(values.containsKey).map((key) => values[key]!).join(L10n.rtl ? '، ' : ', ');
+        var text = row.where(values.containsKey).map((key) => values[key]!).join(L10n.rtl ? '، ' : ', ');
         if (text.isEmpty) continue;
+        // The whole line gets one explicit direction, whatever the text engine guesses for its base.
+        text = L10n.rtl ? '\u200F\u202B$text\u202C' : '\u200E\u202A$text\u202C';
         // The lines carry no "۶ — " day-number prefix: the date already contains the
         // day, and Android draws the big number in the status-bar icon.
         lines.add(text);
@@ -141,6 +155,8 @@ class WindowsDateNotificationPlanner {
           lines: lines,
           lineStyles: lineStyles,
           persianDay: persian.day,
+          iconDay: s.iconDay(date),
+          latinIcon: s.iconLatinDigits,
         ),
       );
     }
