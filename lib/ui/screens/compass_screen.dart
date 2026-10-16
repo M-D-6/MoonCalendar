@@ -816,7 +816,7 @@ class _ReferenceCompassPainter extends CustomPainter {
           )
         : TextStyle(color: color, fontSize: fontSize, fontWeight: FontWeight.w600);
     final tp = TextPainter(
-      text: TextSpan(text: tr(text), style: style),
+      text: TextSpan(text: tr(text), style: style.copyWith(fontFamily: 'Vazirmatn')),
       textDirection: L10n.direction,
     )..layout();
     tp.paint(canvas, Offset(center.dx - tp.width / 2, center.dy - tp.height / 2));

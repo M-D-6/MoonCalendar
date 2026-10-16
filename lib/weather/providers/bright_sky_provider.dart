@@ -41,7 +41,7 @@ class BrightSkyProvider implements WeatherProvider {
         'tz': 'UTC',
         'max_dist': maxDistanceM,
       },
-      headers: {'User-Agent': 'Mooncalendar/1.1.3 ($projectUrl)', 'Accept': 'application/json'},
+      headers: {'User-Agent': 'Mooncalendar/1.1.4 ($projectUrl)', 'Accept': 'application/json'},
     );
     if (response.statusCode != 200) {
       throw StateError('Bright Sky: no DWD station within ${maxDistanceM ~/ 1000} km (HTTP ${response.statusCode})');

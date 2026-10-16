@@ -1628,6 +1628,11 @@ const Map<String, String> enStrings = <String, String>{
   'رقم‌های آیکون': 'Icon digits',
   'طبق تنظیمات برنامه': 'Follow app settings',
   'انگلیسی': 'English',
+  'نمایش پنجره هنگام شروع با ویندوز': 'Show window when starting with Windows',
+  'پنجرهٔ برنامه بعد از ورود به ویندوز باز شود؛ در حالت خاموش برنامه بی‌صدا در ناحیهٔ اعلان می‌ماند': 'Open the app window after signing in to Windows; when off, the app stays quietly in the notification area',
+  'اعلان دما': 'Temperature notification',
+  'نمایش دمای فعلی هوای شهر انتخاب‌شده در یک اعلان بی‌صدا': 'Show the current temperature of the selected city in a silent notification',
+  'دمای فعلی هوا': 'Current air temperature',
 };
 
 const Map<String, String> enTemplates = <String, String>{

@@ -14,6 +14,9 @@ class DrawerEntry {
 /// destinations with an animated selection indicator and a staggered entrance.
 class AppDrawerMenu extends StatefulWidget {
   final String seasonAsset;
+
+  /// Live landscape for the header (the weather page's scene). The seasonal picture is the fallback.
+  final Widget? headerScene;
   final String appName;
   final String dateText;
   final List<DrawerEntry> entries;
@@ -24,6 +27,7 @@ class AppDrawerMenu extends StatefulWidget {
   const AppDrawerMenu({
     super.key,
     required this.seasonAsset,
+    this.headerScene,
     required this.appName,
     required this.dateText,
     required this.entries,
@@ -115,7 +119,7 @@ class AppDrawerMenuState extends State<AppDrawerMenu> with SingleTickerProviderS
             borderRadius: BorderRadius.circular(32),
             child: AspectRatio(
               aspectRatio: 490 / 333,
-              child: Image.asset(widget.seasonAsset, fit: BoxFit.cover),
+              child: widget.headerScene ?? Image.asset(widget.seasonAsset, fit: BoxFit.cover),
             ),
           ),
         ),

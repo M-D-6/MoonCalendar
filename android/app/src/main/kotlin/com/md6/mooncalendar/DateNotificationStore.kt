@@ -51,6 +51,7 @@ internal object DateNotificationStore {
                 put("title", item["title"].orEmpty())
                 put("body", item["body"].orEmpty())
                 put("day", item["day"].orEmpty())
+                put("latin", item["latin"].orEmpty())
                 put("styles", item["styles"].orEmpty())
             })
         }
@@ -104,6 +105,7 @@ internal object DateNotificationStore {
             .setSilent(true)
             .setAutoCancel(false)
             .setOnlyAlertOnce(true)
+            .setGroup("mooncalendar_date")
             .setWhen(0L)
             .setShowWhen(false)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -200,7 +202,7 @@ internal object DateNotificationStore {
     private const val FRAME_IN_TOP = 64f / 384f
     private const val FRAME_IN_BOTTOM = 350f / 384f
     private const val FRAME_STROKE = 30f / 384f
-    private const val DIGIT_FILL = 0.78f
+    private const val DIGIT_FILL = 0.94f
 
     private fun dayIconBitmap(context: Context, day: Int, latin: Boolean): Bitmap {
         val size = (48f * context.resources.displayMetrics.density).roundToInt().coerceAtLeast(96)
@@ -232,7 +234,7 @@ internal object DateNotificationStore {
             textAlign = Paint.Align.LEFT // positioned manually from measured bounds
         }
         // Fit the digits inside the frame with a visible margin from the border.
-        val margin = size * FRAME_STROKE * 0.45f
+        val margin = size * FRAME_STROKE * 0.25f
         val innerW = inner.width() - margin * 2f
         val innerH = inner.height() - margin * 2f
         textPaint.textSize = size.toFloat()

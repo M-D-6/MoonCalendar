@@ -34,7 +34,9 @@ import 'screens/desktop_widgets_screen.dart';
 import 'screens/basic_screens.dart';
 import 'screens/level_screen.dart';
 import '../weather/weather_controller.dart';
+import '../weather/temperature_notifier.dart';
 import '../weather/weather_screen.dart';
+import '../weather/widgets/weather_scene.dart';
 import 'theme.dart';
 import 'widgets/app_drawer.dart';
 import 'widgets/glass.dart';
@@ -268,6 +270,7 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
   /// Created on the first visit of the weather page and kept, so the forecast survives page switches.
   WeatherController? _weatherCtl;
   WeatherController get _weatherController => _weatherCtl ??= WeatherController(widget.settings);
+  late final TemperatureNotifier _temperatureNotifier = TemperatureNotifier(widget.settings, () => _weatherController);
 
   @override
   void initState() {
@@ -281,10 +284,26 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
     widget.settings.addListener(_onWidgetSettingsChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      _temperatureNotifier.sync();
       unawaited(_initializeNativeParity());
     });
     _widgetTimer = Timer.periodic(const Duration(minutes: 15), (_) => unawaited(_syncWidgetData()));
     _scheduleMidnightRollover();
+  }
+
+  Widget _drawerScene() {
+    final cached = _weatherCtl?.cached;
+    final now = DateTime.now().toUtc();
+    final point = cached?.forecast.interpolatedAt(now);
+    final usable = point != null && now.difference(point.time.toUtc()).abs() <= const Duration(hours: 1);
+    return WeatherScene(
+      point: usable ? point : null,
+      timezone: cached?.forecast.timezone ?? 'UTC',
+      reduceMotion: false,
+      zoom: 1.9,
+      latitude: widget.settings.latitude ?? cached?.forecast.latitude ?? 35.7,
+      longitude: widget.settings.longitude ?? cached?.forecast.longitude ?? 51.4,
+    );
   }
 
   Timer? _midnightTimer;
@@ -343,6 +362,7 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
 
   void _onWidgetSettingsChanged() {
     if (!mounted) return;
+    _temperatureNotifier.sync();
     final lang = widget.settings.language;
     final langChanged = _widgetLang != null && _widgetLang != lang;
     _widgetLang = lang;
@@ -570,6 +590,7 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
     _widgetTimer?.cancel();
     _widgetSyncDebounce?.cancel();
     _midnightTimer?.cancel();
+    _temperatureNotifier.dispose();
     _weatherCtl?.dispose();
     super.dispose();
   }
@@ -999,6 +1020,9 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
     return AppDrawerMenu(
       key: _drawerMenuKey,
       seasonAsset: 'assets/images/seasons/$season.webp',
+      // The same living landscape as the weather page: it follows the time of day and the season, and shows the
+      // current weather only when a forecast is already loaded (otherwise a neutral, partly cloudy sky).
+      headerScene: _drawerScene(),
       appName: 'Mooncalendar',
       dateText: () {
         final cal = widget.settings.mainCalendar;

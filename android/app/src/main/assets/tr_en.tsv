@@ -1625,6 +1625,11 @@ D	گزینش تاریخ دوم	Pick second date
 D	رقم‌های آیکون	Icon digits
 D	طبق تنظیمات برنامه	Follow app settings
 D	انگلیسی	English
+D	نمایش پنجره هنگام شروع با ویندوز	Show window when starting with Windows
+D	پنجرهٔ برنامه بعد از ورود به ویندوز باز شود؛ در حالت خاموش برنامه بی‌صدا در ناحیهٔ اعلان می‌ماند	Open the app window after signing in to Windows; when off, the app stays quietly in the notification area
+D	اعلان دما	Temperature notification
+D	نمایش دمای فعلی هوای شهر انتخاب‌شده در یک اعلان بی‌صدا	Show the current temperature of the selected city in a silent notification
+D	دمای فعلی هوا	Current air temperature
 D	کمتر از ۱ دقیقه	Less than 1 min
 D	ابتدا موقعیت جغرافیایی را برای نمایش اوقات شرعی تنظیم کنید	Set your location first to show prayer times
 D	اعلان همیشگی تقویم	Persistent calendar notification

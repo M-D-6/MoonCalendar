@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:convert';
 import 'windows_sensors.dart';
+import 'web_notify_stub.dart' if (dart.library.js_interop) 'web_notify_web.dart' as web_notify;
 import 'web_compass_stub.dart' if (dart.library.js_interop) 'web_compass_web.dart' as web_compass;
 import 'dart:io';
 import 'package:flutter/services.dart';
@@ -49,6 +50,9 @@ LevelReading levelFromGravity(double ax, double ay, double az) {
 
 class PlatformServices {
   static void closeWebPage() => web_compass.webCloseWindow();
+
+  /// Web only: emits false when the page loses focus or is hidden, true when it is back.
+  static Stream<bool> webActivity() => web_notify.webActivity();
 
   static const MethodChannel _method = MethodChannel('com.md6.Mooncalendar/platform');
   static const EventChannel _compass = EventChannel('com.md6.Mooncalendar/compass');

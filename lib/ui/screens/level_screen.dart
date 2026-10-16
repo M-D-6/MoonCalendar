@@ -503,6 +503,7 @@ class _RulerPainter extends CustomPainter {
             text: TextSpan(
               text: tr(label),
               style: TextStyle(
+                fontFamily: 'Vazirmatn',
                 color: color,
                 fontSize: 12 * (localDigits ? 1.4 : 1.0),
               ),

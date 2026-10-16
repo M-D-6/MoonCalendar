@@ -88,6 +88,7 @@ class AppSettings extends ChangeNotifier {
   static const _centerAlignWidgets = 'center_align_widgets';
   static const _showQibla = 'show_qibla';
   static const _trueNorth = 'true_north';
+  static const _notifyTemperature = 'notify_temperature';
   static const _notifyDate = 'notify_date';
   static const _notifyDateLockScreen = 'notify_date_lock_screen';
   static const _largeDayNumberNotification = 'large_day_number_notification';
@@ -107,6 +108,7 @@ class AppSettings extends ChangeNotifier {
   static const _athanCustomName = 'athan_custom_name';
   static const _runInBackground = 'run_in_background';
   static const _exitAction = 'exit_action';
+  static const _showWindowAtStartup = 'show_window_at_startup';
   static const _startWithWindows = 'start_with_windows';
   static const _showDesktopWidgets = 'show_desktop_widgets';
   static const _showTrayIcon = 'show_tray_icon';
@@ -199,6 +201,7 @@ class AppSettings extends ChangeNotifier {
   bool centerAlignWidgets = true;
   bool showQibla = true;
   bool trueNorth = true;
+  bool notifyTemperature = false;
   bool notifyDate = false;
   bool notifyDateLockScreen = true;
   bool largeDayNumberNotification = true;
@@ -405,6 +408,9 @@ class AppSettings extends ChangeNotifier {
   String? athanCustomUri;
   String? athanCustomName;
   bool runInBackground = false;
+
+  /// With "start with Windows": open the main window at sign-in instead of staying in the tray.
+  bool showWindowAtStartup = false;
   /// What the Exit button does on desktop: 'ask', 'quit' or 'tray'.
   String exitAction = 'ask';
   bool startWithWindows = false;
@@ -492,6 +498,7 @@ class AppSettings extends ChangeNotifier {
     centerAlignWidgets = p.getBool(_centerAlignWidgets) ?? true;
     showQibla = p.getBool(_showQibla) ?? true;
     trueNorth = p.getBool(_trueNorth) ?? true;
+    notifyTemperature = p.getBool(_notifyTemperature) ?? false;
     notifyDate = p.getBool(_notifyDate) ?? PlatformInfo.isWindows;
     notifyDateLockScreen = p.getBool(_notifyDateLockScreen) ?? true;
     largeDayNumberNotification = p.getBool(_largeDayNumberNotification) ?? true;
@@ -539,6 +546,7 @@ class AppSettings extends ChangeNotifier {
     athanCustomUri = p.getString(_athanCustomUri);
     athanCustomName = p.getString(_athanCustomName);
     runInBackground = p.getBool(_runInBackground) ?? PlatformInfo.isWindows;
+    showWindowAtStartup = p.getBool(_showWindowAtStartup) ?? false;
     exitAction = const {'ask', 'quit', 'tray'}.contains(p.getString(_exitAction)) ? p.getString(_exitAction)! : 'ask';
     startWithWindows = p.getBool(_startWithWindows) ?? PlatformInfo.isWindows;
     showDesktopWidgets = p.getBool(_showDesktopWidgets) ?? true;
@@ -658,11 +666,14 @@ class AppSettings extends ChangeNotifier {
   Future<void> setCenterAlignWidgets(bool value) => _setBool(_centerAlignWidgets, value, (v) => centerAlignWidgets = v);
   Future<void> setShowQibla(bool value) => _setBool(_showQibla, value, (v) => showQibla = v);
   Future<void> setTrueNorth(bool value) => _setBool(_trueNorth, value, (v) => trueNorth = v);
+  Future<void> setNotifyTemperature(bool value) => _setBool(_notifyTemperature, value, (v) => notifyTemperature = v);
+
   Future<void> setNotifyDate(bool value) => _setBool(_notifyDate, value, (v) => notifyDate = v);
   Future<void> setNotifyDirection(String value) => _setString(_notifyDirection, value, (v) => notifyDirection = v);
   Future<void> setNotifyDateLockScreen(bool value) => _setBool(_notifyDateLockScreen, value, (v) => notifyDateLockScreen = v);
   Future<void> setLargeDayNumberNotification(bool value) => _setBool(_largeDayNumberNotification, value, (v) => largeDayNumberNotification = v);
   Future<void> setAthanVibration(bool value) => _setBool(_athanVibration, value, (v) => athanVibration = v);
+  Future<void> setShowWindowAtStartup(bool value) => _setBool(_showWindowAtStartup, value, (v) => showWindowAtStartup = v);
   Future<void> setExitAction(String value) => _setString(_exitAction, value, (v) => exitAction = v);
   Future<void> setRunInBackground(bool value) => _setBool(_runInBackground, value, (v) => runInBackground = v);
   Future<void> setStartWithWindows(bool value) async {

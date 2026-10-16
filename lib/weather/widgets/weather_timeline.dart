@@ -10,6 +10,8 @@ import 'package:mooncalendar/weather/utils/formatters.dart';
 import 'package:mooncalendar/weather/utils/wx_calendar.dart';
 import 'package:timezone/timezone.dart' as tz;
 
+import 'wx_icon.dart';
+
 /// YoWindow-style timeline.
 ///
 /// * One continuous, linear time axis: every local day is a rectangle whose width is
@@ -83,6 +85,66 @@ class _Day {
   final List<_Tick> ticks;
 }
 
+/// Scrolling stops at the current moment: the timeline never goes back before "now" (today's card stays whole).
+/// Scrolling stays between "now" (the start) and the last hour that has forecast data (the end). The first and
+/// last day cards are drawn whole, but their hours without data cannot be selected.
+class _FromNowPhysics extends ClampingScrollPhysics {
+  const _FromNowPhysics(this.minOffset, this.maxOffset, {super.parent});
+
+  final double Function() minOffset;
+  final double Function() maxOffset;
+
+  @override
+  _FromNowPhysics applyTo(ScrollPhysics? ancestor) => _FromNowPhysics(minOffset, maxOffset, parent: buildParent(ancestor));
+
+  @override
+  double applyBoundaryConditions(ScrollMetrics position, double value) {
+    final min = minOffset().clamp(position.minScrollExtent, position.maxScrollExtent).toDouble();
+    final max = maxOffset().clamp(min, position.maxScrollExtent).toDouble();
+    if (value < position.pixels && position.pixels <= min) return value - position.pixels;
+    if (max <= position.pixels && position.pixels < value) return value - position.pixels;
+    if (value < min && min < position.pixels) return value - min;
+    if (position.pixels < max && max < value) return value - max;
+    return 0.0;
+  }
+}
+
+class _MarkerPainter extends CustomPainter {
+  const _MarkerPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final x = size.width / 2;
+    const top = 22.0;
+    final line = Paint()
+      ..strokeWidth = 2.2
+      ..strokeCap = StrokeCap.round
+      ..shader = const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: <Color>[Color(0xFFFFFFFF), Color(0x99FFFFFF)],
+      ).createShader(Rect.fromLTWH(x - 1, top, 2, size.height - top));
+    canvas.drawLine(Offset(x, top), Offset(x, size.height - 8), Paint()
+      ..color = Colors.black.withValues(alpha: 0.35)
+      ..strokeWidth = 4.5
+      ..strokeCap = StrokeCap.round
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.5));
+    canvas.drawLine(Offset(x, top), Offset(x, size.height - 8), line);
+    // Handle: a downward arrow head at the top and a small dot at the bottom.
+    final arrow = Path()
+      ..moveTo(x - 8, 4)
+      ..lineTo(x + 8, 4)
+      ..lineTo(x, top + 2)
+      ..close();
+    canvas.drawShadow(arrow, Colors.black, 3, true);
+    canvas.drawPath(arrow, Paint()..color = Colors.white);
+    canvas.drawCircle(Offset(x, size.height - 8), 4.5, Paint()..color = Colors.white);
+  }
+
+  @override
+  bool shouldRepaint(covariant _MarkerPainter oldDelegate) => false;
+}
+
 class WeatherTimelineState extends State<WeatherTimeline> {
   /// 24 h == 216 px: wide enough for the day card text, short enough to see weeks.
   static const double pxPerHour = 9;
@@ -92,6 +154,7 @@ class WeatherTimelineState extends State<WeatherTimeline> {
   final ScrollController _scroll = ScrollController();
   List<_Day> _days = const [];
   double _contentWidth = 0;
+  DateTime _dataEnd = DateTime.now().toUtc();
   double _lastPad = -1;
   DateTime _selected = DateTime.now().toUtc();
   int? _lastHapticKey;
@@ -157,7 +220,8 @@ class WeatherTimelineState extends State<WeatherTimeline> {
       final fullStart = _localToUtc(cursor.year, cursor.month, cursor.day);
       final fullEnd = _localToUtc(next.year, next.month, next.day);
       final start = fullStart.isBefore(rangeStart) ? rangeStart : fullStart;
-      final end = fullEnd.isAfter(rangeEnd) ? rangeEnd : fullEnd;
+      // The last day is drawn whole too; hours after the last forecast point just have no data.
+      final end = fullEnd;
       if (!end.isAfter(start)) {
         cursor = next;
         continue;
@@ -196,6 +260,7 @@ class WeatherTimelineState extends State<WeatherTimeline> {
     }
     _days = days;
     _contentWidth = x;
+    _dataEnd = rangeEnd;
   }
 
   WeatherConsensusPoint? _pointNear(DateTime time) {
@@ -336,7 +401,7 @@ class WeatherTimelineState extends State<WeatherTimeline> {
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       shown != null
-                                          ? Text(conditionSymbol(shown.condition), style: const TextStyle(fontSize: 34))
+                                          ? WxIcon(shown.condition, size: 38)
                                           : Text('—', style: theme.textTheme.titleLarge?.copyWith(color: textColor)),
                                       const SizedBox(width: 8),
                                       if (shown != null)
@@ -412,7 +477,7 @@ class WeatherTimelineState extends State<WeatherTimeline> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(cell.hour.toString().padLeft(2, '0'), style: theme.textTheme.labelSmall?.copyWith(fontSize: 10, fontFeatures: const [FontFeature.tabularFigures()])),
-        SizedBox(height: 16, child: Center(child: visible != null ? Text(conditionSymbol(visible.condition, isDay: visible.isDay), style: const TextStyle(fontSize: 13)) : null)),
+        SizedBox(height: 16, child: Center(child: visible != null ? WxIcon(visible.condition, isDay: visible.isDay, size: 17) : null)),
         Text(visible != null ? _short(visible.temperature!.value) : '—', style: theme.textTheme.labelSmall?.copyWith(fontSize: 11, fontWeight: FontWeight.w700)),
       ],
     );
@@ -450,24 +515,24 @@ class WeatherTimelineState extends State<WeatherTimeline> {
                       child: SingleChildScrollView(
                         controller: _scroll,
                         scrollDirection: Axis.horizontal,
-                        physics: const BouncingScrollPhysics(),
+                        physics: _FromNowPhysics(() => _xOf(DateTime.now().toUtc()), () => _xOf(_dataEnd)),
                         child: SizedBox(
                           width: _contentWidth + pad * 2,
                           height: _height,
                           child: Stack(
                             children: [
                               for (final day in _days) _dayCard(context, day, pad, now),
-                              // Soft stop at the end of the forecast horizon.
+                              // Hours after the last forecast point: dimmed and out of reach.
                               Positioned(
-                                left: pad + _contentWidth - 70,
-                                width: 70,
+                                left: pad + _xOf(_dataEnd),
+                                width: math.max(0.0, _contentWidth - _xOf(_dataEnd)),
                                 top: _markerBand,
                                 bottom: 6,
                                 child: IgnorePointer(
                                   child: DecoratedBox(
                                     decoration: BoxDecoration(
                                       borderRadius: const BorderRadius.horizontal(right: Radius.circular(16)),
-                                      gradient: LinearGradient(colors: [Colors.transparent, Colors.black.withValues(alpha: 0.28)]),
+                                      color: Colors.black.withValues(alpha: 0.28),
                                     ),
                                   ),
                                 ),
@@ -479,19 +544,8 @@ class WeatherTimelineState extends State<WeatherTimeline> {
                     ),
                   ),
                 ),
-                // Fixed marker: time chip + a thin line through the cards.
-                IgnorePointer(
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 6),
-                        Expanded(child: Container(width: 2, color: scheme.primary.withValues(alpha: 0.85))),
-                        const SizedBox(height: 6),
-                      ],
-                    ),
-                  ),
-                ),
+                // Fixed marker through the cards.
+                const IgnorePointer(child: SizedBox.expand(child: CustomPaint(painter: _MarkerPainter()))),
               ],
             );
           },

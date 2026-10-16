@@ -19,6 +19,7 @@ import 'widgets/glass_card.dart';
 import 'widgets/source_selector.dart';
 import 'widgets/weather_scene.dart';
 import 'widgets/weather_timeline.dart';
+import 'widgets/wx_icon.dart';
 import 'wx_strings.dart';
 import 'wx_places.dart';
 
@@ -169,9 +170,11 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 child: ShaderMask(
                   blendMode: BlendMode.dstIn,
                   shaderCallback: (rect) {
-                    final edge = mq.padding.top + kTopBarHeight;
-                    final a = ((edge - 10) / rect.height).clamp(0.0, 1.0).toDouble();
-                    final b = ((edge + 10) / rect.height).clamp(0.0, 1.0).toDouble();
+                    // Whole-pixel stops: a fractional edge can leave a faint line at some window sizes.
+                    final edge = (mq.padding.top + kTopBarHeight).roundToDouble();
+                    final h = rect.height.roundToDouble().clamp(1.0, double.infinity).toDouble();
+                    final a = ((edge - 10) / h).clamp(0.0, 0.999).toDouble();
+                    final b = ((edge + 10) / h).clamp(a + 0.0005, 1.0).toDouble();
                     return LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: const <Color>[Colors.transparent, Colors.transparent, Colors.black], stops: <double>[0, a, b]).createShader(rect);
                   },
                   child: _content(),
@@ -295,8 +298,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
     final consensusPoint = actualPoint != null && (_selectedTime.toUtc().difference(actualPoint.time.toUtc()).abs() <= const Duration(hours: 1)) ? actualPoint : null;
     final entries = _sourceEntries(cached);
     final (effectivePoint, sourceName, chosen) = _effectivePoint(cached);
-    final cachedObservation = cached.observation;
-    final CurrentObservation? obs = (!past && chosen == null && cachedObservation != null && cachedObservation.isUsableAt(now) && _selectedTime.toUtc().difference(now).inMinutes.abs() <= 45) ? cachedObservation : null;
     return SafeArea(
       top: false,
       child: LayoutBuilder(builder: (context, constraints) {
@@ -317,13 +318,13 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     noData: noData,
                     selectedTime: _selectedTime,
                     forecast: forecast,
-                    observation: obs,
+                    sourceTemperatures: [for (final e in entries) if (!e.isObservation && e.temperatureC != null) e.temperatureC!],
                     sourceName: sourceName,
                     details: effectivePoint == null
                         ? null
                         : DetailGrid(
                             compact: true,
-                            airQualityCurrent: _selectedTime.toUtc().difference(now).inMinutes.abs() <= 90,
+                            airQualityCurrent: _isToday(forecast.timezone),
                             point: effectivePoint,
                             airQuality: cached.airQuality,
                             astronomy: _astronomy(forecast, effectivePoint.time),
@@ -401,6 +402,13 @@ class _WeatherScreenState extends State<WeatherScreen> {
     );
   }
 
+  /// Whether the selected moment falls on today's date at the place (air quality is known for the whole day).
+  bool _isToday(String timezone) {
+    final a = inTimezone(_selectedTime, timezone);
+    final b = inTimezone(DateTime.now().toUtc(), timezone);
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
   List<SourceEntry> _sourceEntries(CachedForecast cached) {
     const engine = ConsensusEngine();
     final entries = <SourceEntry>[];
@@ -473,16 +481,37 @@ class _WeatherScreenState extends State<WeatherScreen> {
 }
 
 class _HeroWeather extends StatelessWidget {
-  const _HeroWeather({required this.city, required this.point, required this.past, this.noData = false, required this.selectedTime, required this.forecast, this.observation, this.details, this.sourceName});
+  const _HeroWeather({required this.city, required this.point, required this.past, this.noData = false, required this.selectedTime, required this.forecast, this.sourceTemperatures = const <double>[], this.details, this.sourceName});
   final CityModel city;
   final WeatherConsensusPoint? point;
   final bool past;
   final bool noData;
   final DateTime selectedTime;
   final ConsensusForecast forecast;
-  final CurrentObservation? observation;
+  /// Temperature of every source that has a value at the selected time.
+  final List<double> sourceTemperatures;
   final Widget? details;
   final String? sourceName;
+
+  /// "Consensus of N sources" on the left, the warmest and coldest source on the right (the spread).
+  Widget _sourceRange(BuildContext context, AppLocalizations t) {
+    final style = Theme.of(context).textTheme.labelMedium;
+    final temps = sourceTemperatures.where((v) => v.isFinite).toList()..sort();
+    final shown = !past && !noData && temps.isNotEmpty;
+    final label = sourceName ?? (shown ? t.consensusOf(temps.length) : '—');
+    final bold = Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800);
+    return Row(children: [
+      Flexible(child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: style)),
+      const Spacer(),
+      if (shown && sourceName == null) ...[
+        Icon(Icons.arrow_downward_rounded, size: 14, color: Colors.lightBlueAccent.shade100),
+        Text(formatTemperature(temps.first, 'celsius'), style: bold),
+        const SizedBox(width: 10),
+        Icon(Icons.arrow_upward_rounded, size: 14, color: Colors.deepOrangeAccent.shade100),
+        Text(formatTemperature(temps.last, 'celsius'), style: bold),
+      ],
+    ]);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -496,11 +525,15 @@ class _HeroWeather extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
-            const Icon(Icons.location_on_outlined, size: 18),
-            const SizedBox(width: 6),
-            Flexible(child: Text(city.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800))),
-            if (city.subtitle.isNotEmpty) Flexible(child: Text('  ${city.subtitle}', maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.labelMedium)),
-            const Spacer(),
+            Expanded(
+              child: Row(children: [
+                const Icon(Icons.location_on_outlined, size: 18),
+                const SizedBox(width: 6),
+                Flexible(child: Text(city.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800))),
+                if (city.subtitle.isNotEmpty) Flexible(child: Text('  ${city.subtitle}', maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.labelMedium)),
+              ]),
+            ),
+            const SizedBox(width: 8),
             Text(formatClock(selectedTime, timezone: forecast.timezone), style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
           ]),
           const SizedBox(height: 8),
@@ -508,44 +541,13 @@ class _HeroWeather extends StatelessWidget {
           const SizedBox(height: 10),
           Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
             Expanded(child: Text(temp, style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 76, fontWeight: FontWeight.w300, height: 0.9))),
-            Text(conditionSymbol(point?.condition ?? WeatherCondition.cloudy, isDay: point?.isDay ?? true), style: const TextStyle(fontSize: 64)),
+            WxIcon(point?.condition ?? WeatherCondition.cloudy, isDay: point?.isDay ?? true, size: 72),
           ]),
           const SizedBox(height: 8),
           if (noData) Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [const Icon(Icons.info_outline, size: 18), const SizedBox(width: 6), Expanded(child: Text('${t.noData} — ${t.noDataForDate}', style: Theme.of(context).textTheme.bodySmall))])),
           Row(children: [Text(noData ? t.noData : t.condition(condition), style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800))]),
           const SizedBox(height: 6),
-          Row(
-            children: [
-              Text(t.feelsLike, style: Theme.of(context).textTheme.bodyMedium),
-              const SizedBox(width: 6),
-              Text(
-                past ? '—' : formatTemperature(point?.feelsLike?.value, 'celsius'),
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-              ),
-              const Spacer(),
-              if (temperatureMetric != null) ...[
-                Text(
-                  t.confidenceLabel(temperatureMetric.confidence.name),
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
-                const SizedBox(width: 8),
-              ],
-              Flexible(child: Text(sourceName ?? '${point?.sourceCount ?? 0} ${t.sourceCount}', maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.labelMedium)),
-            ],
-          ),
-          if (observation != null) ...[
-            const SizedBox(height: 6),
-            Row(children: [
-              const Icon(Icons.sensors_rounded, size: 16),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  '${t.stationObservation}: ${observation!.stationId} • ${observation!.distanceKm.round()} km • ${formatClock(observation!.observedAt, timezone: forecast.timezone)} • ${formatTemperature(observation!.temperatureC, 'celsius')}',
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
-              ),
-            ]),
-          ],
+          _sourceRange(context, t),
           if (details != null) ...[
             const SizedBox(height: 14),
             Divider(height: 1, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12)),

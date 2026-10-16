@@ -88,10 +88,23 @@ jobs:
       - name: Inno Setup
         shell: pwsh
         run: |
-          $iscc = Get-Command iscc -ErrorAction SilentlyContinue
-          if (-not $iscc) { choco install innosetup -y --no-progress }
-          $exe = @("${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe", "$env:ProgramFiles\Inno Setup 6\ISCC.exe") | Where-Object { Test-Path $_ } | Select-Object -First 1
-          if (-not $exe) { $exe = (Get-Command iscc).Source }
+          # The usual setup: the compiler that ships with the runner image, installed from Chocolatey when missing.
+          function Find-Iscc {
+            @("${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe", "$env:ProgramFiles\Inno Setup 6\ISCC.exe") |
+              Where-Object { Test-Path $_ } | Select-Object -First 1
+          }
+          $exe = Find-Iscc
+          if (-not $exe) {
+            choco install innosetup -y --no-progress
+            $exe = Find-Iscc
+          }
+          if (-not $exe) { throw "Inno Setup compiler not found" }
+          # Every build log records exactly which compiler produced the installer.
+          $version = [Diagnostics.FileVersionInfo]::GetVersionInfo($exe).ProductVersion
+          Write-Host "Inno Setup compiler: $exe"
+          Write-Host "Inno Setup version: $version"
+          # A new major version is a deliberate upgrade, not something a runner image update should do silently.
+          if (-not $version.StartsWith('6.')) { throw "Unexpected Inno Setup version $version (expected 6.x)" }
           & $exe windows/installer/Mooncalendar.iss
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed" }
           Move-Item "windows/installer/Output/MoonCalendar-Setup-x64.exe" "MoonCalendar-windows-x64-setup.exe"

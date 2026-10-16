@@ -254,6 +254,8 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
           if (PlatformInfo.isWindows)
             _section('ویندوز', [
               _switch('شروع با ویندوز', 'اجرای خودکار برنامه (در ناحیهٔ اعلان) هنگام ورود به ویندوز', settings.startWithWindows, settings.setStartWithWindows, Icons.power_settings_new_rounded),
+              if (settings.startWithWindows)
+                _switch('نمایش پنجره هنگام شروع با ویندوز', 'پنجرهٔ برنامه بعد از ورود به ویندوز باز شود؛ در حالت خاموش برنامه بی‌صدا در ناحیهٔ اعلان می‌ماند', settings.showWindowAtStartup, settings.setShowWindowAtStartup, Icons.open_in_new_outlined),
               _switch('فعال ماندن در پس‌زمینه', 'با بستن پنجره، برنامه به‌جای خروج در پس‌زمینه می‌ماند', settings.runInBackground, settings.setRunInBackground, Icons.energy_savings_leaf_outlined),
               ListTile(
                 leading: const Icon(Icons.exit_to_app_rounded),
@@ -290,6 +292,22 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                 await settings.setNotifyDate(value);
               },
               Icons.notifications_outlined,
+            ),
+            _switch(
+              'اعلان دما',
+              'نمایش دمای فعلی هوای شهر انتخاب‌شده در یک اعلان بی‌صدا',
+              settings.notifyTemperature,
+              (value) async {
+                if (value && PlatformInfo.isAndroid) {
+                  final granted = await AthanAndroid.requestNotificationPermission();
+                  if (!granted) {
+                    _snack('برای نمایش اعلان همیشگی، دسترسی اعلان را فعال کنید');
+                    return;
+                  }
+                }
+                await settings.setNotifyTemperature(value);
+              },
+              Icons.thermostat_outlined,
             ),
             if (settings.notifyDate)
               _switch('نمایش اعلان در قفل صفحه', 'فقط هنگامی که قفل صفحه فعال باشد', settings.notifyDateLockScreen, settings.setNotifyDateLockScreen, Icons.lock_outline),
@@ -588,6 +606,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
 
   /// Android 13+ needs an explicit runtime permission before any athan can show.
   Future<bool> _ensureNotificationPermission() async {
+    if (PlatformInfo.isWeb) return AthanService.instance.requestWebPermission();
     if (!PlatformInfo.isAndroid) return true;
     final granted = await AthanAndroid.requestNotificationPermission();
     await AthanService.instance.refreshStatus();

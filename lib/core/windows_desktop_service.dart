@@ -2,6 +2,7 @@ import 'platform_info.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
+import 'package:flutter/painting.dart' show PaintingBinding;
 
 import 'package:tray_manager/tray_manager.dart' as tray;
 import 'package:window_manager/window_manager.dart';
@@ -36,6 +37,10 @@ class WindowsDesktopService with WindowListener, tray.TrayListener {
   static const String _heightKey = 'windows_window_height';
   static const String _maximizedKey = 'windows_window_maximized';
   bool _restoring = false;
+  bool _pendingMaximize = false;
+
+  /// Keep the tray icon even when the setting is off (the window was hidden at sign-in, so the tray is the only way back).
+  bool _forceTray = false;
 
   Future<void> initialize(AppSettings settings) async {
     if (!PlatformInfo.isWindows || _initialized) return;
@@ -77,7 +82,8 @@ class WindowsDesktopService with WindowListener, tray.TrayListener {
         final safeHeight = height.clamp(minHeight, 100000.0).toDouble();
         await windowManager.setSize(ui.Size(safeWidth, safeHeight), animate: false);
       }
-      if (prefs.getBool(_maximizedKey) == true) await windowManager.maximize();
+      // Maximizing shows the window, so it waits until the window is meant to be visible.
+      _pendingMaximize = prefs.getBool(_maximizedKey) == true;
     } finally {
       // Resize events caused by the restore itself must not be saved back as "user" sizes.
       Future<void>.delayed(const Duration(milliseconds: 800), () => _restoring = false);
@@ -144,7 +150,7 @@ class WindowsDesktopService with WindowListener, tray.TrayListener {
       await windowManager.setPreventClose(true);
       final systemTheme = await PlatformServices.systemTheme();
       await PlatformServices.setNativeMenuTheme(dark: systemTheme.dark);
-      if (settings.showTrayIcon) {
+      if (settings.showTrayIcon || _forceTray) {
         await _ensureTray();
         await _applyTrayIcon();
       } else {
@@ -252,9 +258,23 @@ class WindowsDesktopService with WindowListener, tray.TrayListener {
   @override
   void onTrayMenuItemClick(tray.MenuItem menuItem) {}
 
+  /// The window stays hidden after sign-in; the tray icon is guaranteed so the user can bring it back.
+  Future<void> startHiddenInTray() async {
+    _forceTray = true;
+    await _syncSettings();
+  }
+
+  /// Applies the remembered maximized state; call right before the window is first shown.
+  Future<void> applyPendingMaximize() async {
+    if (!_pendingMaximize) return;
+    _pendingMaximize = false;
+    try { await windowManager.maximize(); } catch (_) {}
+  }
+
   Future<void> showWindow({bool fromTray = false}) async {
     if (!PlatformInfo.isWindows) return;
     try {
+      await applyPendingMaximize();
       if (await windowManager.isMinimized()) {
         await windowManager.restore();
       }
@@ -303,6 +323,11 @@ class WindowsDesktopService with WindowListener, tray.TrayListener {
   Future<void> hideWindow() async {
     if (!PlatformInfo.isWindows) return;
     try { await windowManager.hide(); } catch (_) {}
+    // Hidden in the tray: decoded images (scenery, flags, icons) are not needed until the window returns.
+    try {
+      PaintingBinding.instance.imageCache.clear();
+      PaintingBinding.instance.imageCache.clearLiveImages();
+    } catch (_) {}
   }
 
   Future<void> exitApp() async {

@@ -9,6 +9,7 @@ import '../calendar_math.dart';
 import '../l10n/l10n.dart';
 import '../settings.dart';
 import '../platform.dart';
+import '../web_notify_stub.dart' if (dart.library.js_interop) '../web_notify_web.dart' as web_notify;
 import 'athan_android.dart';
 import 'athan_common.dart';
 import 'athan_windows.dart';
@@ -43,9 +44,45 @@ class AthanService with WidgetsBindingObserver {
 
   static bool get isSupported => PlatformInfo.isAndroid || PlatformInfo.isWindows;
 
+  Timer? _webTimer;
+  bool _webListening = false;
+
+  /// Web: while the site is open, shows a notification and plays the athan at the prayer time.
+  void _scheduleWeb() {
+    _webTimer?.cancel();
+    final s = _settings;
+    if (!PlatformInfo.isWeb || s == null || s.latitude == null || s.longitude == null) return;
+    final alarms = AthanPlanner.build(s, days: 2);
+    if (alarms.isEmpty) return;
+    final next = alarms.reduce((a, b) => a.epochMs <= b.epochMs ? a : b);
+    final wait = next.epochMs - DateTime.now().millisecondsSinceEpoch;
+    _webTimer = Timer(Duration(milliseconds: wait < 0 ? 0 : wait), () {
+      // A tab that slept through the time (computer suspended) must not announce an old prayer.
+      if (DateTime.now().millisecondsSinceEpoch - next.epochMs < 5 * 60 * 1000) {
+        web_notify.webNotifyShow(next.title, next.body);
+        final option = athanBundledSound(s.athanSound) ?? athanBundledSounds.first;
+        web_notify.webAudioPlay('assets/assets/audio/${option.assetFile}');
+      }
+      _scheduleWeb();
+    });
+  }
+
+  /// Web: asks the browser for the notification permission (call from a user gesture).
+  Future<bool> requestWebPermission() => web_notify.webNotifyRequestPermission();
+
+  void stopWebAthan() => web_notify.webAudioStop();
+
   void attach(AppSettings settings) {
     if (_settings != null) return;
     _settings = settings;
+    if (PlatformInfo.isWeb) {
+      if (!_webListening) {
+        _webListening = true;
+        settings.addListener(_scheduleWeb);
+      }
+      _scheduleWeb();
+      return;
+    }
     settings.addListener(_onSettingsChanged);
     WidgetsBinding.instance.addObserver(this);
     _startWindowsDateHeartbeat();

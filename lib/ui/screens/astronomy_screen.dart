@@ -1775,7 +1775,9 @@ class _AndroidAstronomyPainter extends CustomPainter {
           fontSize: math.max(1.0, fontSize),
           color: color,
           height: 1,
-          fontFamily: symbol ? _zodiacSymbolFontFamily : null,
+          // A bare TextPainter has no inherited font: on the web the default font has no Persian glyphs
+          // (empty boxes), so the bundled Vazirmatn is named explicitly.
+          fontFamily: symbol ? _zodiacSymbolFontFamily : 'Vazirmatn',
           fontFamilyFallback: planetSymbols
               ? const <String>[_planetSymbolFontFamily, _zodiacSymbolFontFamily]
               : null,

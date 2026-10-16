@@ -1131,6 +1131,7 @@ class _WorldMapPainter extends CustomPainter {
       text: TextSpan(
         text: tr(name),
         style: TextStyle(
+          fontFamily: 'Vazirmatn',
           color: const Color(0xFFF7F2EC),
           fontSize: 15 * s,
           height: 1.15,
@@ -1199,7 +1200,7 @@ class _WorldMapPainter extends CustomPainter {
       final distanceMeters = _distanceMeters(lat1, lon1, lat2, lon2);
       final distanceKm = (distanceMeters / 1000).round();
       final text = TextPainter(
-        text: TextSpan(text: tr('${toPersianDigits(distanceKm.toString())} کیلومتر'), style: const TextStyle(color: Colors.black, fontSize: 42)),
+        text: TextSpan(text: tr('${toPersianDigits(distanceKm.toString())} کیلومتر'), style: const TextStyle(fontFamily: 'Vazirmatn', color: Colors.black, fontSize: 42)),
         textDirection: L10n.direction,
       )..layout();
       canvas.save();

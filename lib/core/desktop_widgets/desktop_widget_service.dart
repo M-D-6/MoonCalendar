@@ -222,6 +222,10 @@ class DesktopWidgetService extends ChangeNotifier {
       ...?saved,
       // Always the app's current language (a saved per-widget snapshot would be stale).
       'appLanguage': _settings?.language.code,
+      // Number/month style is an app-wide choice too: it applies to every widget instantly, without
+      // removing and re-adding it.
+      for (final key in const <String>['localDigits', 'latinGregorianDigits', 'englishGregorianPersianMonths'])
+        if (defaults.containsKey(key)) key: defaults[key],
     };
     // A widget created before any city was chosen saved an empty location. Without a location of its
     // own it follows the app's current one, so prayer times appear as soon as a city is selected.

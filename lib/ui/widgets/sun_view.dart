@@ -258,7 +258,7 @@ class _SunViewPainter extends CustomPainter {
   }) {
     if (text.isEmpty) return;
     TextPainter build(double size) => TextPainter(
-          text: TextSpan(text: tr(text), style: baseStyle.copyWith(color: color, fontSize: size, height: 1.0, fontWeight: FontWeight.w400)),
+          text: TextSpan(text: tr(text), style: baseStyle.copyWith(fontFamily: baseStyle.fontFamily ?? 'Vazirmatn', color: color, fontSize: size, height: 1.0, fontWeight: FontWeight.w400)),
           textDirection: L10n.direction,
         )..layout();
     var tp = build(fontSize);

@@ -67,7 +67,8 @@ Future<void> main(List<String> args) async {
       startupTheme = await PlatformServices.systemTheme().timeout(const Duration(seconds: 2));
     } catch (_) {}
     try {
-      await settings.load().timeout(const Duration(seconds: 3));
+      // At sign-in the disk can be slow: wait longer so the saved choices (tray, hidden start) are not lost to defaults.
+      await settings.load().timeout(Duration(seconds: _startedAtLogin ? 25 : 3));
     } catch (_) {}
 
     runApp(MoonCalendarApp(
@@ -127,8 +128,11 @@ Future<void> _finishWindowsStartup(AppSettings settings) async {
     if (!PlatformInfo.isWindows) return;
     // Keeps the Run entry pointing at the current executable (e.g. after the app was reinstalled elsewhere).
     if (settings.startWithWindows) unawaited(WindowsAutostart.setEnabled(true));
-    // Opened at sign-in: keep the window hidden when a tray icon exists to bring it back.
-    if (!(_startedAtLogin && settings.showTrayIcon)) {
+    // Opened at sign-in: stay in the tray unless the user chose to see the window at startup.
+    if (_startedAtLogin && !settings.showWindowAtStartup) {
+      await WindowsDesktopService.instance.startHiddenInTray();
+    } else {
+      await WindowsDesktopService.instance.applyPendingMaximize();
       await windowManager.show();
       await windowManager.focus();
     }

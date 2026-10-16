@@ -1,10 +1,10 @@
-
+﻿
 
 [LangOptions]
 
 LanguageName=Persian
 LanguageID=$0429
-LanguageCodePage=1256
+LanguageCodePage=0
 RightToLeft=yes
 
 

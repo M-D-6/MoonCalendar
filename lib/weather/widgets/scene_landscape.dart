@@ -924,12 +924,13 @@ class ImageLandscapeRenderer {
       final i = count - 1 - k; // old puffs first, young ones on top
       final t = reduced ? i / count : ((clock * 0.05 + i / count) % 1.0);
       final rise = 1 - math.pow(1 - t, 1.7).toDouble();
-      final y = d.chimney.dy - rise * 120 * cold;
+      // Damp, overcast air keeps the smoke low and short-lived.
+      final y = d.chimney.dy - rise * 120 * cold * (1 - light.overcast * 0.3);
       final drift = windX * wind * 62 * math.pow(t, 1.45).toDouble();
       final turb = reduced ? 0.0 : math.sin(clock * 0.9 + i * 1.9 + t * 7) * (1.5 + 9 * t) * (0.5 + 0.5 * math.sin(i * 2.3 + 1));
       final x = d.chimney.dx + drift + turb;
       final r = 2.6 + 15 * math.pow(t, 0.8).toDouble();
-      final a = math.pow(1 - t, 1.25).toDouble() * math.min(1.0, t * 9) * 0.34 * (1 - light.overcast * 0.25);
+      final a = math.pow(1 - t, 1.25).toDouble() * math.min(1.0, t * 9) * 0.34 * (1 - light.overcast * 0.45);
       final paint = Paint()
         ..isAntiAlias = true
         ..color = tone.withValues(alpha: a.clamp(0.0, 1.0).toDouble())

@@ -98,7 +98,7 @@ class AthanChannel(private val activity: Activity) : MethodChannel.MethodCallHan
                     val date = item["date"]?.toString()?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
                     val title = item["title"]?.toString().orEmpty()
                     val body = item["body"]?.toString().orEmpty()
-                    mapOf("date" to date, "title" to title, "body" to body, "day" to (item["day"]?.toString().orEmpty()), "styles" to (item["styles"]?.toString().orEmpty()))
+                    mapOf("date" to date, "title" to title, "body" to body, "day" to (item["day"]?.toString().orEmpty()), "latin" to (item["latin"]?.toString().orEmpty()), "styles" to (item["styles"]?.toString().orEmpty()))
                 }
                 DateNotificationStore.sync(activity, enabled, lockScreen, largeDayNumber, payloads, rtl)
                 result.success(null)
@@ -108,6 +108,26 @@ class AthanChannel(private val activity: Activity) : MethodChannel.MethodCallHan
                 val enabled = call.argument<Boolean>("enabled") ?: false
                 val table = call.argument<String>("table").orEmpty()
                 AppIconManager.sync(activity, enabled, table, call.argument<Boolean>("latin") ?: false)
+                result.success(null)
+            }
+
+            "showTemperature" -> {
+                TemperatureNotification.show(
+                    activity,
+                    call.argument<String>("city").orEmpty(),
+                    call.argument<String>("temperature").orEmpty(),
+                    call.argument<String>("wind").orEmpty(),
+                    call.argument<Double>("windDegrees") ?: -1.0,
+                    call.argument<String>("feelsLike").orEmpty(),
+                    call.argument<ByteArray>("icon"),
+                    call.argument<Boolean>("rtl") ?: true,
+                    call.argument<Boolean>("lockScreen") ?: true,
+                )
+                result.success(null)
+            }
+
+            "cancelTemperature" -> {
+                TemperatureNotification.cancel(activity)
                 result.success(null)
             }
 

@@ -49,7 +49,7 @@ class MetarProvider {
     final response = await client.get(
       'https://aviationweather.gov/api/data/metar',
       queryParameters: {'bbox': bbox, 'format': 'json', 'hours': 3},
-      headers: {'User-Agent': 'Mooncalendar/1.1.3 ($projectUrl)', 'Accept': 'application/json'},
+      headers: {'User-Agent': 'Mooncalendar/1.1.4 ($projectUrl)', 'Accept': 'application/json'},
     );
     if (response.statusCode != 200 || response.data is! List) return null;
 

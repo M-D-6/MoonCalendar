@@ -98,6 +98,10 @@ class AppLocalizations {
   String get today => tr('امروز');
   String get yesterday => tr('دیروز');
   String get sourceCount => tr('منبع');
+  String consensusOf(int n) {
+    final d = L10n.digits(n);
+    return _by('برآیند $d منبع', 'Consensus of $d sources', 'حصيلة $d مصادر');
+  }
   String get recommendationGood => tr('برای فعالیت بیرون مناسب');
   String get recommendationCaution => tr('احتیاط برای فعالیت طولانی');
   String get recommendationBad => tr('قرارگیری طولانی در بیرون را کاهش دهید');

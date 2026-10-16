@@ -43,17 +43,17 @@ class DetailGrid extends StatelessWidget {
     final cards = <Widget>[
       MetricTile(
         compact: compact,
-        icon: Icons.air_rounded,
-        title: t.wind,
-        value: formatWind(point.windSpeed?.value, windUnit),
-        subtitle: compassDirection(point.windDirection),
-      ),
-      MetricTile(
-        compact: compact,
         icon: Icons.thermostat_outlined,
         title: t.feelsLike,
         value: formatTemperature(point.feelsLike?.value, temperatureUnit),
         subtitle: _confidence(t, point.feelsLike?.confidence),
+      ),
+      MetricTile(
+        compact: compact,
+        icon: Icons.air_rounded,
+        title: t.wind,
+        value: formatWind(point.windSpeed?.value, windUnit),
+        subtitle: compassDirection(point.windDirection),
       ),
       MetricTile(
         compact: compact,
@@ -127,11 +127,15 @@ class DetailGrid extends StatelessWidget {
                   if (airTile != null) SizedBox(width: width, child: airTile),
                 ],
               ),
-              if (airQuality != null && airQualityCurrent) ...[
+              if (airQuality != null) ...[
                 const SizedBox(height: 8),
-                Text(
-                  'PM2.5 ${airQuality!.pm25?.round() ?? '—'} • PM10 ${airQuality!.pm10?.round() ?? '—'} • ${_aqRecommendation(airQuality!.aqi ?? 0, t)}',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 10.5),
+                // The line is always laid out (hidden when the air quality is not known), so the card keeps its height.
+                Opacity(
+                  opacity: airQualityCurrent ? 1 : 0,
+                  child: Text(
+                    'PM2.5 ${airQuality!.pm25?.round() ?? '—'} • PM10 ${airQuality!.pm10?.round() ?? '—'} • ${_aqRecommendation(airQuality!.aqi ?? 0, t)}',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 10.5),
+                  ),
                 ),
               ],
             ],

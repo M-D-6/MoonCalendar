@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' show PathOperation, PointMode;
@@ -7,6 +8,8 @@ import 'package:flutter/scheduler.dart' show Ticker;
 import 'package:flutter/material.dart';
 import 'package:mooncalendar/weather/utils/moon_phase.dart';
 
+import '../../core/platform.dart';
+import '../../core/platform_info.dart';
 import 'scene_light.dart';
 import 'scene_landscape.dart';
 
@@ -27,6 +30,7 @@ class WeatherScene extends StatefulWidget {
     this.latitude = 35.7,
     this.longitude = 51.4,
     this.time,
+    this.zoom = 1.0,
   });
 
   final WeatherConsensusPoint? point;
@@ -38,19 +42,58 @@ class WeatherScene extends StatefulWidget {
   /// Selected instant (UTC). Defaults to the point's time, then to "now".
   final DateTime? time;
 
+  /// 1 = the whole landscape. Larger values magnify it around the cabin (less sky, more house) and shrink the
+  /// sun, moon and star effects to match; used by small previews such as the side-menu header.
+  final double zoom;
+
   @override
   State<WeatherScene> createState() => _WeatherSceneState();
 }
 
-class _WeatherSceneState extends State<WeatherScene> with SingleTickerProviderStateMixin {
+class _WeatherSceneState extends State<WeatherScene> with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final Ticker _ticker;
   final ValueNotifier<int> _repaint = ValueNotifier<int>(0);
   final _SceneModel _model = _SceneModel();
   Duration _last = Duration.zero;
+  Duration _lastPaint = Duration.zero;
+
+  /// The scene is a slow ambient animation: ~30 frames a second look the same as 60-144 and cost half the CPU.
+  static const Duration _frameGap = Duration(milliseconds: 30);
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Nothing is drawn while the window is hidden or in the background (tray, minimized).
+    if (widget.reduceMotion) return;
+    if (state == AppLifecycleState.resumed) {
+      if (!_ticker.isActive && !_webInactive) _ticker.start();
+    } else if (_ticker.isActive) {
+      _ticker.stop();
+      _last = Duration.zero;
+      _lastPaint = Duration.zero;
+    }
+  }
+
+  StreamSubscription<bool>? _webActivity;
+  bool _webInactive = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    if (PlatformInfo.isWeb) {
+      // A browser keeps animating an unfocused window; stop while another window or tab is in front.
+      _webActivity = PlatformServices.webActivity().listen((active) {
+        _webInactive = !active;
+        if (widget.reduceMotion) return;
+        if (active) {
+          if (!_ticker.isActive) _ticker.start();
+        } else if (_ticker.isActive) {
+          _ticker.stop();
+          _last = Duration.zero;
+          _lastPaint = Duration.zero;
+        }
+      });
+    }
     _applyTargets(snap: true);
     SceneAssets.load().then((_) {
       if (mounted) _repaint.value++;
@@ -66,7 +109,8 @@ class _WeatherSceneState extends State<WeatherScene> with SingleTickerProviderSt
     if (widget.reduceMotion && _ticker.isActive) {
       _ticker.stop();
       _last = Duration.zero;
-    } else if (!widget.reduceMotion && !_ticker.isActive) {
+      _lastPaint = Duration.zero;
+    } else if (!widget.reduceMotion && !_ticker.isActive && !_webInactive) {
       _ticker.start();
     }
     if (widget.reduceMotion) _repaint.value++;
@@ -84,6 +128,7 @@ class _WeatherSceneState extends State<WeatherScene> with SingleTickerProviderSt
     final point = widget.point;
     final time = (widget.time ?? point?.time ?? DateTime.now().toUtc()).toUtc();
     _model
+      ..zoom = widget.zoom
       ..latitude = widget.latitude
       ..longitude = widget.longitude
       ..targetTimeMs = time.millisecondsSinceEpoch.toDouble();
@@ -125,11 +170,15 @@ class _WeatherSceneState extends State<WeatherScene> with SingleTickerProviderSt
     final dt = _last == Duration.zero ? 1 / 60 : ((elapsed - _last).inMicroseconds / 1e6).clamp(0.0, 0.1);
     _last = elapsed;
     _model.step(dt);
+    if (elapsed - _lastPaint < _frameGap) return;
+    _lastPaint = elapsed;
     _repaint.value++;
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _webActivity?.cancel();
     _ticker.dispose();
     _repaint.dispose();
     super.dispose();
@@ -151,6 +200,7 @@ class _SceneModel {
   double latitude = 35.7;
   double longitude = 51.4;
   bool reduced = false;
+  double zoom = 1.0;
 
   double timeMs = DateTime.now().toUtc().millisecondsSinceEpoch.toDouble();
   double targetTimeMs = DateTime.now().toUtc().millisecondsSinceEpoch.toDouble();
@@ -174,6 +224,10 @@ class _SceneModel {
   double windX = 0.6;
   double targetWindX = 0.6;
   double landClock = 0;
+
+  /// Where the clouds are along the sky: they travel with the wind (direction and speed), faster in a gale
+  /// and in a storm, slowly in a calm.
+  double cloudDrift = 0;
 
   /// Free-running clock (seconds) for drifting clouds, particles and twinkling.
   double clock = 0;
@@ -200,6 +254,7 @@ class _SceneModel {
     wind = _ease(wind, targetWind, dt, 2.5);
     windX = _ease(windX, targetWindX, dt, 2.5);
     landClock += dt * windRate(wind);
+    cloudDrift += dt * windX * (0.35 + wind / 22) * (1 + 0.5 * math.max(rain, thunder));
     // Scrubbing the timeline: the displayed time glides after the selected time.
     final diff = targetTimeMs - timeMs;
     if (diff.abs() > 48 * 3600 * 1000) {
@@ -445,6 +500,19 @@ class _ScenePainter extends CustomPainter {
     if (size.isEmpty) return;
     canvas.save();
     canvas.clipRect(Offset.zero & size); // never draw over the navigation menu
+    final zoom = model.zoom;
+    if (zoom > 1.001) {
+      // Magnify around the cabin (the sky is cropped away, the house fills the view). The target point is
+      // clamped so the magnified picture always still covers the whole view.
+      final f = SceneFrame.fit(size);
+      final anchor = Offset(f.dx + SceneFrame.focusX * f.scale, f.dy + 600 * f.scale);
+      double pick(double wanted, double lo, double hi) => lo > hi ? (lo + hi) / 2 : wanted.clamp(lo, hi).toDouble();
+      final cx = pick(size.width * 0.5, size.width - zoom * (size.width - anchor.dx), zoom * anchor.dx);
+      final cy = pick(size.height * 0.62, size.height - zoom * (size.height - anchor.dy), zoom * anchor.dy);
+      canvas.translate(cx, cy);
+      canvas.scale(zoom);
+      canvas.translate(-anchor.dx, -anchor.dy);
+    }
     _paintScene(canvas, size);
     canvas.restore();
   }
@@ -482,11 +550,13 @@ class _ScenePainter extends CustomPainter {
     final starVisibility = (1 - _smooth(-14, -3, sunAlt)) * (1 - m.cloud * 0.92) * (1 - m.fog) * (1 - m.rain * 0.8);
     if (starVisibility > 0.01) {
       final paint = Paint()..strokeCap = StrokeCap.round;
+      final compact = model.zoom > 1.001;
       for (final star in _stars) {
+        if (compact && star[3] > 0.45) continue; // fewer, finer stars in a small view
         final twinkle = 0.62 + 0.38 * math.sin(m.clock * (1.2 + star[3] * 2.4) + star[3] * 40);
         paint
           ..color = Colors.white.withValues(alpha: (starVisibility * twinkle * (0.35 + star[2] * 0.35)).clamp(0.0, 1.0))
-          ..strokeWidth = star[2];
+          ..strokeWidth = compact ? star[2] * 0.55 : star[2];
         canvas.drawPoints(PointMode.points, [Offset(star[0] * w, star[1] * horizonY)], paint);
       }
     }
@@ -508,13 +578,14 @@ class _ScenePainter extends CustomPainter {
       final warm = 1 - _smooth(-1, 7, sunAlt);
       final sunColor = Color.lerp(const Color(0xFFFFF4C8), const Color(0xFFFF9F4A), warm)!;
       final clearness = 1 - overcast * 0.78;
-      final glowRadius = w.clamp(300.0, 900.0).toDouble() * (0.30 + warm * 0.12);
+      final compact = m.zoom > 1.001;
+      final glowRadius = (compact ? w * 0.22 : w.clamp(300.0, 900.0).toDouble()) * (0.30 + warm * 0.12);
       canvas.drawCircle(
         p,
         glowRadius,
         Paint()..shader = RadialGradient(colors: [sunColor.withValues(alpha: 0.55 * sunVisible * clearness), sunColor.withValues(alpha: 0.0)]).createShader(Rect.fromCircle(center: p, radius: glowRadius)),
       );
-      final r = math.max(math.min(w, h) * 0.045, 15.0) * (1 + warm * 0.25);
+      final r = math.max(math.min(w, h) * 0.045, compact ? 5.0 : 15.0) * (1 + warm * 0.25);
       final vis = sunVisible * (0.35 + 0.65 * clearness);
       canvas.drawCircle(p, r * 2.5, Paint()..color = sunColor.withValues(alpha: 0.10 * vis));
       canvas.drawCircle(p, r * 1.7, Paint()..color = sunColor.withValues(alpha: 0.18 * vis));
@@ -525,12 +596,13 @@ class _ScenePainter extends CustomPainter {
     final moonVisible = _smooth(-3, 5, moonAlt) * (1 - m.cloud * 0.75) * (1 - m.fog * 0.8) * (1 - _smooth(-6, 2, sunAlt) * 0.88);
     if (moonVisible > 0.01) {
       final p = place(sky.moon);
+      final compact = m.zoom > 1.001;
       final r = math.min(w, h) * 0.04;
-      final halo = r * 5;
+      final halo = r * (compact ? 2.6 : 5);
       canvas.drawCircle(
         p,
         halo,
-        Paint()..shader = RadialGradient(colors: [const Color(0xFFCFE0FF).withValues(alpha: 0.30 * moonVisible * (0.35 + sky.moonIllumination * 0.65)), const Color(0xFFCFE0FF).withValues(alpha: 0)]).createShader(Rect.fromCircle(center: p, radius: halo)),
+        Paint()..shader = RadialGradient(colors: [const Color(0xFFCFE0FF).withValues(alpha: (compact ? 0.16 : 0.30) * moonVisible * (0.35 + sky.moonIllumination * 0.65)), const Color(0xFFCFE0FF).withValues(alpha: 0)]).createShader(Rect.fromCircle(center: p, radius: halo)),
       );
       _drawMoon(canvas, p, r, sky.moonIllumination, sky.moonLimbAngle, moonVisible);
     }
@@ -648,7 +720,7 @@ class _ScenePainter extends CustomPainter {
     for (final cloud in _clouds) {
       final appear = _smooth(cloud.threshold - 0.12, cloud.threshold + 0.12, m.cloud);
       if (appear < 0.01) continue;
-      final phase = (cloud.x + m.clock * cloud.speed) % 1.0;
+      final phase = (cloud.x + m.cloudDrift * cloud.speed) % 1.0;
       final cx = (phase * 1.5 - 0.25) * w;
       final cy = cloud.y * h * skyScale;
       final alpha = (appear * (0.70 + cloud.opacity * 0.30)).clamp(0.0, 1.0).toDouble();

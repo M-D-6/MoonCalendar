@@ -265,6 +265,32 @@ class AthanWindows {
     );
   }
 
+  /// Shows (replaces) the silent temperature toast. Runs a short hidden script only when the text changed.
+  static String? _lastTemperature;
+  static Future<void> showTemperature({required String title, required String body, required bool rtl}) async {
+    if (!isSupported) return;
+    final key = '$rtl|$title|$body';
+    if (key == _lastTemperature) return;
+    _lastTemperature = key;
+    try {
+      await _ensureScripts();
+      await File(_p('temperature.json')).writeAsString(
+        jsonEncode(<String, Object?>{'title': title, 'body': body, 'rtl': rtl, 'at': DateTime.now().millisecondsSinceEpoch}),
+        flush: true,
+      );
+      await Process.start('wscript.exe', <String>['//B', '//Nologo', _p('launcher.vbs'), 'temp_show'], mode: ProcessStartMode.detached);
+    } catch (_) {}
+  }
+
+  static Future<void> clearTemperature() async {
+    if (!isSupported || _lastTemperature == null) return;
+    _lastTemperature = null;
+    try {
+      await _ensureScripts();
+      await Process.start('wscript.exe', <String>['//B', '//Nologo', _p('launcher.vbs'), 'temp_clear'], mode: ProcessStartMode.detached);
+    } catch (_) {}
+  }
+
   /// Stops a playing athan and clears its toast.
   static Future<void> stop() async {
     if (!isSupported) return;
@@ -340,10 +366,15 @@ $AppInfoFile     = Join-Path $Dir 'app.json'
 $SessionFile     = Join-Path $Dir 'session.json'
 $StateFile       = Join-Path $Dir 'state.json'
 $PreviewFile     = Join-Path $Dir 'preview.json'
+$TemperatureFile = Join-Path $Dir 'temperature.json'
 $PidFile         = Join-Path $Dir 'athan.pid'
 $Launcher        = Join-Path $Dir 'launcher.vbs'
 $LogFile         = Join-Path $Dir 'athan.log'
 $Aumid           = 'MoonCalendar.Athan'
+# Each kind of notification has its own app identity, so Windows lists them separately instead of folding
+# the calendar, the temperature and the athan into one stack.
+$DateAumid       = 'MoonCalendar.Date'
+$TempAumid       = 'MoonCalendar.Weather'
 $TaskName        = 'MoonCalendarAthan'
 $DateTaskName    = 'MoonCalendarDateNotification'
 $AppName         = 'Mooncalendar'
@@ -525,6 +556,11 @@ function Register-App {
     $key = 'HKCU:\Software\Classes\AppUserModelId\' + $Aumid
     if (-not (Test-Path $key)) { New-Item -Path $key -Force | Out-Null }
     New-ItemProperty -Path $key -Name 'DisplayName' -Value $AppName -PropertyType String -Force | Out-Null
+    foreach ($extra in @(@($DateAumid, ($AppName + ' - Date')), @($TempAumid, ($AppName + ' - Weather')))) {
+        $extraKey = 'HKCU:\Software\Classes\AppUserModelId\' + $extra[0]
+        if (-not (Test-Path $extraKey)) { New-Item -Path $extraKey -Force | Out-Null }
+        New-ItemProperty -Path $extraKey -Name 'DisplayName' -Value $extra[1] -PropertyType String -Force | Out-Null
+    }
 
     $proto = 'HKCU:\Software\Classes\mooncalendar-athan'
     New-Item -Path $proto -Force | Out-Null
@@ -641,7 +677,11 @@ function Show-DateToast([object[]]$Lines, [object[]]$Styles) {
     # The persisted layout has no artificial row limit. ToastGeneric can still
     # impose its own visual height, so every configured logical row is retained
     # and joined with explicit line breaks instead of being silently dropped.
-    try { [Windows.UI.Notifications.ToastNotificationManager]::History.RemoveGroup($DateGroup) } catch { }
+    try { [Windows.UI.Notifications.ToastNotificationManager]::History.RemoveGroup($DateGroup, $DateAumid) } catch { }
+    # Older versions posted the calendar toast under the athan identity: clear that leftover once.
+    try { [Windows.UI.Notifications.ToastNotificationManager]::History.RemoveGroup($DateGroup, $Aumid) } catch { }
+    # The temperature toast goes first so the calendar toast lands on top of it.
+    try { Invoke-TempShow -Quiet; Start-Sleep -Milliseconds 400 } catch { }
     $dateRtl = $true
     try { $dsched = Get-JsonFile $DateScheduleFile; if ($dsched -and $dsched.rtl -eq $false) { $dateRtl = $false } } catch { }
     # A leading RLM / LRM mark sets the paragraph direction of every row (the toast has no direction switch).
@@ -693,7 +733,7 @@ function Show-DateToast([object[]]$Lines, [object[]]$Styles) {
     $toast.Group = $DateGroup
     $toast.SuppressPopup = $true
     $toast.ExpirationTime = [DateTimeOffset]::Now.AddHours(30)
-    [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($Aumid).Show($toast)
+    [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($DateAumid).Show($toast)
     return $toast
 }
 
@@ -771,7 +811,7 @@ function Invoke-DateWatch {
         }
 
         if ($show -and $item) {
-            try { [Windows.UI.Notifications.ToastNotificationManager]::History.RemoveGroup($DateGroup) } catch { }
+            try { [Windows.UI.Notifications.ToastNotificationManager]::History.RemoveGroup($DateGroup, $DateAumid) } catch { }
             Show-DateToast ([object[]]$item.lines) ([object[]]$item.styles) | Out-Null
         }
 
@@ -883,7 +923,7 @@ function Invoke-DateRegister {
     # Show immediately so enabling the setting is visible at once.
     $item = Get-TodaysDateNotification
     if ($item) {
-        try { [Windows.UI.Notifications.ToastNotificationManager]::History.RemoveGroup($DateGroup) } catch { }
+        try { [Windows.UI.Notifications.ToastNotificationManager]::History.RemoveGroup($DateGroup, $DateAumid) } catch { }
         Show-DateToast ([object[]]$item.lines) ([object[]]$item.styles) | Out-Null
     }
     Invoke-DateEnsureTask
@@ -932,7 +972,7 @@ function Invoke-DateTouch {
     try {
         $item = Get-TodaysDateNotification
         if ($item) {
-            try { [Windows.UI.Notifications.ToastNotificationManager]::History.RemoveGroup($DateGroup) } catch { }
+            try { [Windows.UI.Notifications.ToastNotificationManager]::History.RemoveGroup($DateGroup, $DateAumid) } catch { }
             Show-DateToast ([object[]]$item.lines) ([object[]]$item.styles) | Out-Null
         }
     } catch { Write-Log ('date touch toast error: ' + $_) }
@@ -973,8 +1013,40 @@ function Invoke-DateUnregister {
     try { Stop-ScheduledTask -TaskName $DateTaskName -ErrorAction SilentlyContinue } catch { }
     Stop-DateWatcherProcess
     try { Unregister-ScheduledTask -TaskName $DateTaskName -Confirm:$false -ErrorAction SilentlyContinue } catch { }
-    try { Initialize-Toast; [Windows.UI.Notifications.ToastNotificationManager]::History.RemoveGroup($DateGroup) } catch { }
+    try { Initialize-Toast; [Windows.UI.Notifications.ToastNotificationManager]::History.RemoveGroup($DateGroup, $DateAumid) } catch { }
     Write-Log 'date notification watcher task removed'
+}
+
+function Invoke-TempShow([switch]$Quiet) {
+    $item = Get-JsonFile $TemperatureFile
+    if (-not $item) { return }
+    # Never repeat an old reading (the app may have been closed for hours).
+    if ($item.at -and (((Get-NowMs) - [int64]$item.at) -gt 10800000)) { return }
+    if (-not $Quiet) { Register-App }
+    Initialize-Toast
+    $rtl = ($item.rtl -ne $false)
+    $mark = $(if ($rtl) { [string][char]0x200F } else { [string][char]0x200E })
+    $t = [System.Security.SecurityElement]::Escape($mark + [string]$item.title)
+    $b = [System.Security.SecurityElement]::Escape($mark + [string]$item.body)
+    $lang = $(if ($rtl) { 'fa-IR' } else { 'en-US' })
+    $align = $(if ($rtl) { 'right' } else { 'left' })
+    $xml = '<toast><visual><binding template="ToastGeneric" lang="' + $lang + '">' +
+        '<text hint-align="' + $align + '">' + $t + '</text><text hint-align="' + $align + '">' + $b + '</text>' +
+        '</binding></visual><audio silent="true"/></toast>'
+    $doc = New-Object Windows.Data.Xml.Dom.XmlDocument
+    $doc.LoadXml($xml)
+    $toast = New-Object Windows.UI.Notifications.ToastNotification -ArgumentList $doc
+    $toast.Tag = 'temperature'
+    $toast.Group = 'temperature'
+    $toast.SuppressPopup = $true
+    $toast.ExpirationTime = [DateTimeOffset]::Now.AddHours(3)
+    [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($TempAumid).Show($toast)
+}
+
+function Invoke-TempClear {
+    try { Remove-Item -LiteralPath $TemperatureFile -Force -ErrorAction SilentlyContinue } catch { }
+    try { Initialize-Toast; [Windows.UI.Notifications.ToastNotificationManager]::History.RemoveGroup('temperature', $TempAumid) } catch { }
+    try { [Windows.UI.Notifications.ToastNotificationManager]::History.RemoveGroup('temperature', $Aumid) } catch { }
 }
 
 function Invoke-Preview {
@@ -995,6 +1067,8 @@ try {
         'date_tick'       { Invoke-DateTick }
         'date_unregister' { Invoke-DateUnregister }
         'preview'         { Invoke-Preview }
+        'temp_show'       { Invoke-TempShow }
+        'temp_clear'      { Invoke-TempClear }
         'stop'            { Initialize-Toast; Stop-Athan }
         default {
             if (-not (Test-AthanSession)) {

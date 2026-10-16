@@ -4,7 +4,7 @@
 #define MyAppVersion GetEnv("MOONCALENDAR_VERSION")
 #if MyAppVersion == ""
   #undef MyAppVersion
-  #define MyAppVersion "1.1.3"
+  #define MyAppVersion "1.1.4"
 #endif
 
 ; Flutter build folder: build\windows\<arch>\runner\Release.
@@ -87,8 +87,8 @@ UninstallLogMode=append
 
 RedirectionGuard=yes
 
-Compression=lzma
-SolidCompression=yes
+Compression=zip
+SolidCompression=no
 
 UseSetupLdr=x64
 
@@ -123,9 +123,10 @@ Source: "{#MyPublishDir}\*"; \
 
 
 [UninstallDelete]
-; Force cleanup of the exact application directory after uninstall.
-; This targets ONLY {app}, not the parent Program Files directory.
-Type: filesandordirs; Name: "{app}"
+; Force cleanup of the application directory after uninstall, but only when it is a folder of our own
+; (named after the app and holding the executable). A folder shared with other programs is never wiped:
+; there the uninstaller removes just the files it installed.
+Type: filesandordirs; Name: "{app}"; Check: IsOwnAppFolder
 
 
 [InstallDelete]
@@ -210,6 +211,17 @@ procedure RemoveNotificationRegistration;
 begin
   RegDeleteKeyIncludingSubkeys(HKCU, 'Software\Classes\AppUserModelId\MoonCalendar.Athan');
   RegDeleteKeyIncludingSubkeys(HKCU, 'Software\Classes\mooncalendar-athan');
+end;
+
+
+{ True only for a dedicated application folder (its name is the app name and it contains our executable). }
+function IsOwnAppFolder: Boolean;
+var
+  Folder: String;
+begin
+  Folder := RemoveBackslash(ExpandConstant('{app}'));
+  Result := (CompareText(ExtractFileName(Folder), '{#MyAppName}') = 0) and
+    FileExists(Folder + '\{#MyAppExeName}');
 end;
 
 
@@ -403,8 +415,9 @@ begin
     CleanupMoonCalendarShortcuts();
 
     { Extra cleanup for files created after installation. }
-    if DirExists(ExpandConstant('{app}')) then
-      DelTree(ExpandConstant('{app}'), True, True, True);
+    if IsOwnAppFolder() or (CompareText(ExtractFileName(RemoveBackslash(ExpandConstant('{app}'))), '{#MyAppName}') = 0) then
+      if DirExists(ExpandConstant('{app}')) then
+        DelTree(ExpandConstant('{app}'), True, True, True);
 
     if DeleteSettings then
       DeleteMoonCalendarSettings();

@@ -75,6 +75,7 @@ object AthanNotifier {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setGroup("mooncalendar_athan")
             .setSound(soundUri, AudioManager.STREAM_NOTIFICATION)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
