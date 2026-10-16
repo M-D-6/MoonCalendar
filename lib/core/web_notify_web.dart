@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 
 /// Browser notification + audio for the athan while the site is open.
 /// Notifications need a secure (https) page and the user's permission, which can only be requested
@@ -22,7 +23,8 @@ extension type _Audio._(JSObject _) implements JSObject {
 _Audio? _audio;
 _Notification? _lastNotification;
 
-bool get _supported => globalContext.has('Notification');
+bool get _supported =>
+    globalContext.getProperty<JSAny?>('Notification'.toJS) != null;
 
 Future<bool> webNotifyRequestPermission() async {
   if (!_supported) return false;
@@ -42,9 +44,9 @@ void webNotifyShow(String title, String body) {
     if (_Notification.permission != 'granted') return;
     _lastNotification?.close();
     final options = JSObject()
-      ..['body'] = body.toJS
-      ..['tag'] = 'mooncalendar-athan'.toJS
-      ..['dir'] = 'auto'.toJS;
+      ..setProperty('body'.toJS, body.toJS)
+      ..setProperty('tag'.toJS, 'mooncalendar-athan'.toJS)
+      ..setProperty('dir'.toJS, 'auto'.toJS);
     _lastNotification = _Notification(title, options);
   } catch (_) {}
 }
