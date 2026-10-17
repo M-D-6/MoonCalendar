@@ -1,7 +1,6 @@
 import '../../core/platform_info.dart';
 import '../../core/l10n/l10n.dart';
 import '../widgets/tr_text.dart';
-import 'dart:io';
 import 'package:flutter/material.dart' hide Text;
 import 'package:flutter/services.dart';
 

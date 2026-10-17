@@ -2,7 +2,6 @@ import '../../core/platform_info.dart';
 import '../../core/l10n/l10n.dart';
 import '../widgets/tr_text.dart';
 import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart' show SynchronousFuture;
 import 'package:flutter/material.dart' hide Text;
@@ -966,6 +965,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 controller: _yearScroll,
                 itemExtent: _yearItemExtent,
                 itemCount: _yearListCount,
+                // ignore: deprecated_member_use
                 cacheExtent: _yearItemExtent,
                 itemBuilder: (context, i) {
                   final int year = _yearListBase + i;

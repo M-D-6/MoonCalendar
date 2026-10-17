@@ -518,7 +518,6 @@ class _HeroWeather extends StatelessWidget {
     final t = AppLocalizations.of(context);
     final condition = point?.condition.name ?? 'cloudy';
     final temp = (past || noData) ? '—' : formatTemperature(point?.temperature?.value, 'celsius');
-    final temperatureMetric = point?.temperature;
     return Padding(
       padding: const EdgeInsets.fromLTRB(22, 6, 22, 10),
       child: GlassCard(

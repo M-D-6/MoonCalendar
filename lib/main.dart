@@ -1,13 +1,12 @@
 import 'core/platform_info.dart';
-import 'core/l10n/l10n.dart';
 import 'dart:async';
-import 'dart:io';
 import 'dart:convert';
 
 import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show SystemChannels;
 
 import 'core/athan/athan_service.dart';
 import 'core/event_repository.dart';
@@ -53,6 +52,9 @@ Future<void> main(List<String> args) async {
     final imageCache = PaintingBinding.instance.imageCache;
     imageCache.maximumSize = 32;
     imageCache.maximumSizeBytes = 8 * 1024 * 1024;
+    // The renderer's GPU resource cache otherwise grows towards its (large) default on desktop; a smaller
+    // budget keeps the working set low and costs nothing visible (ignored when the engine has no such cache).
+    unawaited(SystemChannels.skia.invokeMethod<void>('Skia.setResourceCacheMaxBytes', 48 * 1024 * 1024).catchError((Object _) {}));
   }
 
   final settings = AppSettings();

@@ -1,7 +1,6 @@
 import 'platform_info.dart';
 import 'windows_autostart.dart';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -109,6 +108,9 @@ class AppSettings extends ChangeNotifier {
   static const _runInBackground = 'run_in_background';
   static const _exitAction = 'exit_action';
   static const _showWindowAtStartup = 'show_window_at_startup';
+  static const _autoUpdateCheck = 'auto_update_check';
+  static const _skippedUpdate = 'skipped_update_version';
+  static const _lastUpdateCheck = 'last_update_check_ms';
   static const _startWithWindows = 'start_with_windows';
   static const _showDesktopWidgets = 'show_desktop_widgets';
   static const _showTrayIcon = 'show_tray_icon';
@@ -411,6 +413,11 @@ class AppSettings extends ChangeNotifier {
 
   /// With "start with Windows": open the main window at sign-in instead of staying in the tray.
   bool showWindowAtStartup = false;
+
+  /// Look for a newer release once a day (off by default), the version the user chose to skip, and the last check.
+  bool autoUpdateCheck = false;
+  String skippedUpdate = '';
+  int lastUpdateCheckMs = 0;
   /// What the Exit button does on desktop: 'ask', 'quit' or 'tray'.
   String exitAction = 'ask';
   bool startWithWindows = false;
@@ -547,6 +554,9 @@ class AppSettings extends ChangeNotifier {
     athanCustomName = p.getString(_athanCustomName);
     runInBackground = p.getBool(_runInBackground) ?? PlatformInfo.isWindows;
     showWindowAtStartup = p.getBool(_showWindowAtStartup) ?? false;
+    autoUpdateCheck = p.getBool(_autoUpdateCheck) ?? false;
+    skippedUpdate = p.getString(_skippedUpdate) ?? '';
+    lastUpdateCheckMs = p.getInt(_lastUpdateCheck) ?? 0;
     exitAction = const {'ask', 'quit', 'tray'}.contains(p.getString(_exitAction)) ? p.getString(_exitAction)! : 'ask';
     startWithWindows = p.getBool(_startWithWindows) ?? PlatformInfo.isWindows;
     showDesktopWidgets = p.getBool(_showDesktopWidgets) ?? true;
@@ -673,6 +683,12 @@ class AppSettings extends ChangeNotifier {
   Future<void> setNotifyDateLockScreen(bool value) => _setBool(_notifyDateLockScreen, value, (v) => notifyDateLockScreen = v);
   Future<void> setLargeDayNumberNotification(bool value) => _setBool(_largeDayNumberNotification, value, (v) => largeDayNumberNotification = v);
   Future<void> setAthanVibration(bool value) => _setBool(_athanVibration, value, (v) => athanVibration = v);
+  Future<void> setAutoUpdateCheck(bool value) => _setBool(_autoUpdateCheck, value, (v) => autoUpdateCheck = v);
+
+  Future<void> setSkippedUpdate(String value) => _setString(_skippedUpdate, value, (v) => skippedUpdate = v);
+
+  Future<void> setLastUpdateCheck(int value) => _setInt(_lastUpdateCheck, value, onUpdate: (v) => lastUpdateCheckMs = v);
+
   Future<void> setShowWindowAtStartup(bool value) => _setBool(_showWindowAtStartup, value, (v) => showWindowAtStartup = v);
   Future<void> setExitAction(String value) => _setString(_exitAction, value, (v) => exitAction = v);
   Future<void> setRunInBackground(bool value) => _setBool(_runInBackground, value, (v) => runInBackground = v);

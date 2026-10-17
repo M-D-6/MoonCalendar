@@ -5,14 +5,13 @@ import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart' hide Text;
 import 'package:mooncalendar/ui/widgets/tr_text.dart';
-import 'package:mooncalendar/weather/wx_strings.dart';
 import 'package:mooncalendar/weather/utils/formatters.dart';
 import 'package:mooncalendar/weather/utils/wx_calendar.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import 'wx_icon.dart';
 
-/// YoWindow-style timeline.
+/// Scrollable forecast timeline.
 ///
 /// * One continuous, linear time axis: every local day is a rectangle whose width is
 ///   proportional to its 24 hours (a DST day is 23/25 hours wide).
@@ -110,7 +109,10 @@ class _FromNowPhysics extends ClampingScrollPhysics {
 }
 
 class _MarkerPainter extends CustomPainter {
-  const _MarkerPainter();
+  const _MarkerPainter(this.color);
+
+  /// Soft tone taken from the theme (not pure white).
+  final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -119,10 +121,10 @@ class _MarkerPainter extends CustomPainter {
     final line = Paint()
       ..strokeWidth = 2.2
       ..strokeCap = StrokeCap.round
-      ..shader = const LinearGradient(
+      ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: <Color>[Color(0xFFFFFFFF), Color(0x99FFFFFF)],
+        colors: <Color>[color, color.withValues(alpha: 0.6)],
       ).createShader(Rect.fromLTWH(x - 1, top, 2, size.height - top));
     canvas.drawLine(Offset(x, top), Offset(x, size.height - 8), Paint()
       ..color = Colors.black.withValues(alpha: 0.35)
@@ -137,12 +139,12 @@ class _MarkerPainter extends CustomPainter {
       ..lineTo(x, top + 2)
       ..close();
     canvas.drawShadow(arrow, Colors.black, 3, true);
-    canvas.drawPath(arrow, Paint()..color = Colors.white);
-    canvas.drawCircle(Offset(x, size.height - 8), 4.5, Paint()..color = Colors.white);
+    canvas.drawPath(arrow, Paint()..color = color);
+    canvas.drawCircle(Offset(x, size.height - 8), 4.5, Paint()..color = color);
   }
 
   @override
-  bool shouldRepaint(covariant _MarkerPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _MarkerPainter oldDelegate) => oldDelegate.color != color;
 }
 
 class WeatherTimelineState extends State<WeatherTimeline> {
@@ -368,8 +370,6 @@ class WeatherTimelineState extends State<WeatherTimeline> {
     final textColor = scheme.onSurface;
     final roomy = day.width >= 64; // very short slivers (the last/first hours) show no text
 
-    Widget fit(Widget child) => FittedBox(fit: BoxFit.scaleDown, child: child);
-
     return Positioned(
       left: pad + day.x0,
       width: day.width,
@@ -486,11 +486,10 @@ class WeatherTimelineState extends State<WeatherTimeline> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final now = DateTime.now().toUtc();
 
     return Directionality(
-      // The time axis always runs left -> right (past -> future), like YoWindow.
+      // The time axis always runs left -> right (past -> future).
       textDirection: TextDirection.ltr,
       child: SizedBox(
         height: _height,
@@ -545,7 +544,13 @@ class WeatherTimelineState extends State<WeatherTimeline> {
                   ),
                 ),
                 // Fixed marker through the cards.
-                const IgnorePointer(child: SizedBox.expand(child: CustomPaint(painter: _MarkerPainter()))),
+                IgnorePointer(
+                  child: SizedBox.expand(
+                    child: CustomPaint(
+                      painter: _MarkerPainter(Color.lerp(theme.colorScheme.primary, Colors.white, 0.55)!),
+                    ),
+                  ),
+                ),
               ],
             );
           },

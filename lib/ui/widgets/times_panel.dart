@@ -1,4 +1,3 @@
-import '../../core/l10n/l10n.dart';
 import 'tr_text.dart';
 import 'dart:async';
 import 'package:flutter/material.dart' hide Text;

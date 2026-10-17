@@ -7,7 +7,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 /// Asks for any date and time (in the app's main calendar) and returns it as a UTC instant, or null.
 ///
-/// Like YoWindow, any day can be visited: where there is no forecast the app shows "no data" but
+/// Any day can be visited: where there is no forecast the app shows "no data" but
 /// the landscape still follows the date (season, sun, moon phase).
 Future<DateTime?> showDateJumpDialog(
   BuildContext context, {

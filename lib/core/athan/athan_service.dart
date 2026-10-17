@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../calendar_math.dart';
 import '../l10n/l10n.dart';
 import '../settings.dart';
 import '../platform.dart';
@@ -333,11 +332,16 @@ class AthanService with WidgetsBindingObserver {
       );
     } else if (PlatformInfo.isWindows) {
       await AthanWindows.preview(title: title, body: body, soundPath: await windowsSoundPath(s));
+    } else if (PlatformInfo.isWeb) {
+      web_notify.webNotifyShow(title, body);
+      final option = athanBundledSound(s.athanSound) ?? athanBundledSounds.first;
+      web_notify.webAudioPlay('assets/assets/audio/${option.assetFile}');
     }
   }
 
   Future<void> stopPlayback() async {
     if (PlatformInfo.isWindows) await AthanWindows.stop();
+    if (PlatformInfo.isWeb) web_notify.webAudioStop();
   }
 
   /// Opens the platform's picker for a custom athan. Returns null if cancelled.

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-import 'dart:ui' show PathOperation;
 
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
@@ -21,7 +20,7 @@ import 'scene_light.dart' show LandscapeLight, Seasons, windAmplitude;
 
 /// Shape kinds (order of `kinds` in scene_vec.json).
 class _K {
-  static const mtn = 0, grass = 1, foliage = 2, canopy = 3, bush = 4, trunk = 5, wood = 6, path = 7, rock = 8, water = 9, snowcap = 10, roof = 11, cabin = 12, win = 13, dwin = 14, winframe = 15, flower = 16;
+  static const mtn = 0, grass = 1, foliage = 2, canopy = 3, bush = 4, trunk = 5, wood = 6, path = 7, rock = 8, water = 9, roof = 11, win = 13, flower = 16;
 }
 
 class _Region {
@@ -168,7 +167,9 @@ class _Group {
 class SceneData {
   SceneData._(this.regions, this.groups, this.waterPath, this.rippleClip, this.twigs, this.blossoms, this.blades, this.chimney, this.canopyGroup, this.waterHook, this.animalHook, this.hill);
 
+  // ignore: library_private_types_in_public_api
   final List<_Region> regions;
+  // ignore: library_private_types_in_public_api
   final List<_Group> groups;
   final Path waterPath;
 
@@ -256,6 +257,21 @@ class SceneAssets {
 
   static bool get ready => data != null;
 
+  static int _users = 0;
+
+  /// A scene on screen asks for the artwork; the last one to leave frees it (it is several MB of paths and
+  /// pictures, useless while the weather page is not open) and it is parsed again on the next visit.
+  static void acquire() => _users++;
+
+  static void release() {
+    if (_users > 0) _users--;
+    if (_users == 0) {
+      data = null;
+      _loading = null;
+      ImageLandscapeRenderer.disposeCache();
+    }
+  }
+
   /// Safe to call many times; the data is parsed once.
   static Future<void> load() => _loading ??= _loadAll();
 
@@ -263,6 +279,7 @@ class SceneAssets {
     try {
       final text = await rootBundle.loadString('assets/weather/scene_vec.json');
       data = SceneData.parse(text);
+      if (_users == 0) data = null; // the page was left while this was loading
     } catch (_) {
       data = null;
     }
@@ -368,7 +385,7 @@ class ImageLandscapeRenderer {
   ImageLandscapeRenderer({
     required this.seasons,
     required this.light,
-    required double clock,
+    required this.clock,
     required this.reduced,
     required this.snow,
     required this.rain,
@@ -378,7 +395,7 @@ class ImageLandscapeRenderer {
     this.windX = 0.6,
     this.time = 0,
     this.solarDay = 0,
-  }) : clock = clock;
+  });
 
   final Seasons seasons;
   final LandscapeLight light;
@@ -402,6 +419,16 @@ class ImageLandscapeRenderer {
   final double solarDay;
 
   static final _LookCache _cache = _LookCache();
+
+  /// Frees the recorded pictures (the next paint records them again).
+  static void disposeCache() {
+    for (final s in _cache.segs) {
+      s.picture?.dispose();
+    }
+    _cache.segs = <_Seg>[];
+    _cache.paints = <Paint>[];
+    _cache.key = '';
+  }
 
   /// Ambient value of the artwork itself (golden hour): the picture is shown ungraded here.
   static const double _refAmbient = 0.62;
@@ -639,7 +666,7 @@ class ImageLandscapeRenderer {
 
     // Everything inside this layer is colour graded together.
     canvas.saveLayer(bounds, Paint()..colorFilter = _lightFilter());
-    _Disp disp = (r, x, y) => _displace(r, x, y, d);
+    Offset disp(_Region r, double x, double y) => _displace(r, x, y, d);
     for (final s in _cache.segs) {
       if (s.picture != null) {
         canvas.drawPicture(s.picture!);
@@ -915,11 +942,15 @@ class ImageLandscapeRenderer {
   /// Chimney smoke: a plume of soft, overlapping puffs. It rises fast and slows down, widens,
   /// thins out and is bent along the wind's direction (strong wind lays it flat); in the cold it
   /// rises higher and looks whiter, like steam.
+  /// Blur filters in half-pixel steps, created once: a new native filter per puff per frame piles up garbage.
+  static final Map<int, ui.MaskFilter> _smokeBlurs = <int, ui.MaskFilter>{};
+  static ui.MaskFilter _smokeBlur(double sigma) => _smokeBlurs.putIfAbsent((sigma * 2).round(), () => ui.MaskFilter.blur(ui.BlurStyle.normal, (sigma * 2).round() / 2));
+
   void _smoke(Canvas canvas, SceneData d) {
     final cold = 1 + seasons.winter * 0.5;
     final tone = Color.lerp(const Color(0xFFE6EEF6), const Color(0xFF9AA4B5), _night)!;
     final wind = (_wind / 1.6).clamp(0.05, 2.6).toDouble();
-    const count = 34;
+    const count = 24;
     for (var k = 0; k < count; k++) {
       final i = count - 1 - k; // old puffs first, young ones on top
       final t = reduced ? i / count : ((clock * 0.05 + i / count) % 1.0);
@@ -934,7 +965,7 @@ class ImageLandscapeRenderer {
       final paint = Paint()
         ..isAntiAlias = true
         ..color = tone.withValues(alpha: a.clamp(0.0, 1.0).toDouble())
-        ..maskFilter = ui.MaskFilter.blur(ui.BlurStyle.normal, 1.0 + r * 0.42);
+        ..maskFilter = _smokeBlur(1.0 + r * 0.42);
       canvas.drawCircle(Offset(x, y), r, paint);
     }
   }

@@ -15,7 +15,8 @@ external _Window get _window;
 extension type _Window._(JSObject _) implements JSObject {
   external void addEventListener(String type, JSFunction listener);
   external void removeEventListener(String type, JSFunction listener);
-  external JSAny? get DeviceOrientationEvent;
+  @JS('DeviceOrientationEvent')
+  external JSAny? get deviceOrientationEvent;
   external void close();
 }
 
@@ -44,7 +45,7 @@ double? _headingOf(_OrientationEvent e) {
 }
 
 bool get _hasRequestPermission {
-  final cls = _window.DeviceOrientationEvent;
+  final cls = _window.deviceOrientationEvent;
   return cls != null && (cls as JSObject).has('requestPermission');
 }
 
@@ -67,7 +68,7 @@ bool get _isIos => _userAgent.contains('iPhone') || _userAgent.contains('iPad') 
 /// devices without the sensors (desktop browsers) fire one empty event or none, so a single event is not
 /// enough to call the sensor available.
 Future<bool> _probe(String eventName, bool Function(_OrientationEvent) hasData) async {
-  if (_window.DeviceOrientationEvent == null) return false;
+  if (_window.deviceOrientationEvent == null) return false;
   // iOS only reports after the permission was granted, so its presence is taken as available.
   if (_isIos && _hasRequestPermission) return true;
   var count = 0;
@@ -134,7 +135,7 @@ Stream<double> webCompassStream() => _controller.stream;
 Future<void> webCompassStart() async {
   try {
     if (!_hasRequestPermission) return;
-    final cls = _window.DeviceOrientationEvent as _OrientationEventClass;
+    final cls = _window.deviceOrientationEvent as _OrientationEventClass;
     await cls.requestPermission().toDart;
   } catch (_) {}
 }

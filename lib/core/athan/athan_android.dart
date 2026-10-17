@@ -1,5 +1,4 @@
 import '../platform_info.dart';
-import 'dart:io';
 
 import 'package:flutter/services.dart';
 
@@ -129,6 +128,28 @@ class AthanAndroid {
   static Future<void> cancelTemperature() async {
     if (!isSupported) return;
     try { await _channel.invokeMethod<void>('cancelTemperature'); } catch (_) {}
+  }
+
+  /// CPU architectures of this phone, best first (decides which release APK fits).
+  static Future<List<String>> supportedAbis() async {
+    if (!isSupported) return const <String>[];
+    try {
+      final list = await _channel.invokeListMethod<String>('supportedAbis');
+      return list ?? const <String>[];
+    } catch (_) {
+      return const <String>[];
+    }
+  }
+
+  /// Opens the system installer for a downloaded APK. False when it could not be opened or the user still has to
+  /// allow installs from this app (the settings page for that is opened).
+  static Future<bool> installApk(String path) async {
+    if (!isSupported) return false;
+    try {
+      return (await _channel.invokeMethod<bool>('installApk', <String, dynamic>{'path': path})) ?? false;
+    } catch (_) {
+      return false;
+    }
   }
 
   static Future<void> cancelDateNotification() async {

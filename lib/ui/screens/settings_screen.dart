@@ -3,11 +3,13 @@ import '../../core/l10n/l10n.dart';
 import '../widgets/tr_text.dart';
 import 'dart:async';
 import 'theme_dialog.dart';
-import 'dart:io';
 
 import 'package:flutter/material.dart' hide Text;
 import 'calendar_dialogs.dart' show showCalendarPriorityDialog;
 import '../widgets/glass.dart';
+import '../widgets/update_dialog.dart';
+import '../../core/app_version.dart';
+import '../../core/update_service.dart';
 
 import '../../core/athan/athan_android.dart';
 import '../../core/athan/athan_common.dart';
@@ -269,6 +271,16 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
               ),
               _switch('نمایش آیکون Tray', 'نمایش آیکون Mooncalendar در ناحیهٔ اعلان ویندوز', settings.showTrayIcon, settings.setShowTrayIcon, Icons.notifications_none_outlined),
             ]),
+          if (UpdateService.isSupported)
+            _section('به‌روزرسانی', [
+              _switch('بررسی خودکار به‌روزرسانی', 'روزی یک بار نسخهٔ جدید برنامه در GitHub بررسی شود', settings.autoUpdateCheck, settings.setAutoUpdateCheck, Icons.system_update_alt_rounded),
+              ListTile(
+                leading: const Icon(Icons.update_rounded),
+                title: const Text('بررسی به‌روزرسانی', textDirection: TextDirection.rtl),
+                subtitle: Text('نسخهٔ فعلی: ${toPersianDigits(appVersion)}', textDirection: TextDirection.rtl),
+                onTap: () => UpdateUi.checkNow(context, settings),
+              ),
+            ]),
         ],
       );
 
@@ -522,14 +534,14 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
               trailing: Icon(L10n.chevron),
               onTap: _athanSoundDialog,
             ),
-          if (hasLocation && AthanService.isSupported)
+          if (hasLocation && (AthanService.isSupported || PlatformInfo.isWeb))
             ListTile(
               leading: const Icon(Icons.volume_up_outlined),
               title: const Text('پیش‌نمایش', textDirection: TextDirection.rtl),
               subtitle: const Text('اعلان و صدای اذان را همین حالا مثل زمان واقعی نشان می‌دهد', textDirection: TextDirection.rtl),
               onTap: _athanPreviewDialog,
             ),
-          if (hasLocation && PlatformInfo.isWindows)
+          if (hasLocation && (PlatformInfo.isWindows || PlatformInfo.isWeb))
             ListTile(
               leading: const Icon(Icons.stop_circle_outlined),
               title: const Text('توقف صدای اذان', textDirection: TextDirection.rtl),

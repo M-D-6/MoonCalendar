@@ -137,7 +137,7 @@ class ConsensusEngine {
     if (before != null && before.time.toUtc().isAtSameMomentAs(time)) return before;
 
     WeatherSample? nearestWithin(Duration limit) {
-      final candidates = [if (before != null) before, if (after != null) after];
+      final candidates = [?before, ?after];
       WeatherSample? best;
       var bestDelta = limit + const Duration(microseconds: 1);
       for (final candidate in candidates) {

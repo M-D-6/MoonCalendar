@@ -80,6 +80,7 @@ class _WeatherSceneState extends State<WeatherScene> with SingleTickerProviderSt
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    SceneAssets.acquire();
     if (PlatformInfo.isWeb) {
       // A browser keeps animating an unfocused window; stop while another window or tab is in front.
       _webActivity = PlatformServices.webActivity().listen((active) {
@@ -179,6 +180,7 @@ class _WeatherSceneState extends State<WeatherScene> with SingleTickerProviderSt
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _webActivity?.cancel();
+    SceneAssets.release();
     _ticker.dispose();
     _repaint.dispose();
     super.dispose();

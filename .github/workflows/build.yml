@@ -99,33 +99,11 @@ jobs:
             $exe = Find-Iscc
           }
           if (-not $exe) { throw "Inno Setup compiler not found" }
-          # Read the installed Inno Setup version from Windows uninstall metadata first.
-          # Some Chocolatey builds report 0.0.0.0 in the executable's ProductVersion.
-          $version = $null
-          $registryPaths = @(
-            'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*',
-            'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*'
-          )
-          foreach ($path in $registryPaths) {
-            $entry = Get-ItemProperty $path -ErrorAction SilentlyContinue |
-              Where-Object { $_.DisplayName -match '^Inno Setup' -and $_.DisplayVersion -match '^\d+\.\d+' } |
-              Select-Object -First 1
-            if ($entry) { $version = $entry.DisplayVersion; break }
-          }
-          # Fall back to executable metadata, preferring FileVersion over a placeholder ProductVersion.
-          if (-not $version) {
-            $fileInfo = [Diagnostics.FileVersionInfo]::GetVersionInfo($exe)
-            foreach ($candidate in @($fileInfo.ProductVersion, $fileInfo.FileVersion)) {
-              if ($candidate -match '(?<!\d)(\d+\.\d+(?:\.\d+){0,2})(?!\d)' -and $Matches[1] -ne '0.0.0.0') {
-                $version = $Matches[1]
-                break
-              }
-            }
-          }
-          if (-not $version) { throw "Could not determine the installed Inno Setup version" }
+          # Every build log records exactly which compiler produced the installer.
+          $version = [Diagnostics.FileVersionInfo]::GetVersionInfo($exe).ProductVersion
           Write-Host "Inno Setup compiler: $exe"
           Write-Host "Inno Setup version: $version"
-          # Keep the expected major version check, but do not rely on placeholder PE metadata.
+          # A new major version is a deliberate upgrade, not something a runner image update should do silently.
           if (-not $version.StartsWith('6.')) { throw "Unexpected Inno Setup version $version (expected 6.x)" }
           & $exe windows/installer/Mooncalendar.iss
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed" }

@@ -13,7 +13,7 @@ import 'retrying_dio.dart';
 /// * Etiquette: identify the app with a User-Agent and stay far below the published
 ///   rate limit (we do at most one request per city per refresh, i.e. >= 30 min).
 ///
-/// This is *observed* data and is used for the "now" value (like YoWindow does) and,
+/// This is *observed* data and is used for the "now" value and,
 /// later, to learn which forecast model is the most accurate for the region.
 class MetarProvider {
   MetarProvider(this.client, {required this.projectUrl});
@@ -49,7 +49,7 @@ class MetarProvider {
     final response = await client.get(
       'https://aviationweather.gov/api/data/metar',
       queryParameters: {'bbox': bbox, 'format': 'json', 'hours': 3},
-      headers: {'User-Agent': 'Mooncalendar/1.1.4 ($projectUrl)', 'Accept': 'application/json'},
+      headers: {'User-Agent': 'Mooncalendar/1.1.5 ($projectUrl)', 'Accept': 'application/json'},
     );
     if (response.statusCode != 200 || response.data is! List) return null;
 

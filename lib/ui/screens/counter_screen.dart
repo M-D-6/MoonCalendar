@@ -2,7 +2,6 @@ import '../../core/platform_info.dart';
 import '../../core/l10n/l10n.dart';
 import '../widgets/tr_text.dart';
 import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart' hide Text;

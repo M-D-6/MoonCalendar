@@ -1,6 +1,5 @@
 import 'platform_info.dart';
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/painting.dart' show PaintingBinding;
 
@@ -9,7 +8,6 @@ import 'package:window_manager/window_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'athan/athan_service.dart';
-import 'calendar_math.dart';
 import 'settings.dart';
 import 'platform.dart';
 import 'desktop_widgets/desktop_widget_service.dart';

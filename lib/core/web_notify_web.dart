@@ -23,8 +23,7 @@ extension type _Audio._(JSObject _) implements JSObject {
 _Audio? _audio;
 _Notification? _lastNotification;
 
-bool get _supported =>
-    globalContext.getProperty<JSAny?>('Notification'.toJS) != null;
+bool get _supported => globalContext.hasProperty('Notification'.toJS).toDart;
 
 Future<bool> webNotifyRequestPermission() async {
   if (!_supported) return false;

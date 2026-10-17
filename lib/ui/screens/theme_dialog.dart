@@ -110,8 +110,6 @@ class _ThemeDialogState extends State<_ThemeDialog> {
     final mode = _customOpen ? _Mode.custom : _modeOf(s);
     Widget tile(_Mode m, String title, {String? sub}) => RadioListTile<_Mode>(
           value: m,
-          groupValue: mode,
-          onChanged: (v) => _pick(v!),
           title: Text(title),
           subtitle: sub == null ? null : Text(sub, style: TextStyle(color: cs.onSurfaceVariant, fontSize: 12)),
           contentPadding: const EdgeInsets.symmetric(horizontal: 8),
@@ -124,7 +122,10 @@ class _ThemeDialogState extends State<_ThemeDialog> {
       content: SizedBox(
         width: 360,
         child: SingleChildScrollView(
-          child: Column(
+          child: RadioGroup<_Mode>(
+            groupValue: mode,
+            onChanged: (v) => _pick(v!),
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -139,6 +140,7 @@ class _ThemeDialogState extends State<_ThemeDialog> {
                 child: _customOpen ? _panel(cs) : const SizedBox(width: double.infinity),
               ),
             ],
+            ),
           ),
         ),
       ),
@@ -246,20 +248,22 @@ Future<void> showLanguageDialog(BuildContext context, AppSettings settings) {
         contentPadding: const EdgeInsets.fromLTRB(8, 12, 8, 0),
         content: SizedBox(
           width: 320,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final l in AppLanguage.values)
-                RadioListTile<AppLanguage>(
-                  value: l,
-                  groupValue: settings.language,
-                  onChanged: (v) async {
-                    Navigator.pop(dialogContext);
-                    await settings.setLanguage(v!);
-                  },
-                  title: Align(alignment: AlignmentDirectional.centerStart, child: PlainText(l.nativeName, textDirection: L10n.direction)),
-                ),
-            ],
+          child: RadioGroup<AppLanguage>(
+            groupValue: settings.language,
+            onChanged: (v) async {
+              Navigator.pop(dialogContext);
+              await settings.setLanguage(v!);
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final l in AppLanguage.values)
+                  RadioListTile<AppLanguage>(
+                    value: l,
+                    title: Align(alignment: AlignmentDirectional.centerStart, child: PlainText(l.nativeName, textDirection: L10n.direction)),
+                  ),
+              ],
+            ),
           ),
         ),
         actions: [TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('لغو'))],

@@ -11,7 +11,7 @@ import 'weather_controller.dart';
 import 'wx_strings.dart';
 
 /// Keeps the ongoing temperature notification up to date while the app is running.
-/// Text is built here, in the app language only: "<city>" over "<temperature> • <condition>".
+/// Text is built here, in the app language only: `city` over `temperature • condition`.
 class TemperatureNotifier {
   TemperatureNotifier(this.settings, this.controllerFor);
 

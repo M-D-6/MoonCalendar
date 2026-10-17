@@ -4,7 +4,7 @@
 #define MyAppVersion GetEnv("MOONCALENDAR_VERSION")
 #if MyAppVersion == ""
   #undef MyAppVersion
-  #define MyAppVersion "1.1.4"
+  #define MyAppVersion "1.1.5"
 #endif
 
 ; Flutter build folder: build\windows\<arch>\runner\Release.
@@ -87,8 +87,8 @@ UninstallLogMode=append
 
 RedirectionGuard=yes
 
-Compression=zip
-SolidCompression=no
+Compression=lzma
+SolidCompression=yes
 
 UseSetupLdr=x64
 
@@ -155,6 +155,11 @@ Filename: "{app}\{#MyAppExeName}"; \
     Description: "{cm:LaunchProgram,{#MyAppName}}"; \
     Flags: nowait postinstall skipifsilent
 
+; Silent runs (the in-app updater) have no finish page: start the new version right away.
+Filename: "{app}\{#MyAppExeName}"; \
+    WorkingDir: "{app}"; \
+    Flags: nowait skipifnotsilent
+
 
 [CustomMessages]
 
@@ -172,6 +177,45 @@ ar.AdditionalIcons=اختصارات إضافية:
 ar.CreateStartMenuShortcut=إنشاء اختصار في قائمة ابدأ
 ar.CreateDesktopIcon=إنشاء اختصار على سطح المكتب
 ar.LaunchProgram=تشغيل %1
+
+en.ModeTitle=Mooncalendar is already installed
+en.ModeSubtitle=Version %1 is installed. Choose what to do.
+en.ModeUpdate=Update to version %1 (keeps your settings)
+en.ModeRepair=Repair this installation (reinstall the program files, keeps your settings)
+en.ModeReinstall=Reinstall version %1 over the installed version %2
+en.ModeUninstall=Uninstall Mooncalendar
+en.BtnUpdate=&Update
+en.BtnRepair=&Repair
+en.ReadyUpdate=Setup is ready to update Mooncalendar to version %1.
+en.ReadyRepair=Setup is ready to repair Mooncalendar. Your settings are kept.
+en.DoneUpdate=Mooncalendar was updated.
+en.DoneRepair=Mooncalendar was repaired.
+
+fa.ModeTitle=Mooncalendar از قبل نصب شده است
+fa.ModeSubtitle=نسخهٔ %1 نصب است. یکی از گزینه‌ها را انتخاب کنید.
+fa.ModeUpdate=به‌روزرسانی به نسخهٔ %1 (تنظیمات شما حفظ می‌شود)
+fa.ModeRepair=تعمیر نصب فعلی (نصب دوبارهٔ فایل‌های برنامه، تنظیمات حفظ می‌شود)
+fa.ModeReinstall=نصب دوبارهٔ نسخهٔ %1 روی نسخهٔ نصب‌شدهٔ %2
+fa.ModeUninstall=حذف Mooncalendar
+fa.BtnUpdate=&به‌روزرسانی
+fa.BtnRepair=&تعمیر
+fa.ReadyUpdate=برنامه آمادهٔ به‌روزرسانی Mooncalendar به نسخهٔ %1 است.
+fa.ReadyRepair=برنامه آمادهٔ تعمیر Mooncalendar است. تنظیمات شما حفظ می‌شود.
+fa.DoneUpdate=Mooncalendar به‌روزرسانی شد.
+fa.DoneRepair=Mooncalendar تعمیر شد.
+
+ar.ModeTitle=Mooncalendar مثبّت بالفعل
+ar.ModeSubtitle=الإصدار %1 مثبّت. اختر ما تريد فعله.
+ar.ModeUpdate=التحديث إلى الإصدار %1 (مع الاحتفاظ بإعداداتك)
+ar.ModeRepair=إصلاح هذا التثبيت (إعادة تثبيت ملفات البرنامج مع الاحتفاظ بالإعدادات)
+ar.ModeReinstall=إعادة تثبيت الإصدار %1 فوق الإصدار المثبّت %2
+ar.ModeUninstall=إزالة Mooncalendar
+ar.BtnUpdate=&تحديث
+ar.BtnRepair=&إصلاح
+ar.ReadyUpdate=الإعداد جاهز لتحديث Mooncalendar إلى الإصدار %1.
+ar.ReadyRepair=الإعداد جاهز لإصلاح Mooncalendar. سيتم الاحتفاظ بإعداداتك.
+ar.DoneUpdate=تم تحديث Mooncalendar.
+ar.DoneRepair=تم إصلاح Mooncalendar.
 
 
 [Code]
@@ -210,6 +254,8 @@ end;
 procedure RemoveNotificationRegistration;
 begin
   RegDeleteKeyIncludingSubkeys(HKCU, 'Software\Classes\AppUserModelId\MoonCalendar.Athan');
+  RegDeleteKeyIncludingSubkeys(HKCU, 'Software\Classes\AppUserModelId\MoonCalendar.Date');
+  RegDeleteKeyIncludingSubkeys(HKCU, 'Software\Classes\AppUserModelId\MoonCalendar.Weather');
   RegDeleteKeyIncludingSubkeys(HKCU, 'Software\Classes\mooncalendar-athan');
 end;
 
@@ -421,5 +467,135 @@ begin
 
     if DeleteSettings then
       DeleteMoonCalendarSettings();
+  end;
+end;
+
+
+{ ---------------------------------------------------------------------------------------------
+  Setup side: recognise an existing installation and offer Update / Repair / Uninstall instead of
+  a plain first-time install. Silent runs (the in-app updater) skip all of this and just update. }
+
+var
+  ModePage: TInputOptionWizardPage;
+  InstalledVersion: String;
+  InstalledUninstaller: String;
+  { 0 = fresh install, 1 = update (older version installed), 2 = repair / reinstall (same or newer) }
+  InstallMode: Integer;
+  LeaveWithoutAsking: Boolean;
+
+
+function UninstallKey: String;
+begin
+  Result := 'Software\Microsoft\Windows\CurrentVersion\Uninstall\' + '{5B2E9C41-7D68-4A13-9E0F-3C84D1A6B72E}' + '_is1';
+end;
+
+
+function DetectInstalled: Boolean;
+var
+  Raw: String;
+begin
+  Result := False;
+  InstalledVersion := '';
+  InstalledUninstaller := '';
+  if RegQueryStringValue(HKCU, UninstallKey, 'DisplayVersion', InstalledVersion) then
+  begin
+    RegQueryStringValue(HKCU, UninstallKey, 'UninstallString', Raw);
+    InstalledUninstaller := RemoveQuotes(Raw);
+    Result := True;
+  end;
+end;
+
+
+function ComparedToInstalled: Integer;
+var
+  A, B: Int64;
+begin
+  if StrToVersion(InstalledVersion, A) and StrToVersion('{#MyAppVersion}', B) then
+    Result := ComparePackedVersion(B, A)
+  else
+    Result := 0;
+end;
+
+
+procedure InitializeWizard;
+begin
+  InstallMode := 0;
+  if not DetectInstalled then
+    Exit;
+
+  if ComparedToInstalled > 0 then
+    InstallMode := 1
+  else
+    InstallMode := 2;
+
+  ModePage := CreateInputOptionPage(wpWelcome, CustomMessage('ModeTitle'),
+    FmtMessage(CustomMessage('ModeSubtitle'), [InstalledVersion]), '', True, False);
+
+  if InstallMode = 1 then
+    ModePage.Add(FmtMessage(CustomMessage('ModeUpdate'), ['{#MyAppVersion}']))
+  else if ComparedToInstalled = 0 then
+    ModePage.Add(CustomMessage('ModeRepair'))
+  else
+    ModePage.Add(FmtMessage(CustomMessage('ModeReinstall'), ['{#MyAppVersion}', InstalledVersion]));
+  ModePage.Add(CustomMessage('ModeUninstall'));
+  ModePage.SelectedValueIndex := 0;
+end;
+
+
+{ The install location is kept from the existing installation. }
+function ShouldSkipPage(PageID: Integer): Boolean;
+begin
+  Result := (InstallMode <> 0) and (PageID = wpSelectDir);
+end;
+
+
+function NextButtonClick(CurPageID: Integer): Boolean;
+var
+  ResultCode: Integer;
+begin
+  Result := True;
+  if (InstallMode <> 0) and (CurPageID = ModePage.ID) and (ModePage.SelectedValueIndex = 1) then
+  begin
+    { Hand over to the regular uninstaller (it asks about settings itself) and leave. }
+    if (InstalledUninstaller <> '') and FileExists(InstalledUninstaller) then
+      Exec(InstalledUninstaller, '', '', SW_SHOWNORMAL, ewNoWait, ResultCode);
+    Result := False;
+    LeaveWithoutAsking := True;
+    WizardForm.Close;
+  end;
+end;
+
+
+procedure CancelButtonClick(CurPageID: Integer; var Cancel, Confirm: Boolean);
+begin
+  if LeaveWithoutAsking then
+    Confirm := False;
+end;
+
+
+procedure CurPageChanged(CurPageID: Integer);
+begin
+  if InstallMode = 0 then
+    Exit;
+
+  if CurPageID = wpReady then
+  begin
+    if InstallMode = 1 then
+    begin
+      WizardForm.NextButton.Caption := CustomMessage('BtnUpdate');
+      WizardForm.ReadyLabel.Caption := FmtMessage(CustomMessage('ReadyUpdate'), ['{#MyAppVersion}']);
+    end
+    else
+    begin
+      WizardForm.NextButton.Caption := CustomMessage('BtnRepair');
+      WizardForm.ReadyLabel.Caption := CustomMessage('ReadyRepair');
+    end;
+  end
+  else if CurPageID = wpFinished then
+  begin
+    if InstallMode = 1 then
+      WizardForm.FinishedLabel.Caption := CustomMessage('DoneUpdate')
+    else
+      WizardForm.FinishedLabel.Caption := CustomMessage('DoneRepair');
   end;
 end;

@@ -2,7 +2,6 @@ import '../core/platform_info.dart';
 import '../core/l10n/l10n.dart';
 import 'widgets/tr_text.dart';
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart' hide Text;
 import 'package:flutter/services.dart';
@@ -36,12 +35,12 @@ import 'screens/level_screen.dart';
 import '../weather/weather_controller.dart';
 import '../weather/temperature_notifier.dart';
 import '../weather/weather_screen.dart';
-import '../weather/widgets/weather_scene.dart';
 import 'theme.dart';
 import 'widgets/app_drawer.dart';
 import 'widgets/glass.dart';
 import 'widgets/page_frame.dart';
 import 'widgets/startup_splash.dart';
+import 'widgets/update_dialog.dart';
 
 class MoonCalendarApp extends StatefulWidget {
   final AppSettings settings;
@@ -291,21 +290,6 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
     _scheduleMidnightRollover();
   }
 
-  Widget _drawerScene() {
-    final cached = _weatherCtl?.cached;
-    final now = DateTime.now().toUtc();
-    final point = cached?.forecast.interpolatedAt(now);
-    final usable = point != null && now.difference(point.time.toUtc()).abs() <= const Duration(hours: 1);
-    return WeatherScene(
-      point: usable ? point : null,
-      timezone: cached?.forecast.timezone ?? 'UTC',
-      reduceMotion: false,
-      zoom: 1.9,
-      latitude: widget.settings.latitude ?? cached?.forecast.latitude ?? 35.7,
-      longitude: widget.settings.longitude ?? cached?.forecast.longitude ?? 51.4,
-    );
-  }
-
   Timer? _midnightTimer;
   int _lastSeenDay = _dayStamp(DateTime.now());
 
@@ -353,6 +337,10 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
     await Future<void>.delayed(const Duration(milliseconds: 1500));
     if (!mounted) return;
     await _syncWidgetData();
+    // Optional daily look for a newer release (off unless the user enabled it).
+    await Future<void>.delayed(const Duration(seconds: 6));
+    if (!mounted) return;
+    unawaited(UpdateUi.autoCheck(context, widget.settings));
   }
 
   Timer? _widgetSyncDebounce;
@@ -1020,9 +1008,6 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
     return AppDrawerMenu(
       key: _drawerMenuKey,
       seasonAsset: 'assets/images/seasons/$season.webp',
-      // The same living landscape as the weather page: it follows the time of day and the season, and shows the
-      // current weather only when a forecast is already loaded (otherwise a neutral, partly cloudy sky).
-      headerScene: _drawerScene(),
       appName: 'Mooncalendar',
       dateText: () {
         final cal = widget.settings.mainCalendar;

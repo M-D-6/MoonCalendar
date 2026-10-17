@@ -1,5 +1,5 @@
 /// A real, measured weather observation (not a forecast), e.g. from the nearest
-/// airport METAR station. YoWindow shows the same kind of value as "current weather".
+/// airport METAR station. It is shown as the current weather.
 class CurrentObservation {
   const CurrentObservation({
     required this.stationId,

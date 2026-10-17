@@ -124,7 +124,7 @@ class SceneLife {
   SceneLife({
     required this.seasons,
     required this.light,
-    required double clock,
+    required this.clock,
     required this.reduced,
     required this.snow,
     required this.rain,
@@ -132,7 +132,7 @@ class SceneLife {
     required this.cloud,
     this.meadowTop = 0,
     this.wind = 18,
-  }) : clock = clock;
+  });
 
   final Seasons seasons;
   final LandscapeLight light;

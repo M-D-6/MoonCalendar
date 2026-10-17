@@ -1,7 +1,6 @@
 import 'platform_info.dart';
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:geolocator/geolocator.dart';
@@ -182,7 +181,7 @@ class LocationService {
       final response = await http.get(uri, headers: const <String, String>{
         'Accept': 'application/json',
         'Accept-Language': 'fa,en',
-        'User-Agent': 'MooncalendarFlutter/1.1.4',
+        'User-Agent': 'MooncalendarFlutter/1.1.5',
       }).timeout(const Duration(seconds: 4));
       if (response.statusCode != 200) return null;
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));

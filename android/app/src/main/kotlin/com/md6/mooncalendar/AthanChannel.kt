@@ -126,6 +126,11 @@ class AthanChannel(private val activity: Activity) : MethodChannel.MethodCallHan
                 result.success(null)
             }
 
+            "supportedAbis" -> result.success(Build.SUPPORTED_ABIS.toList())
+            "installApk" -> {
+                val path = call.argument<String>("path")
+                result.success(path != null && installApk(File(path)))
+            }
             "cancelTemperature" -> {
                 TemperatureNotification.cancel(activity)
                 result.success(null)
@@ -339,5 +344,28 @@ class AthanChannel(private val activity: Activity) : MethodChannel.MethodCallHan
         } ?: return null
         val shared = FileProvider.getUriForFile(activity, "${activity.packageName}.provider", out)
         return mapOf("uri" to shared.toString(), "name" to name)
+    }
+
+    /** Opens the system package installer for a downloaded update; sends the user to the "allow installs" page first if needed. */
+    private fun installApk(file: File): Boolean {
+        if (!file.exists()) return false
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !activity.packageManager.canRequestPackageInstalls()) {
+                activity.startActivity(
+                    Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + activity.packageName))
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                )
+                return false
+            }
+            val uri = FileProvider.getUriForFile(activity, activity.packageName + ".provider", file)
+            activity.startActivity(
+                Intent(Intent.ACTION_VIEW)
+                    .setDataAndType(uri, "application/vnd.android.package-archive")
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+            )
+            true
+        } catch (_: Exception) {
+            false
+        }
     }
 }
