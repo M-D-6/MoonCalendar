@@ -91,12 +91,36 @@ class _Region {
   bool anim = false;
   late final Path staticPath = _toPath(null);
 
+  /// Where the shape can ever be drawn (including its movement); bounds an offscreen layer instead of the whole canvas.
+  late final Rect layerBounds = _outline();
+
+  Rect _outline() {
+    var box = ell == null ? staticPath.getBounds() : Rect.fromLTRB(0, 0, 0, 0);
+    final e = ell;
+    if (e != null && e.length >= 4) {
+      var l = 1e9, t = 1e9, rr = -1e9, b = -1e9;
+      for (var i = 0; i + 3 < e.length; i += 4) {
+        l = math.min(l, e[i] - e[i + 2]);
+        rr = math.max(rr, e[i] + e[i + 2]);
+        t = math.min(t, e[i + 1] - e[i + 3]);
+        b = math.max(b, e[i + 1] + e[i + 3]);
+      }
+      box = Rect.fromLTRB(l, t, rr, b);
+    }
+    return box.inflate(80);
+  }
+
   /// A smooth closed curve through the shape's points (quadratic curves between the mid points;
   /// corner points are stored twice so they stay sharp).
+  // Scratch buffers and a path reused for every animated frame, so moving shapes allocate nothing per frame.
+  Float64List? _xs;
+  Float64List? _ys;
+  Path? _live;
+
   Path _toPath(_Disp? d) {
     final n = p.length ~/ 2;
-    final xs = List<double>.filled(n, 0);
-    final ys = List<double>.filled(n, 0);
+    final xs = _xs ??= Float64List(n);
+    final ys = _ys ??= Float64List(n);
     for (var i = 0; i < n; i++) {
       var x = p[i * 2], y = p[i * 2 + 1];
       if (d != null) {
@@ -107,7 +131,13 @@ class _Region {
       xs[i] = x;
       ys[i] = y;
     }
-    final path = Path();
+    final Path path;
+    if (d == null) {
+      path = Path();
+    } else {
+      path = _live ??= Path();
+      path.reset();
+    }
     if (n < 3) return path;
     path.moveTo((xs[n - 1] + xs[0]) / 2, (ys[n - 1] + ys[0]) / 2);
     for (var i = 0; i < n; i++) {
@@ -452,7 +482,19 @@ class ImageLandscapeRenderer {
 
   /// Colour grading of the whole artwork: slightly fresher and cooler in full daylight,
   /// washed out when overcast, dark and blue at night. At the reference light it is identity.
+  // The grade only changes with the light, so one filter object serves many frames.
+  static ui.ColorFilter? _filterCache;
+  static int _filterKey = 0;
+
   ui.ColorFilter _lightFilter() {
+    final key = Object.hash((_day * 200).round(), (light.overcast * 200).round(), (_night * 200).round());
+    final cached = _filterCache;
+    if (cached != null && key == _filterKey) return cached;
+    _filterKey = key;
+    return _filterCache = _buildLightFilter();
+  }
+
+  ui.ColorFilter _buildLightFilter() {
     var m = _identity();
     m = _compose(m, _diag(1 + 0.02 * _day, 1 + 0.045 * _day, 1 + 0.08 * _day));
     final sat = (1 + 0.10 * _day) * (1 - 0.50 * light.overcast);
@@ -681,7 +723,7 @@ class ImageLandscapeRenderer {
         // bare crown
       } else if (!(r.kind == _K.flower && seasons.winter > 0.4)) {
         final fade = r.kind == _K.canopy && _canopyAlpha < 0.99;
-        if (fade) canvas.saveLayer(null, Paint()..color = Color.fromARGB((_canopyAlpha * 255).round().clamp(0, 255).toInt(), 255, 255, 255));
+        if (fade) canvas.saveLayer(r.layerBounds, Paint()..color = Color.fromARGB((_canopyAlpha * 255).round().clamp(0, 255).toInt(), 255, 255, 255));
         r.draw(canvas, _cache.paints[r.idx], disp);
         if (fade) canvas.restore();
       }
@@ -720,7 +762,7 @@ class ImageLandscapeRenderer {
       p
         ..color = (dark ? const Color(0xFF1E6FD0) : const Color(0xFFFFFFFF)).withValues(alpha: (dark ? a * 1.2 : a).clamp(0.0, 1.0).toDouble())
         ..strokeWidth = 1.0 + u * 2.2;
-      final path = Path()..moveTo(x, y);
+      final path = (_scratch..reset())..moveTo(x, y);
       const n = 6;
       for (var j = 1; j <= n; j++) {
         final px = x + length * j / n;
@@ -781,6 +823,9 @@ class ImageLandscapeRenderer {
   // ------------------------------------------------------------------ grass blades
 
   /// Hundreds of grass blades along the hill ridges; each leans and springs back in the wind.
+  // One path reused by every per-frame stroke / blade / twig (the canvas copies it when it is drawn).
+  static final Path _scratch = Path();
+
   void _blades(Canvas canvas, SceneData d) {
     final paint = Paint()..isAntiAlias = true;
     var lastHex = -1;
@@ -803,7 +848,7 @@ class ImageLandscapeRenderer {
         lean = (math.sin(clock * 1.9 + x * 0.045 + i * 0.7) * 0.55 + math.sin(clock * 3.7 + x * 0.11 + i) * 0.2) * h * 0.9 * gust;
       }
       final w = 0.9 + h * 0.12;
-      final path = Path()
+      final path = (_scratch..reset())
         ..moveTo(x - w, y + 1.5)
         ..quadraticBezierTo(x - w * 0.4 + lean * 0.25, y - h * 0.55, x + lean, y - h)
         ..quadraticBezierTo(x + w * 0.4 + lean * 0.25, y - h * 0.55, x + w, y + 1.5)
@@ -844,7 +889,7 @@ class ImageLandscapeRenderer {
     final len = d.distance;
     if (len < 0.01) return;
     final n = Offset(-d.dy / len, d.dx / len);
-    final path = Path()
+    final path = (_scratch..reset())
       ..moveTo(a.dx + n.dx * w0 / 2, a.dy + n.dy * w0 / 2)
       ..lineTo(b.dx + n.dx * w1 / 2, b.dy + n.dy * w1 / 2)
       ..lineTo(b.dx - n.dx * w1 / 2, b.dy - n.dy * w1 / 2)

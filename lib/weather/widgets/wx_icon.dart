@@ -27,10 +27,24 @@ class _WxIconPainter extends CustomPainter {
   final bool isDay;
 
   // The icon is designed on a 100 x 100 canvas.
+  // Each variant is recorded once (boolean geometry and gradients are costly) and replayed for every cell.
+  static final Map<int, ui.Picture> _pictures = <int, ui.Picture>{};
+
   @override
   void paint(Canvas canvas, Size size) {
+    final key = condition.index * 2 + (isDay ? 1 : 0);
+    final picture = _pictures.putIfAbsent(key, () {
+      final recorder = ui.PictureRecorder();
+      _draw(Canvas(recorder));
+      return recorder.endRecording();
+    });
     canvas.save();
     canvas.scale(size.width / 100, size.height / 100);
+    canvas.drawPicture(picture);
+    canvas.restore();
+  }
+
+  void _draw(Canvas canvas) {
     switch (condition) {
       case WeatherCondition.clear:
         _body(canvas, const Offset(50, 50), 1.0);
@@ -73,7 +87,6 @@ class _WxIconPainter extends CustomPainter {
           ..close();
         canvas.drawPath(bolt, Paint()..color = const Color(0xFFFFC83D));
     }
-    canvas.restore();
   }
 
   void _body(Canvas canvas, Offset c, double scale) {

@@ -55,11 +55,21 @@ internal object TemperatureNotification {
         }
         val bounds = android.graphics.Rect()
         paint.getTextBounds(digits, 0, digits.length, bounds)
-        val maxW = s * 0.56f
-        val maxH = s * 0.56f
-        val scale = minOf(maxW / bounds.width().coerceAtLeast(1), maxH / bounds.height().coerceAtLeast(1))
-        paint.textSize = s * scale
+        // Same glyph height for Latin and Persian digits: size by height, then narrow the glyphs
+        // (up to 20 %) before shrinking when the number is wide.
+        val targetH = s * 0.48f
+        val maxW = s * 0.64f
+        paint.textSize = s * (targetH / bounds.height().coerceAtLeast(1))
         paint.getTextBounds(digits, 0, digits.length, bounds)
+        if (bounds.width() > maxW) {
+            val need = maxW / bounds.width()
+            paint.textScaleX = need.coerceAtLeast(0.8f)
+            paint.getTextBounds(digits, 0, digits.length, bounds)
+            if (bounds.width() > maxW) {
+                paint.textSize = paint.textSize * maxW / bounds.width()
+                paint.getTextBounds(digits, 0, digits.length, bounds)
+            }
+        }
         val cx = s * 0.46f
         canvas.drawText(digits, cx - bounds.exactCenterX(), s * 0.55f - bounds.exactCenterY(), paint)
         val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply {

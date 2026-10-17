@@ -6,6 +6,7 @@ import 'dart:js_interop_unsafe';
 /// Notifications need a secure (https) page and the user's permission, which can only be requested
 /// from a user gesture (a click in the settings).
 
+@JS('Notification')
 extension type _Notification._(JSObject _) implements JSObject {
   external factory _Notification(String title, JSObject options);
   external static String get permission;
@@ -13,6 +14,7 @@ extension type _Notification._(JSObject _) implements JSObject {
   external void close();
 }
 
+@JS('Audio')
 extension type _Audio._(JSObject _) implements JSObject {
   external factory _Audio(String src);
   external JSPromise<JSAny?> play();

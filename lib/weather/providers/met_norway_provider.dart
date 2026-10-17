@@ -15,7 +15,7 @@ class MetNorwayProvider implements WeatherProvider {
   @override
   String get id => 'met-no';
 
-  String get userAgent => 'Mooncalendar/1.1.5 ($projectUrl)';
+  String get userAgent => 'Mooncalendar/1.1.6 ($projectUrl)';
 
   @override
   Future<ProviderForecast> fetch(LocationCoordinate location, {ProviderCacheState? cacheState}) async {

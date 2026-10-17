@@ -4,7 +4,7 @@
 #define MyAppVersion GetEnv("MOONCALENDAR_VERSION")
 #if MyAppVersion == ""
   #undef MyAppVersion
-  #define MyAppVersion "1.1.5"
+  #define MyAppVersion "1.1.6"
 #endif
 
 ; Flutter build folder: build\windows\<arch>\runner\Release.

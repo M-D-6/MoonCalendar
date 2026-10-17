@@ -526,7 +526,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
             ),
           if (hasLocation) _athanAlarmsTile(),
           if (hasLocation) _athanStatusTiles(),
-          if (hasLocation && AthanService.isSupported)
+          if (hasLocation && (AthanService.isSupported || PlatformInfo.isWeb))
             ListTile(
               leading: const Icon(Icons.music_note_outlined),
               title: const Text('انتخاب اذان', textDirection: TextDirection.rtl),
@@ -735,7 +735,8 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                     subtitle: const Text('انتخاب از زنگ‌ها و اعلان‌های گوشی', textDirection: TextDirection.rtl),
                     onTap: () => pickCustom(AthanService.instance.pickRingtone),
                   ),
-                ListTile(
+                if (!PlatformInfo.isWeb)
+                  ListTile(
                   leading: const Icon(Icons.audio_file_outlined),
                   title: const Text('بیشتر', textDirection: TextDirection.rtl),
                   subtitle: const Text('انتخاب یک پرونده صوتی، برای نمونه «mp3»', textDirection: TextDirection.rtl),
@@ -768,7 +769,9 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
       ),
     );
     if (prayer == null) return;
-    if (!await _ensureNotificationPermission()) return;
+    // In a browser the sound plays even when the notification permission is refused.
+    final allowed = await _ensureNotificationPermission();
+    if (!allowed && !PlatformInfo.isWeb) return;
     try {
       await AthanService.instance.preview(prayer);
     } catch (_) {

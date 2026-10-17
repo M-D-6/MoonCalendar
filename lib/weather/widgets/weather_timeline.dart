@@ -109,42 +109,54 @@ class _FromNowPhysics extends ClampingScrollPhysics {
 }
 
 class _MarkerPainter extends CustomPainter {
-  const _MarkerPainter(this.color);
+  const _MarkerPainter(this.color, this.top);
 
   /// Soft tone taken from the theme (not pure white).
   final Color color;
 
+  /// Where the line ends: the top edge of the day cards.
+  final double top;
+
   @override
   void paint(Canvas canvas, Size size) {
     final x = size.width / 2;
-    const top = 22.0;
-    final line = Paint()
-      ..strokeWidth = 2.2
-      ..strokeCap = StrokeCap.round
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: <Color>[color, color.withValues(alpha: 0.6)],
-      ).createShader(Rect.fromLTWH(x - 1, top, 2, size.height - top));
-    canvas.drawLine(Offset(x, top), Offset(x, size.height - 8), Paint()
-      ..color = Colors.black.withValues(alpha: 0.35)
-      ..strokeWidth = 4.5
-      ..strokeCap = StrokeCap.round
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.5));
-    canvas.drawLine(Offset(x, top), Offset(x, size.height - 8), line);
-    // Handle: a downward arrow head at the top and a small dot at the bottom.
-    final arrow = Path()
-      ..moveTo(x - 8, 4)
-      ..lineTo(x + 8, 4)
-      ..lineTo(x, top + 2)
-      ..close();
-    canvas.drawShadow(arrow, Colors.black, 3, true);
-    canvas.drawPath(arrow, Paint()..color = color);
-    canvas.drawCircle(Offset(x, size.height - 8), 4.5, Paint()..color = color);
+    final bottom = size.height - 8;
+    final rect = Rect.fromLTRB(x - 2, top, x + 2, bottom);
+    // The line rises from the dot to the height of the day cards and fades out at its upper end.
+    final fade = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: <Color>[color.withValues(alpha: 0), color, color],
+      stops: const <double>[0.0, 0.38, 1.0],
+    ).createShader(rect);
+    canvas.drawLine(
+      Offset(x, top),
+      Offset(x, bottom),
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: const <Color>[Color(0x00000000), Color(0x59000000), Color(0x59000000)],
+          stops: const <double>[0.0, 0.38, 1.0],
+        ).createShader(rect)
+        ..strokeWidth = 4.5
+        ..strokeCap = StrokeCap.round
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.5),
+    );
+    canvas.drawLine(
+      Offset(x, top),
+      Offset(x, bottom),
+      Paint()
+        ..shader = fade
+        ..strokeWidth = 2.2
+        ..strokeCap = StrokeCap.round,
+    );
+    canvas.drawCircle(Offset(x, bottom), 4.5, Paint()..color = Colors.black.withValues(alpha: 0.30)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2));
+    canvas.drawCircle(Offset(x, bottom), 4.5, Paint()..color = color);
   }
 
   @override
-  bool shouldRepaint(covariant _MarkerPainter oldDelegate) => oldDelegate.color != color;
+  bool shouldRepaint(covariant _MarkerPainter oldDelegate) => oldDelegate.color != color || oldDelegate.top != top;
 }
 
 class WeatherTimelineState extends State<WeatherTimeline> {
@@ -515,7 +527,8 @@ class WeatherTimelineState extends State<WeatherTimeline> {
                         controller: _scroll,
                         scrollDirection: Axis.horizontal,
                         physics: _FromNowPhysics(() => _xOf(DateTime.now().toUtc()), () => _xOf(_dataEnd)),
-                        child: SizedBox(
+                        child: RepaintBoundary(
+                         child: SizedBox(
                           width: _contentWidth + pad * 2,
                           height: _height,
                           child: Stack(
@@ -538,6 +551,7 @@ class WeatherTimelineState extends State<WeatherTimeline> {
                               ),
                             ],
                           ),
+                         ),
                         ),
                       ),
                     ),
@@ -545,9 +559,11 @@ class WeatherTimelineState extends State<WeatherTimeline> {
                 ),
                 // Fixed marker through the cards.
                 IgnorePointer(
-                  child: SizedBox.expand(
-                    child: CustomPaint(
-                      painter: _MarkerPainter(Color.lerp(theme.colorScheme.primary, Colors.white, 0.55)!),
+                  child: RepaintBoundary(
+                    child: SizedBox.expand(
+                      child: CustomPaint(
+                        painter: _MarkerPainter(Color.lerp(theme.colorScheme.primary, Colors.white, 0.55)!, _markerBand),
+                      ),
                     ),
                   ),
                 ),

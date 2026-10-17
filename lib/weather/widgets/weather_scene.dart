@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
-import 'dart:ui' show PathOperation, PointMode;
+import 'dart:ui' show PathOperation, PointMode, Shader;
 
 import 'package:consensus_engine/consensus_engine.dart';
 import 'package:flutter/scheduler.dart' show Ticker;
@@ -58,7 +58,9 @@ class _WeatherSceneState extends State<WeatherScene> with SingleTickerProviderSt
   Duration _lastPaint = Duration.zero;
 
   /// The scene is a slow ambient animation: ~30 frames a second look the same as 60-144 and cost half the CPU.
-  static const Duration _frameGap = Duration(milliseconds: 30);
+  static const Duration _frameGapNative = Duration(milliseconds: 66);
+  static const Duration _frameGapWeb = Duration(milliseconds: 66);
+  static Duration get _frameGap => PlatformInfo.isWeb ? _frameGapWeb : _frameGapNative;
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -438,6 +440,32 @@ class _ScenePainter extends CustomPainter {
   static final List<List<double>> _drops = _buildDrops(260);
   static final List<List<double>> _flakes = _buildDrops(160);
 
+  // Gradients and the moon's lit shape are rebuilt only when their inputs change (they live in native memory).
+  static final Map<int, Shader> _cloudShaders = <int, Shader>{};
+  static final Float32List _starPoint = Float32List(2);
+  static Path? _moonLit;
+  static int _moonKey = 0;
+
+  static Shader _cloudShader(Color c, Color shade, double alpha) {
+    final top = c.withValues(alpha: alpha);
+    final under = shade.withValues(alpha: alpha);
+    final key = Object.hash(top.toARGB32(), under.toARGB32());
+    final cached = _cloudShaders[key];
+    if (cached != null) return cached;
+    if (_cloudShaders.length > 48) {
+      for (final shader in _cloudShaders.values) {
+        shader.dispose();
+      }
+      _cloudShaders.clear();
+    }
+    return _cloudShaders[key] = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [top, top, under],
+      stops: const [0.0, 0.58, 1.0],
+    ).createShader(const Rect.fromLTRB(-2, -1.25, 2, 0));
+  }
+
   static double _hash(int n) {
     final x = math.sin(n * 127.1 + 311.7) * 43758.5453;
     return x - x.floorToDouble();
@@ -559,7 +587,9 @@ class _ScenePainter extends CustomPainter {
         paint
           ..color = Colors.white.withValues(alpha: (starVisibility * twinkle * (0.35 + star[2] * 0.35)).clamp(0.0, 1.0))
           ..strokeWidth = compact ? star[2] * 0.55 : star[2];
-        canvas.drawPoints(PointMode.points, [Offset(star[0] * w, star[1] * horizonY)], paint);
+        _starPoint[0] = star[0] * w;
+        _starPoint[1] = star[1] * horizonY;
+        canvas.drawRawPoints(PointMode.points, _starPoint, paint);
       }
     }
 
@@ -683,21 +713,27 @@ class _ScenePainter extends CustomPainter {
   }
 
   void _drawMoon(Canvas canvas, Offset c, double r, double illumination, double limbAngle, double alpha) {
-    final rect = Rect.fromCircle(center: c, radius: r);
     // Dark side (earthshine).
     canvas.drawCircle(c, r, Paint()..color = const Color(0xFF8FA2C8).withValues(alpha: 0.22 * alpha));
     // Lit side drawn on the right, then turned so that it faces the Sun.
     canvas.save();
     canvas.translate(c.dx, c.dy);
     canvas.rotate(limbAngle - math.pi / 2);
-    canvas.translate(-c.dx, -c.dy);
-    final half = Path()
-      ..moveTo(c.dx, c.dy - r)
-      ..arcTo(rect, -math.pi / 2, math.pi, false)
-      ..close();
-    final a = r * (1 - 2 * illumination).abs();
-    final ellipse = Path()..addOval(Rect.fromCenter(center: c, width: 2 * a, height: 2 * r));
-    final lit = illumination < 0.5 ? Path.combine(PathOperation.difference, half, ellipse) : Path.combine(PathOperation.union, half, ellipse);
+    // The lit shape is built around the origin and only rebuilt when the phase or size really changes.
+    final key = Object.hash((r * 4).round(), (illumination * 500).round());
+    var lit = _moonLit;
+    if (lit == null || key != _moonKey) {
+      final origin = Rect.fromCircle(center: Offset.zero, radius: r);
+      final half = Path()
+        ..moveTo(0, -r)
+        ..arcTo(origin, -math.pi / 2, math.pi, false)
+        ..close();
+      final a = r * (1 - 2 * illumination).abs();
+      final ellipse = Path()..addOval(Rect.fromCenter(center: Offset.zero, width: 2 * a, height: 2 * r));
+      lit = illumination < 0.5 ? Path.combine(PathOperation.difference, half, ellipse) : Path.combine(PathOperation.union, half, ellipse);
+      _moonLit = lit;
+      _moonKey = key;
+    }
     canvas.drawPath(lit, Paint()..color = const Color(0xFFF3F6FF).withValues(alpha: 0.96 * alpha));
     canvas.restore();
   }
@@ -732,12 +768,7 @@ class _ScenePainter extends CustomPainter {
       canvas.scale(u);
       final paint = Paint()
         ..isAntiAlias = true
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [cloudColor.withValues(alpha: alpha), cloudColor.withValues(alpha: alpha), shadeColor.withValues(alpha: alpha)],
-          stops: const [0.0, 0.58, 1.0],
-        ).createShader(const Rect.fromLTRB(-2, -1.25, 2, 0));
+        ..shader = _cloudShader(cloudColor, shadeColor, (alpha * 100).round() / 100);
       canvas.drawPath(cloud.path, paint);
       canvas.restore();
     }

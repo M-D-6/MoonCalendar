@@ -1,7 +1,7 @@
 name: mooncalendar
 publish_to: "none"
 description: Mooncalendar — a Persian calendar built with Flutter, based on the Android Persian Calendar project.
-version: 1.1.5+6
+version: 1.1.6+7
 
 environment:
   sdk: ">=3.9.0 <4.0.0"
