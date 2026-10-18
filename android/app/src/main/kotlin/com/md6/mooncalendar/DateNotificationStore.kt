@@ -105,7 +105,6 @@ internal object DateNotificationStore {
             .setSilent(true)
             .setAutoCancel(false)
             .setOnlyAlertOnce(true)
-            .setGroup("mooncalendar_date")
             .setWhen(0L)
             .setShowWhen(false)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -145,7 +144,7 @@ internal object DateNotificationStore {
             builder.setStyle(NotificationCompat.BigTextStyle().bigText(expandedBody))
         }
 
-        notificationManager.notify(NOTIFICATION_ID, builder.build())
+        runCatching { notificationManager.notify(NOTIFICATION_ID, builder.build()) }
     }
 
     /**

@@ -278,22 +278,32 @@ class UpdateService {
 
   static Future<String> _install(File file) async {
     if (PlatformInfo.isWindows) {
+      final logPath = '${file.parent.path}${Platform.pathSeparator}setup.log';
+      final args = ['/SILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/CLOSEAPPLICATIONS', '/LOG=$logPath'];
       try {
-        // PowerShell waits for this process to be gone (the setup refuses to run over an open app), then starts the
-        // setup silently. The script travels base64 encoded, so spaces and non-Latin letters in paths are safe.
-        final path = file.path.replaceAll("'", "''");
-        final script = "Start-Sleep -Seconds 2; Start-Process -FilePath '$path' -ArgumentList '/SILENT','/SUPPRESSMSGBOXES','/NORESTART','/CLOSEAPPLICATIONS'";
-        final bytes = <int>[for (final unit in script.codeUnits) ...[unit & 0xFF, unit >> 8]];
-        await Process.start(
-          'powershell.exe',
-          ['-NoProfile', '-NonInteractive', '-WindowStyle', 'Hidden', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', base64Encode(bytes)],
-          mode: ProcessStartMode.detached,
-        );
-        Future<void>.delayed(const Duration(milliseconds: 400), () => WindowsDesktopService.instance.exitApp());
-        return 'ok';
+        // The setup is started directly and detached from this process. It waits by itself until the running app
+        // (its single-instance mutex) is gone, so the app only has to close right after.
+        await Process.start(file.path, args, mode: ProcessStartMode.detached);
+        _log('install: setup started directly, log $logPath');
       } catch (e) {
-        return 'error:${e.runtimeType}: $e';
+        _log('install: direct start failed ${e.runtimeType}: $e; trying the shell');
+        try {
+          final path = file.path.replaceAll("'", "''");
+          final list = args.map((a) => "'${a.replaceAll("'", "''")}'").join(',');
+          final script = 'Start-Process -FilePath \'$path\' -ArgumentList $list';
+          final bytes = <int>[for (final unit in script.codeUnits) ...[unit & 0xFF, unit >> 8]];
+          await Process.start(
+            'powershell.exe',
+            ['-NoProfile', '-NonInteractive', '-WindowStyle', 'Hidden', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', base64Encode(bytes)],
+            mode: ProcessStartMode.detached,
+          );
+          _log('install: setup started through the shell');
+        } catch (e2) {
+          return 'error:${e2.runtimeType}: $e2';
+        }
       }
+      Future<void>.delayed(const Duration(milliseconds: 1500), () => WindowsDesktopService.instance.exitApp());
+      return 'ok';
     }
     if (PlatformInfo.isAndroid) return AthanAndroid.installApk(file.path);
     return 'error:unsupported';

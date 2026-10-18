@@ -20,6 +20,9 @@ class TemperatureNotifier {
   Timer? _timer;
   bool _active = false;
   DateTime? _lastRefresh;
+  String? _lastPosted;
+  Timer? _deferred;
+  DateTime _lastPostAt = DateTime.fromMillisecondsSinceEpoch(0);
 
   static bool get supported => PlatformInfo.isAndroid || PlatformInfo.isWindows;
 
@@ -47,6 +50,8 @@ class TemperatureNotifier {
       _controller = null;
       _timer?.cancel();
       _timer = null;
+      _deferred?.cancel();
+      _lastPosted = null;
       AthanAndroid.cancelTemperature();
       AthanWindows.clearTemperature();
     }
@@ -73,6 +78,17 @@ class TemperatureNotifier {
     final rtl = L10n.lang != AppLanguage.en;
     final temperature = L10n.digits(formatTemperature(temp, 'celsius'));
     final title = c.current.name;
+    // Identical content is not posted again, and posts are at least 20 s apart: the system throttles bursts.
+    final signature = '$title|$temperature|${settings.notifyDateLockScreen}|${L10n.lang.name}';
+    final now = DateTime.now();
+    if (signature == _lastPosted && now.difference(_lastPostAt) < const Duration(minutes: 10)) return;
+    if (signature != _lastPosted && now.difference(_lastPostAt) < const Duration(seconds: 20)) {
+      _deferred?.cancel();
+      _deferred = Timer(const Duration(seconds: 20) - now.difference(_lastPostAt) + const Duration(milliseconds: 200), () => unawaited(_post()));
+      return;
+    }
+    _lastPosted = signature;
+    _lastPostAt = now;
     final direction = compassDirection(point.windDirection);
     final windValue = L10n.digits(formatWind(point.windSpeed?.value, 'kmh'));
     final wind = point.windSpeed?.value == null ? '' : (direction.isEmpty || direction == '—' ? windValue : '$windValue ($direction)');
@@ -97,6 +113,7 @@ class TemperatureNotifier {
   void dispose() {
     _controller?.removeListener(_onWeather);
     _timer?.cancel();
+    _deferred?.cancel();
     _active = false;
   }
 }

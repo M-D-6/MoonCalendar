@@ -23,25 +23,24 @@ internal object TemperatureNotification {
     private const val NOTIFICATION_ID = 1004
     private const val CHANNEL_ID = "mooncalendar_temperature_notification"
 
+    /** What is currently posted; an identical update is skipped (the system rate-limits and flickers on repeats). */
+    @Volatile private var lastKey: String? = null
+
     fun cancel(context: Context) {
+        lastKey = null
         NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID)
     }
 
+    private fun isShown(manager: NotificationManager): Boolean =
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+            runCatching { manager.activeNotifications.any { it.id == NOTIFICATION_ID } }.getOrDefault(false)
+
     /** Status-bar glyph: the temperature digits, drawn white (the system tints it). */
     private fun temperatureIcon(context: Context, text: String): IconCompat {
-        val size = (48f * context.resources.displayMetrics.density).roundToInt().coerceAtLeast(96)
+        val size = (24f * context.resources.displayMetrics.density).roundToInt().coerceIn(48, 96)
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val s = size.toFloat()
-        // Frame: a rounded thermometer-style badge (rounded square with a small bulb notch at the bottom).
-        val stroke = s * 0.075f
-        val framePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.WHITE
-            style = Paint.Style.STROKE
-            strokeWidth = stroke
-        }
-        val frame = RectF(stroke, stroke, s - stroke, s - stroke)
-        canvas.drawRoundRect(frame, s * 0.26f, s * 0.26f, framePaint)
         // Digits only (the degree sign is drawn as a small ring at the top corner, like a superscript).
         val digits = text.trim().replace("°", "").ifEmpty { "--" }
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -53,8 +52,8 @@ internal object TemperatureNotification {
         paint.getTextBounds(digits, 0, digits.length, bounds)
         // Same glyph height for Latin and Persian digits: size by height, then narrow the glyphs
         // (up to 20 %) before shrinking when the number is wide.
-        val targetH = s * 0.48f
-        val maxW = s * 0.64f
+        val targetH = s * 0.62f
+        val maxW = s * 0.78f
         paint.textSize = s * (targetH / bounds.height().coerceAtLeast(1))
         paint.getTextBounds(digits, 0, digits.length, bounds)
         if (bounds.width() > maxW) {
@@ -66,14 +65,14 @@ internal object TemperatureNotification {
                 paint.getTextBounds(digits, 0, digits.length, bounds)
             }
         }
-        val cx = s * 0.46f
-        canvas.drawText(digits, cx - bounds.exactCenterX(), s * 0.55f - bounds.exactCenterY(), paint)
+        val cx = s * 0.44f
+        canvas.drawText(digits, cx - bounds.exactCenterX(), s * 0.56f - bounds.exactCenterY(), paint)
         val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
             style = Paint.Style.STROKE
             strokeWidth = s * 0.05f
         }
-        canvas.drawCircle(s * 0.80f, s * 0.27f, s * 0.065f, ring)
+        canvas.drawCircle(s * 0.86f, s * 0.2f, s * 0.07f, ring)
         return IconCompat.createWithBitmap(bitmap)
     }
 
@@ -95,6 +94,8 @@ internal object TemperatureNotification {
     ) {
         if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return
         val manager = context.getSystemService(NotificationManager::class.java) ?: return
+        val key = "$temperature|$lockScreen"
+        if (key == lastKey && isShown(manager)) return
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
@@ -115,13 +116,12 @@ internal object TemperatureNotification {
             .setOngoing(true)
             .setSilent(true)
             .setOnlyAlertOnce(true)
-            .setGroup("mooncalendar_temperature")
             .setShowWhen(false)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_STATUS)
             .setVisibility(if (lockScreen) NotificationCompat.VISIBILITY_PUBLIC else NotificationCompat.VISIBILITY_SECRET)
         AstronomyWidgetSupport.launchApp(context, requestCode = 1004)?.let { builder.setContentIntent(it) }
         // A notification problem must never take the app (or the other notifications) down with it.
-        runCatching { manager.notify(NOTIFICATION_ID, builder.build()) }
+        if (runCatching { manager.notify(NOTIFICATION_ID, builder.build()) }.isSuccess) lastKey = key
     }
 }
