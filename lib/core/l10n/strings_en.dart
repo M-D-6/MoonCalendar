@@ -1648,6 +1648,21 @@ const Map<String, String> enStrings = <String, String>{
   'در حال دریافت به‌روزرسانی': 'Downloading update',
   'برای نصب، اجازهٔ «نصب برنامه از این منبع» را بدهید و دوباره به‌روزرسانی را بزنید.': 'Allow "install apps from this source" for Mooncalendar, then tap Update again.',
   'دریافت به‌روزرسانی ناموفق بود؛ دوباره تلاش کنید.': 'The update download failed. Please try again.',
+  'صفحهٔ دانلود': 'Download page',
+  'دریافت به‌روزرسانی ناموفق بود. می‌توانید فایل را از صفحهٔ دانلود بگیرید.': 'The update download failed. You can get the file from the download page.',
+  'نصب به‌روزرسانی شروع نشد. می‌توانید فایل را از صفحهٔ دانلود بگیرید.': 'The update could not be started. You can get the file from the download page.',
+  'در حال بررسی آخرین نسخه…': 'Checking the latest version…',
+  'نسخهٔ منتشرشده‌ای پیدا نشد.': 'No published release was found.',
+  'فایل نصب این نسخه برای دستگاه شما در صفحهٔ انتشار پیدا نشد.': 'The installer for your device was not found on the release page.',
+  'نصب مجدد آخرین نسخه': 'Install the latest version again',
+  'آخرین نسخهٔ منتشرشده': 'Latest published version',
+  'نسخهٔ فعلی': 'Current version',
+  'فایل نصب دریافت و روی نسخهٔ فعلی نصب می‌شود.': 'The installer is downloaded and installed over the current version.',
+  'دریافت و نصب': 'Download and install',
+  'بررسی آخرین نسخه ممکن نشد؛ اتصال اینترنت را بررسی کنید.': 'Could not check the latest version; check your internet connection.',
+  'جزئیات فنی': 'Technical details',
+  'کپی جزئیات': 'Copy details',
+  'حتی اگر نسخهٔ جدیدتری نباشد، فایل نصب آخرین انتشار دریافت و نصب می‌شود': 'Even without a newer version, the installer of the latest release is downloaded and installed',
 };
 
 const Map<String, String> enTemplates = <String, String>{

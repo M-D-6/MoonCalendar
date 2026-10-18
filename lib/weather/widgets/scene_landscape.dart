@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 
+import '../../core/platform_info.dart';
 import 'scene_light.dart' show LandscapeLight, Seasons, windAmplitude;
 
 /// The illustrated landscape of the live scene, drawn entirely with code.
@@ -407,6 +408,9 @@ class _Seg {
 
 class _LookCache {
   String key = '';
+  // Still image of the whole landscape (used when it does not move), and what it was drawn for.
+  ui.Picture? still;
+  String stillKey = '';
   List<Paint> paints = <Paint>[];
   List<_Seg> segs = <_Seg>[];
 }
@@ -458,6 +462,9 @@ class ImageLandscapeRenderer {
     _cache.segs = <_Seg>[];
     _cache.paints = <Paint>[];
     _cache.key = '';
+    _cache.still?.dispose();
+    _cache.still = null;
+    _cache.stillKey = '';
   }
 
   /// Ambient value of the artwork itself (golden hour): the picture is shown ungraded here.
@@ -704,6 +711,34 @@ class ImageLandscapeRenderer {
     canvas.save();
     canvas.translate(frame.dx, frame.dy);
     canvas.scale(frame.scale);
+    if (reduced) {
+      // Nothing moves: the whole landscape is one recorded picture, replayed for every frame.
+      final key = _stillKey();
+      if (_cache.still == null || _cache.stillKey != key) {
+        final recorder = ui.PictureRecorder();
+        final c = Canvas(recorder);
+        _graded(c, d);
+        _overlays(c, d);
+        _cache.still?.dispose();
+        _cache.still = recorder.endRecording();
+        _cache.stillKey = key;
+      }
+      canvas.drawPicture(_cache.still!);
+    } else {
+      _graded(canvas, d);
+      _overlays(canvas, d);
+    }
+    canvas.restore();
+  }
+
+  /// Everything the still picture depends on (the look, the light grade, the lit windows, the smoke's lean).
+  String _stillKey() {
+    int q(double v, [double k = 20]) => (v * k).round();
+    return '${_lookKey()}|${q(light.overcast)}|${q(light.sunVisible)}|${q(light.moonVisible)}|${q(windX, 10)}|${q(_wind, 1)}|${solarDay.floor()}';
+  }
+
+  /// The colour graded part: shapes, grass, flowers, twigs and blossoms.
+  void _graded(Canvas canvas, SceneData d) {
     final bounds = Rect.fromLTWH(0, 0, SceneFrame.refWidth, SceneFrame.refHeight);
 
     // Everything inside this layer is colour graded together.
@@ -733,11 +768,13 @@ class ImageLandscapeRenderer {
     _bareTree(canvas, d);
     _blossoms(canvas, d);
     canvas.restore();
+  }
 
+  /// Water glints, window light and chimney smoke, drawn over the graded part.
+  void _overlays(Canvas canvas, SceneData d) {
     _glints(canvas, d);
     _windowLight(canvas);
     _smoke(canvas, d);
-    canvas.restore();
   }
 
   // ------------------------------------------------------------------------ river
@@ -750,7 +787,7 @@ class ImageLandscapeRenderer {
     final p = Paint()..strokeCap = StrokeCap.round;
     const span = SceneFrame.refWidth + 300;
     final live = reduced ? 0.0 : 1.0;
-    for (var i = 0; i < 120; i++) {
+    for (var i = 0; i < _rippleCount; i++) {
       final u = math.pow(_hash(i * 7 + 1), 0.9).toDouble();
       final y = 600 + u * (SceneFrame.refHeight - 600);
       final speed = live * (9 + _hash(i * 5 + 3) * 16) * (0.4 + u);
@@ -823,6 +860,10 @@ class ImageLandscapeRenderer {
   // ------------------------------------------------------------------ grass blades
 
   /// Hundreds of grass blades along the hill ridges; each leans and springs back in the wind.
+  // The browser rasterises in WebAssembly: fewer ripple streaks and smoke puffs there look the same at a glance.
+  static final int _rippleCount = PlatformInfo.isWeb ? 64 : 120;
+  static final int _smokePuffs = PlatformInfo.isWeb ? 14 : 24;
+
   // One path reused by every per-frame stroke / blade / twig (the canvas copies it when it is drawn).
   static final Path _scratch = Path();
 
@@ -995,7 +1036,7 @@ class ImageLandscapeRenderer {
     final cold = 1 + seasons.winter * 0.5;
     final tone = Color.lerp(const Color(0xFFE6EEF6), const Color(0xFF9AA4B5), _night)!;
     final wind = (_wind / 1.6).clamp(0.05, 2.6).toDouble();
-    const count = 24;
+    final count = _smokePuffs;
     for (var k = 0; k < count; k++) {
       final i = count - 1 - k; // old puffs first, young ones on top
       final t = reduced ? i / count : ((clock * 0.05 + i / count) % 1.0);

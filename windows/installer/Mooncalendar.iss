@@ -502,6 +502,13 @@ begin
     RegQueryStringValue(HKCU, UninstallKey, 'UninstallString', Raw);
     InstalledUninstaller := RemoveQuotes(Raw);
     Result := True;
+  end
+  else if RegQueryStringValue(HKLM, UninstallKey, 'DisplayVersion', InstalledVersion) then
+  begin
+    { An older all-users installation. }
+    RegQueryStringValue(HKLM, UninstallKey, 'UninstallString', Raw);
+    InstalledUninstaller := RemoveQuotes(Raw);
+    Result := True;
   end;
 end;
 
@@ -545,7 +552,9 @@ end;
 { The install location is kept from the existing installation. }
 function ShouldSkipPage(PageID: Integer): Boolean;
 begin
-  Result := (InstallMode <> 0) and (PageID = wpSelectDir);
+  Result := False;
+  if InstallMode <> 0 then
+    Result := (PageID = wpSelectDir);
 end;
 
 
@@ -554,10 +563,14 @@ var
   ResultCode: Integer;
 begin
   Result := True;
-  if (InstallMode <> 0) and (CurPageID = ModePage.ID) and (ModePage.SelectedValueIndex = 1) then
+  if InstallMode = 0 then
+    Exit;
+  if CurPageID <> ModePage.ID then
+    Exit;
+  if ModePage.SelectedValueIndex = 1 then
   begin
     { Hand over to the regular uninstaller (it asks about settings itself) and leave. }
-    if (InstalledUninstaller <> '') and FileExists(InstalledUninstaller) then
+    if FileExists(InstalledUninstaller) then
       Exec(InstalledUninstaller, '', '', SW_SHOWNORMAL, ewNoWait, ResultCode);
     Result := False;
     LeaveWithoutAsking := True;

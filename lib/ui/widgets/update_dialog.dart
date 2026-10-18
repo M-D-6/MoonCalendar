@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart' hide Text;
+import 'package:flutter/services.dart';
 
 import '../../core/app_version.dart';
 import '../../core/calendar_math.dart' show toPersianDigits;
 import '../../core/settings.dart';
 import '../../core/update_service.dart';
+import '../../core/l10n/l10n.dart';
 import 'tr_text.dart';
 
 /// User-facing part of the update system: the "new version" prompt, the download progress and the manual check.
@@ -46,12 +48,79 @@ class UpdateUi {
       } else {
         await _prompt(context, settings, info);
       }
-    } catch (_) {
+    } catch (e) {
       messenger.hideCurrentSnackBar();
-      messenger.showSnackBar(const SnackBar(content: Text('بررسی به‌روزرسانی ممکن نشد؛ اتصال اینترنت را بررسی کنید.')));
+      UpdateService.log.add('check: failed ${e.runtimeType}: $e');
+      if (context.mounted) await _showFailure(context, 'بررسی به‌روزرسانی ممکن نشد؛ اتصال اینترنت را بررسی کنید.');
     } finally {
       _busy = false;
     }
+  }
+
+  /// Settings → "Install the latest release again": offers the newest published release even when it is the
+  /// version already installed (a repair, and a way to test the whole download and install path).
+  static Future<void> reinstallLatest(BuildContext context, AppSettings settings) async {
+    if (_busy) return;
+    _busy = true;
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(const SnackBar(content: Text('در حال بررسی آخرین نسخه…'), duration: Duration(seconds: 2)));
+    try {
+      final info = await UpdateService.checkLatest(force: true);
+      messenger.hideCurrentSnackBar();
+      if (!context.mounted) return;
+      if (info == null) {
+        await _showFailure(context, 'نسخهٔ منتشرشده‌ای پیدا نشد.');
+      } else if (!info.hasAsset) {
+        await _showFailure(context, 'فایل نصب این نسخه برای دستگاه شما در صفحهٔ انتشار پیدا نشد.', info);
+      } else {
+        final ok = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('نصب مجدد آخرین نسخه', textDirection: TextDirection.rtl),
+            content: PlainText('${tr('آخرین نسخهٔ منتشرشده')}: ${_digits(info.version)}\n${tr('نسخهٔ فعلی')}: ${_digits(appVersion)}\n\n${tr('فایل نصب دریافت و روی نسخهٔ فعلی نصب می‌شود.')}'),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('انصراف')),
+              FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('دریافت و نصب')),
+            ],
+          ),
+        );
+        if (ok == true && context.mounted) await _downloadAndInstall(context, info);
+      }
+    } catch (e) {
+      messenger.hideCurrentSnackBar();
+      UpdateService.log.add('check: failed ${e.runtimeType}: $e');
+      if (context.mounted) await _showFailure(context, 'بررسی آخرین نسخه ممکن نشد؛ اتصال اینترنت را بررسی کنید.');
+    } finally {
+      _busy = false;
+    }
+  }
+
+  /// A failure dialog with the technical trace (selectable and copyable) so that the cause can be reported.
+  static Future<void> _showFailure(BuildContext context, String message, [UpdateInfo? info]) {
+    final report = UpdateService.report;
+    return showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('خطا', textDirection: TextDirection.rtl),
+        content: SizedBox(
+          width: 460,
+          child: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(message, textDirection: TextDirection.rtl),
+              const SizedBox(height: 12),
+              const Text('جزئیات فنی', style: TextStyle(fontWeight: FontWeight.bold), textDirection: TextDirection.rtl),
+              const SizedBox(height: 4),
+              Directionality(textDirection: TextDirection.ltr, child: SelectableText(report, style: const TextStyle(fontSize: 11.5))),
+            ]),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Clipboard.setData(ClipboardData(text: report)), child: const Text('کپی جزئیات')),
+          TextButton(onPressed: () => UpdateService.openReleasePage(info), child: const Text('صفحهٔ دانلود')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('بستن')),
+        ],
+      ),
+    );
   }
 
   static String _digits(String s) => toPersianDigits(s);
@@ -83,6 +152,7 @@ class UpdateUi {
           TextButton(onPressed: () => Navigator.pop(ctx, _Choice.never), child: const Text('دیگر به‌روزرسانی نکن')),
           TextButton(onPressed: () => Navigator.pop(ctx, _Choice.skip), child: const Text('رد کردن این نسخه')),
           TextButton(onPressed: () => Navigator.pop(ctx, _Choice.later), child: const Text('بعداً')),
+          TextButton(onPressed: () => Navigator.pop(ctx, _Choice.page), child: const Text('صفحهٔ دانلود')),
           if (info.hasAsset) FilledButton(onPressed: () => Navigator.pop(ctx, _Choice.update), child: const Text('به‌روزرسانی')),
         ],
       ),
@@ -90,6 +160,8 @@ class UpdateUi {
     switch (choice) {
       case _Choice.update:
         if (context.mounted) await _downloadAndInstall(context, info);
+      case _Choice.page:
+        await UpdateService.openReleasePage(info);
       case _Choice.skip:
         await settings.setSkippedUpdate(info.version);
       case _Choice.never:
@@ -126,17 +198,22 @@ class UpdateUi {
     try {
       final file = await UpdateService.download(info, onProgress: (v) => progress.value = v, cancelled: () => cancelled);
       closeDialog();
-      final ok = await UpdateService.install(file);
-      if (!ok) {
-        messenger.showSnackBar(const SnackBar(
-          content: Text('برای نصب، اجازهٔ «نصب برنامه از این منبع» را بدهید و دوباره به‌روزرسانی را بزنید.'),
-          duration: Duration(seconds: 6),
+      final answer = await UpdateService.install(file);
+      if (answer == 'permission') {
+        // Android: the permission to install from this app is still missing (its settings page was opened). The
+        // downloaded file is kept, so a second tap installs without downloading again.
+        messenger.showSnackBar(SnackBar(
+          content: const Text('برای نصب، اجازهٔ «نصب برنامه از این منبع» را بدهید و دوباره به‌روزرسانی را بزنید.'),
+          duration: const Duration(seconds: 8),
+          action: SnackBarAction(label: tr('صفحهٔ دانلود'), onPressed: () => UpdateService.openReleasePage(info)),
         ));
+      } else if (answer != 'ok') {
+        if (context.mounted) await _showFailure(context, 'نصب به‌روزرسانی شروع نشد. می‌توانید فایل را از صفحهٔ دانلود بگیرید.', info);
       }
     } catch (e) {
       closeDialog();
-      if (!UpdateService.isCancelled(e)) {
-        messenger.showSnackBar(const SnackBar(content: Text('دریافت به‌روزرسانی ناموفق بود؛ دوباره تلاش کنید.')));
+      if (!UpdateService.isCancelled(e) && context.mounted) {
+        await _showFailure(context, 'دریافت به‌روزرسانی ناموفق بود. می‌توانید فایل را از صفحهٔ دانلود بگیرید.', info);
       }
     } finally {
       progress.dispose();
@@ -144,4 +221,4 @@ class UpdateUi {
   }
 }
 
-enum _Choice { update, later, skip, never }
+enum _Choice { update, page, later, skip, never }

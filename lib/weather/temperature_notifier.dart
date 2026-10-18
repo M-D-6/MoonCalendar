@@ -6,7 +6,6 @@ import '../core/l10n/l10n.dart';
 import '../core/platform_info.dart';
 import '../core/settings.dart';
 import 'utils/formatters.dart';
-import 'widgets/wx_icon.dart';
 import 'weather_controller.dart';
 import 'wx_strings.dart';
 
@@ -85,7 +84,7 @@ class TemperatureNotifier {
         wind: wind,
         windDegrees: point.windDirection,
         feelsLike: feels,
-        icon: await renderWxIconPng(point.condition, point.isDay),
+        icon: null,
         rtl: rtl,
         lockScreen: settings.notifyDateLockScreen,
       );
@@ -98,5 +97,6 @@ class TemperatureNotifier {
   void dispose() {
     _controller?.removeListener(_onWeather);
     _timer?.cancel();
+    _active = false;
   }
 }

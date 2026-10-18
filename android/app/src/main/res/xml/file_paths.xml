@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
     <external-files-path name="alarms" path="Alarms/" />
-    <cache-path name="updates" path="/" />
-    <external-cache-path name="updates_ext" path="/" />
+    <cache-path name="updates" path="mooncalendar_update/" />
 </paths>

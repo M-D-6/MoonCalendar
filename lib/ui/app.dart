@@ -41,6 +41,7 @@ import 'widgets/glass.dart';
 import 'widgets/page_frame.dart';
 import 'widgets/startup_splash.dart';
 import 'widgets/update_dialog.dart';
+import '../core/update_service.dart';
 
 class MoonCalendarApp extends StatefulWidget {
   final AppSettings settings;
@@ -337,6 +338,8 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
     await Future<void>.delayed(const Duration(milliseconds: 1500));
     if (!mounted) return;
     await _syncWidgetData();
+    // Old update downloads (unfinished, already installed, outdated) are removed at every start.
+    unawaited(UpdateService.cleanup());
     // Optional daily look for a newer release (off unless the user enabled it).
     await Future<void>.delayed(const Duration(seconds: 6));
     if (!mounted) return;

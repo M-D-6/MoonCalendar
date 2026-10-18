@@ -4,24 +4,20 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.os.Build
-import android.view.View
-import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import kotlin.math.roundToInt
 
 /**
- * Silent, ongoing notification with the current weather, separate from the calendar notification.
- * Status-bar icon: the temperature as text. Body: weather icon, big temperature, wind arrow + speed + city,
- * "feels like". Everything is text prepared by the app in the app language.
+ * Silent, ongoing notification with the current temperature, separate from the calendar notification.
+ * Status-bar icon: the temperature as text. Body: only the temperature with its degree sign.
  */
 internal object TemperatureNotification {
     private const val NOTIFICATION_ID = 1004
@@ -81,6 +77,11 @@ internal object TemperatureNotification {
         return IconCompat.createWithBitmap(bitmap)
     }
 
+    /** The temperature glyph, or the app's plain status icon when it cannot be drawn. */
+    private fun smallIcon(context: Context, temperature: String): IconCompat =
+        (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) runCatching { temperatureIcon(context, temperature) }.getOrNull() else null)
+            ?: IconCompat.createWithResource(context, R.drawable.ic_stat_mooncalendar)
+
     fun show(
         context: Context,
         city: String,
@@ -107,11 +108,10 @@ internal object TemperatureNotification {
             }
             manager.createNotificationChannel(channel)
         }
-        val windLine = listOf(wind, city).filter { it.isNotBlank() }.joinToString("  ")
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) temperatureIcon(context, temperature) else IconCompat.createWithResource(context, R.drawable.ic_stat_mooncalendar))
-            .setContentTitle("$temperature  $city")
-            .setContentText(feelsLike)
+            .setSmallIcon(smallIcon(context, temperature))
+            // Plain notification: just the temperature with its degree sign (the status bar shows it as the icon).
+            .setContentTitle(temperature)
             .setOngoing(true)
             .setSilent(true)
             .setOnlyAlertOnce(true)
@@ -121,24 +121,7 @@ internal object TemperatureNotification {
             .setCategory(NotificationCompat.CATEGORY_STATUS)
             .setVisibility(if (lockScreen) NotificationCompat.VISIBILITY_PUBLIC else NotificationCompat.VISIBILITY_SECRET)
         AstronomyWidgetSupport.launchApp(context, requestCode = 1004)?.let { builder.setContentIntent(it) }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val views = RemoteViews(context.packageName, R.layout.weather_notification).also {
-                it.setInt(R.id.weather_root, "setLayoutDirection", if (rtl) View.LAYOUT_DIRECTION_RTL else View.LAYOUT_DIRECTION_LTR)
-                val bmp = icon?.let { b -> BitmapFactory.decodeByteArray(b, 0, b.size) }
-                if (bmp != null) it.setImageViewBitmap(R.id.weather_icon, bmp) else it.setViewVisibility(R.id.weather_icon, View.GONE)
-                it.setTextViewText(R.id.weather_temp, temperature)
-                it.setTextViewText(R.id.weather_wind, windLine)
-                it.setTextViewText(R.id.weather_feels, feelsLike)
-                if (windDegrees >= 0 && wind.isNotBlank()) {
-                    // Meteorological degrees say where the wind comes FROM; the arrow points where it goes.
-                    it.setFloat(R.id.weather_arrow, "setRotation", ((windDegrees + 180.0) % 360.0).toFloat())
-                } else {
-                    it.setViewVisibility(R.id.weather_arrow, View.GONE)
-                }
-            }
-            builder.setCustomContentView(views)
-            builder.setStyle(NotificationCompat.DecoratedCustomViewStyle())
-        }
-        manager.notify(NOTIFICATION_ID, builder.build())
+        // A notification problem must never take the app (or the other notifications) down with it.
+        runCatching { manager.notify(NOTIFICATION_ID, builder.build()) }
     }
 }

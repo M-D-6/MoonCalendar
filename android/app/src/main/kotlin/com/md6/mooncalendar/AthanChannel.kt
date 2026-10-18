@@ -126,10 +126,22 @@ class AthanChannel(private val activity: Activity) : MethodChannel.MethodCallHan
                 result.success(null)
             }
 
+            "openUrl" -> {
+                val url = call.argument<String>("url")
+                result.success(
+                    try {
+                        activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                        true
+                    } catch (_: Exception) {
+                        false
+                    }
+                )
+            }
             "supportedAbis" -> result.success(Build.SUPPORTED_ABIS.toList())
+            "updateDir" -> result.success(File(activity.cacheDir, "mooncalendar_update").apply { mkdirs() }.absolutePath)
             "installApk" -> {
                 val path = call.argument<String>("path")
-                result.success(path != null && installApk(File(path)))
+                result.success(if (path == null) "error:no file" else installApk(File(path)))
             }
             "cancelTemperature" -> {
                 TemperatureNotification.cancel(activity)
@@ -346,26 +358,35 @@ class AthanChannel(private val activity: Activity) : MethodChannel.MethodCallHan
         return mapOf("uri" to shared.toString(), "name" to name)
     }
 
-    /** Opens the system package installer for a downloaded update; sends the user to the "allow installs" page first if needed. */
-    private fun installApk(file: File): Boolean {
-        if (!file.exists()) return false
+    /**
+     * Opens the system package installer for a downloaded update. Returns "ok", "permission" (the user still has to
+     * allow installs from this app; its settings page is opened) or "error:<reason>".
+     */
+    private fun installApk(file: File): String {
+        if (!file.exists()) return "error:the downloaded file is missing (${file.path})"
+        var stage = "start"
         return try {
+            stage = "permission check"
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !activity.packageManager.canRequestPackageInstalls()) {
                 activity.startActivity(
                     Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + activity.packageName))
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 )
-                return false
+                return "permission"
             }
+            stage = "file provider"
             val uri = FileProvider.getUriForFile(activity, activity.packageName + ".provider", file)
-            activity.startActivity(
-                Intent(Intent.ACTION_VIEW)
-                    .setDataAndType(uri, "application/vnd.android.package-archive")
-                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
-            )
-            true
-        } catch (_: Exception) {
-            false
+            stage = "start installer"
+            val intent = Intent(Intent.ACTION_VIEW)
+                .setDataAndType(uri, "application/vnd.android.package-archive")
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+            // Some installers only honour the grant when the URI also travels as clip data.
+            intent.clipData = android.content.ClipData.newRawUri("", uri)
+            activity.startActivity(intent)
+            "ok"
+        } catch (e: Exception) {
+            "error:[$stage] ${e.javaClass.simpleName}: ${e.message} | sdk=${Build.VERSION.SDK_INT} " +
+                "size=${file.length()} path=${file.path} authority=${activity.packageName}.provider"
         }
     }
 }

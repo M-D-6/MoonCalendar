@@ -130,6 +130,16 @@ class AthanAndroid {
     try { await _channel.invokeMethod<void>('cancelTemperature'); } catch (_) {}
   }
 
+  /// Opens a web page in the phone's browser.
+  static Future<bool> openUrl(String url) async {
+    if (!isSupported) return false;
+    try {
+      return (await _channel.invokeMethod<bool>('openUrl', <String, dynamic>{'url': url})) ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// CPU architectures of this phone, best first (decides which release APK fits).
   static Future<List<String>> supportedAbis() async {
     if (!isSupported) return const <String>[];
@@ -143,12 +153,22 @@ class AthanAndroid {
 
   /// Opens the system installer for a downloaded APK. False when it could not be opened or the user still has to
   /// allow installs from this app (the settings page for that is opened).
-  static Future<bool> installApk(String path) async {
-    if (!isSupported) return false;
+  static Future<String> installApk(String path) async {
+    if (!isSupported) return 'error:unsupported';
     try {
-      return (await _channel.invokeMethod<bool>('installApk', <String, dynamic>{'path': path})) ?? false;
+      return (await _channel.invokeMethod<String>('installApk', <String, dynamic>{'path': path})) ?? 'error:no answer';
+    } catch (e) {
+      return 'error:$e';
+    }
+  }
+
+  /// App-private folder the native side can hand to the package installer (inside the cache directory).
+  static Future<String?> updateDir() async {
+    if (!isSupported) return null;
+    try {
+      return await _channel.invokeMethod<String>('updateDir');
     } catch (_) {
-      return false;
+      return null;
     }
   }
 

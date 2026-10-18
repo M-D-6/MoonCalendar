@@ -1645,6 +1645,21 @@ D	بعداً	Later
 D	در حال دریافت به‌روزرسانی	Downloading update
 D	برای نصب، اجازهٔ «نصب برنامه از این منبع» را بدهید و دوباره به‌روزرسانی را بزنید.	Allow "install apps from this source" for Mooncalendar, then tap Update again.
 D	دریافت به‌روزرسانی ناموفق بود؛ دوباره تلاش کنید.	The update download failed. Please try again.
+D	صفحهٔ دانلود	Download page
+D	دریافت به‌روزرسانی ناموفق بود. می‌توانید فایل را از صفحهٔ دانلود بگیرید.	The update download failed. You can get the file from the download page.
+D	نصب به‌روزرسانی شروع نشد. می‌توانید فایل را از صفحهٔ دانلود بگیرید.	The update could not be started. You can get the file from the download page.
+D	در حال بررسی آخرین نسخه…	Checking the latest version…
+D	نسخهٔ منتشرشده‌ای پیدا نشد.	No published release was found.
+D	فایل نصب این نسخه برای دستگاه شما در صفحهٔ انتشار پیدا نشد.	The installer for your device was not found on the release page.
+D	نصب مجدد آخرین نسخه	Install the latest version again
+D	آخرین نسخهٔ منتشرشده	Latest published version
+D	نسخهٔ فعلی	Current version
+D	فایل نصب دریافت و روی نسخهٔ فعلی نصب می‌شود.	The installer is downloaded and installed over the current version.
+D	دریافت و نصب	Download and install
+D	بررسی آخرین نسخه ممکن نشد؛ اتصال اینترنت را بررسی کنید.	Could not check the latest version; check your internet connection.
+D	جزئیات فنی	Technical details
+D	کپی جزئیات	Copy details
+D	حتی اگر نسخهٔ جدیدتری نباشد، فایل نصب آخرین انتشار دریافت و نصب می‌شود	Even without a newer version, the installer of the latest release is downloaded and installed
 D	کمتر از ۱ دقیقه	Less than 1 min
 D	ابتدا موقعیت جغرافیایی را برای نمایش اوقات شرعی تنظیم کنید	Set your location first to show prayer times
 D	اعلان همیشگی تقویم	Persistent calendar notification

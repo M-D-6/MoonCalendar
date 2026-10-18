@@ -65,6 +65,11 @@ class _WeatherSceneState extends State<WeatherScene> with SingleTickerProviderSt
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     // Nothing is drawn while the window is hidden or in the background (tray, minimized).
+    if (state == AppLifecycleState.hidden || state == AppLifecycleState.paused) {
+      // Minimized or in the tray: the recorded pictures and shaders are rebuilt on the next paint, so free them now.
+      ImageLandscapeRenderer.disposeCache();
+      _ScenePainter.releaseCaches();
+    }
     if (widget.reduceMotion) return;
     if (state == AppLifecycleState.resumed) {
       if (!_ticker.isActive && !_webInactive) _ticker.start();
@@ -445,6 +450,16 @@ class _ScenePainter extends CustomPainter {
   static final Float32List _starPoint = Float32List(2);
   static Path? _moonLit;
   static int _moonKey = 0;
+
+  /// Drops the native gradient shaders and the moon shape; they are created again when needed.
+  static void releaseCaches() {
+    for (final shader in _cloudShaders.values) {
+      shader.dispose();
+    }
+    _cloudShaders.clear();
+    _moonLit = null;
+    _moonKey = 0;
+  }
 
   static Shader _cloudShader(Color c, Color shade, double alpha) {
     final top = c.withValues(alpha: alpha);

@@ -280,6 +280,12 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                 subtitle: Text('نسخهٔ فعلی: ${toPersianDigits(appVersion)}', textDirection: TextDirection.rtl),
                 onTap: () => UpdateUi.checkNow(context, settings),
               ),
+              ListTile(
+                leading: const Icon(Icons.replay_rounded),
+                title: const Text('نصب مجدد آخرین نسخه', textDirection: TextDirection.rtl),
+                subtitle: const Text('حتی اگر نسخهٔ جدیدتری نباشد، فایل نصب آخرین انتشار دریافت و نصب می‌شود', textDirection: TextDirection.rtl),
+                onTap: () => UpdateUi.reinstallLatest(context, settings),
+              ),
             ]),
         ],
       );
