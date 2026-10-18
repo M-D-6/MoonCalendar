@@ -103,15 +103,28 @@ class UpdateService {
     }
     _log('check: wanted ${await _wantedAssetNames()}; release has ${[for (final a in assets) a['name']]}; picked ${asset?['name']}');
     final digest = asset?['digest'] as String?; // "sha256:<hex>"
+    final assetUrlRaw = asset?['browser_download_url'] as String?;
+    final checksum = digest != null && RegExp(r'^sha256:[0-9a-fA-F]{64}$').hasMatch(digest) ? digest.substring(7).toLowerCase() : null;
+    // Only a file with a published SHA-256 from GitHub's own servers can be installed from inside the app.
+    final trusted = asset != null && checksum != null && _isTrustedUrl(assetUrlRaw);
+    if (asset != null && !trusted) _log('check: asset rejected (checksum ${checksum == null ? 'missing' : 'ok'}, url $assetUrlRaw)');
     return UpdateInfo(
       version: tag.replaceFirst(RegExp(r'^[vV]'), ''),
       notes: (json['body'] as String? ?? '').trim(),
       pageUrl: json['html_url'] as String? ?? 'https://github.com/$repository/releases/latest',
-      assetName: asset?['name'] as String?,
-      assetUrl: asset?['browser_download_url'] as String?,
-      assetSize: (asset?['size'] as num?)?.toInt(),
-      sha256: digest != null && digest.startsWith('sha256:') ? digest.substring(7).toLowerCase() : null,
+      assetName: trusted ? asset['name'] as String? : null,
+      assetUrl: trusted ? assetUrlRaw : null,
+      assetSize: trusted ? (asset['size'] as num?)?.toInt() : null,
+      sha256: trusted ? checksum : null,
     );
+  }
+
+  /// Downloads must come over HTTPS from GitHub itself (release assets are served from these hosts).
+  static bool _isTrustedUrl(String? url) {
+    final uri = url == null ? null : Uri.tryParse(url);
+    if (uri == null || uri.scheme != 'https') return false;
+    final host = uri.host.toLowerCase();
+    return host == 'github.com' || host.endsWith('.githubusercontent.com');
   }
 
   /// Release file names that suit this device, best first.
@@ -205,6 +218,7 @@ class UpdateService {
   /// size is unknown); [cancelled] aborts. Whatever goes wrong, no partial file stays behind.
   static Future<File> download(UpdateInfo info, {required void Function(double? progress) onProgress, required bool Function() cancelled}) async {
     _log('download: ${info.assetName} (${info.assetSize} bytes) ${info.assetUrl}');
+    if (info.sha256 == null || !_isTrustedUrl(info.assetUrl)) throw const HttpException('No published checksum or untrusted address; the file is not downloaded');
     final existing = await readyFile(info);
     if (existing != null) {
       _log('download: reusing the verified file ${existing.path}');
@@ -237,7 +251,7 @@ class UpdateService {
       }
       _log('download: received $received of $total bytes');
       if (total != null && total > 0 && received != total) throw HttpException('The downloaded file is incomplete ($received of $total bytes)');
-      if (info.sha256 != null) {
+      {
         final actual = await _sha256Of(part);
         _log('download: sha256 $actual, expected ${info.sha256}');
         if (actual != info.sha256) throw const HttpException('The downloaded file is damaged (checksum mismatch)');
@@ -247,6 +261,7 @@ class UpdateService {
         'version': info.version,
         'name': info.assetName,
         'size': received,
+        'sha256': info.sha256,
         'at': DateTime.now().millisecondsSinceEpoch,
       }));
       return done;
@@ -271,6 +286,15 @@ class UpdateService {
   /// downloaded file is kept, so a second tap does not download again). Returns false when it could not be started.
   static Future<String> install(File file) async {
     _log('install: ${file.path} (${file.existsSync() ? file.lengthSync() : 'missing'} bytes)');
+    // Verify again right before starting: the file must still be exactly what GitHub published.
+    final expected = _readMeta()?['sha256'] as String?;
+    if (expected == null || !file.existsSync()) return 'error:the downloaded file cannot be verified';
+    final actual = await _sha256Of(file);
+    _log('install: sha256 $actual, expected $expected');
+    if (actual != expected) {
+      _deleteFolder();
+      return 'error:the downloaded file does not match the published checksum and was deleted';
+    }
     final result = await _install(file);
     _log('install: result $result');
     return result;

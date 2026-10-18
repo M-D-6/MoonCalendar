@@ -119,7 +119,7 @@ class LandscapeLight {
   final Color skyBottom;
 }
 
-/// Drifting petals (spring) and falling leaves (autumn), fireflies on warm nights and birds.
+/// Birds crossing the sky.
 class SceneLife {
   SceneLife({
     required this.seasons,
@@ -169,69 +169,7 @@ class SceneLife {
     canvas = target;
     w = size.width;
     h = size.height;
-    _particles();
-    _fireflies();
     _birds();
-  }
-
-  static const _autumnTones = [Color(0xFFD9822B), Color(0xFFC0392B), Color(0xFFE0B030), Color(0xFF9BAA3A)];
-
-  /// Falling leaves (autumn only).
-  void _particles() {
-    if (reduced) return;
-    final autumn = seasons.autumn;
-    if (autumn < 0.08) return;
-    if (rain > 0.5 || snow > 0.3) return;
-    for (var i = 0; i < 16; i++) {
-      final weight = autumn;
-      final speed = 0.018 + _hash(i * 3 + 1) * 0.02;
-      final progress = (_hash(i * 5 + 2) + clock * speed) % 1.0;
-      final x = ((_hash(i * 7 + 3) + progress * 0.35 * windGust + math.sin(clock * 0.8 + i) * 0.02) % 1.0) * w;
-      final y = progress * h * 0.95;
-      final spin = clock * (0.8 + _hash(i) * 1.6) + i;
-      final size = h * (0.004 + _hash(i * 9) * 0.004);
-      final color = _autumnTones[i % _autumnTones.length];
-      canvas.save();
-      canvas.translate(x, y);
-      canvas.rotate(spin);
-      canvas.scale(1, 0.55 + 0.45 * math.cos(spin * 1.3).abs());
-      final paint = Paint()..isAntiAlias = true..color = lit(color).withValues(alpha: weight * 0.85);
-      // a real leaf: pointed at both ends, with a stalk and a midrib
-      final l = size * 1.5, wd = size * 0.62;
-      final leaf = Path()
-        ..moveTo(-l, 0)
-        ..quadraticBezierTo(-l * 0.15, -wd * 1.7, l, 0)
-        ..quadraticBezierTo(-l * 0.15, wd * 1.7, -l, 0)
-        ..close();
-      canvas.drawPath(leaf, paint);
-      final vein = Paint()
-        ..isAntiAlias = true
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = math.max(0.5, size * 0.12)
-        ..strokeCap = StrokeCap.round
-        ..color = lit(const Color(0xFF5A3A1A)).withValues(alpha: weight * 0.6);
-      canvas.drawLine(Offset(-l * 1.35, 0), Offset(l * 0.8, 0), vein);
-      canvas.restore();
-    }
-  }
-
-  /// Warm fireflies over the meadow on warm nights.
-  void _fireflies() {
-    if (reduced) return;
-    final strength = darkness * (seasons.spring * 0.8 + seasons.summer + seasons.autumn * 0.2) * (1 - rain) * (1 - snow) * (1 - fog * 0.6);
-    if (strength < 0.08) return;
-    for (var i = 0; i < 18; i++) {
-      final cx = _hash(i * 7 + 1) * w;
-      final top = meadowTop > 0 ? meadowTop : h * 0.78;
-      final cy = top + _hash(i * 11 + 2) * (h - top) * 0.8;
-      final x = cx + math.sin(clock * (0.3 + _hash(i) * 0.4) + i * 2.0) * w * 0.03;
-      final y = cy + math.sin(clock * (0.4 + _hash(i * 3) * 0.4) + i) * h * 0.02;
-      final pulse = 0.5 + 0.5 * math.sin(clock * (1.1 + _hash(i * 5)) + i * 1.9);
-      final alpha = strength * pulse;
-      canvas.drawCircle(Offset(x, y), 7, Paint()..color = const Color(0xFFCFFF6A).withValues(alpha: alpha * 0.16));
-      canvas.drawCircle(Offset(x, y), 3, Paint()..color = const Color(0xFFCFFF6A).withValues(alpha: alpha * 0.35));
-      canvas.drawCircle(Offset(x, y), 1.2, Paint()..color = const Color(0xFFF4FFC0).withValues(alpha: alpha));
-    }
   }
 
   void _birds() {

@@ -770,9 +770,8 @@ class ImageLandscapeRenderer {
     canvas.restore();
   }
 
-  /// Water glints, window light and chimney smoke, drawn over the graded part.
+  /// Window light and chimney smoke, drawn over the graded part.
   void _overlays(Canvas canvas, SceneData d) {
-    _glints(canvas, d);
     _windowLight(canvas);
     _smoke(canvas, d);
   }
@@ -812,7 +811,7 @@ class ImageLandscapeRenderer {
       final ring = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.2;
-      for (var i = 0; i < 40; i++) {
+      for (var i = 0; i < 20; i++) {
         final t = reduced ? 0.4 : ((clock * 0.9 + _hash(i * 3 + 1) * 5) % 1.0);
         final x = 560 + _hash(i * 5 + 2) * 1200;
         final y = 700 + _hash(i * 9 + 4) * 170;
@@ -834,34 +833,11 @@ class ImageLandscapeRenderer {
     canvas.restore();
   }
 
-  /// Sparkles of sun / moon light on the water (outside the colour graded layer).
-  void _glints(Canvas canvas, SceneData d) {
-    final strength = math.max(light.sunVisible * (0.4 + 0.6 * light.ambient) * (1 - light.overcast * 0.8), light.moonVisible * 0.6) * (1 - _frozen);
-    if (strength < 0.05) return;
-    final tone = light.sunVisible >= light.moonVisible ? const Color(0xFFFFF1C2) : const Color(0xFFDDE8FF);
-    canvas.save();
-    canvas.clipPath(d.rippleClip);
-    final p = Paint()..strokeCap = StrokeCap.round;
-    for (var k = 0; k < 36; k++) {
-      final u = 0.04 + _hash(k * 7 + 3) * 0.94;
-      final x = 700 + _hash(k * 11 + 5) * (SceneFrame.refWidth - 700);
-      final y = 705 + u * (SceneFrame.refHeight - 705);
-      final tw = reduced ? 0.7 : 0.5 + 0.5 * math.sin(clock * (1.4 + _hash(k) * 2.0) + k * 3.1);
-      if (tw < 0.35) continue;
-      final len = 3 + u * 9;
-      p
-        ..color = tone.withValues(alpha: ((0.15 + 0.75 * tw) * strength).clamp(0.0, 1.0).toDouble())
-        ..strokeWidth = 0.9 + u * 1.5;
-      canvas.drawLine(Offset(x - len, y), Offset(x + len, y), p);
-    }
-    canvas.restore();
-  }
-
   // ------------------------------------------------------------------ grass blades
 
   /// Hundreds of grass blades along the hill ridges; each leans and springs back in the wind.
   // The browser rasterises in WebAssembly: fewer ripple streaks and smoke puffs there look the same at a glance.
-  static final int _rippleCount = PlatformInfo.isWeb ? 64 : 120;
+  static final int _rippleCount = PlatformInfo.isWeb ? 32 : 60;
   static final int _smokePuffs = PlatformInfo.isWeb ? 14 : 24;
 
   // One path reused by every per-frame stroke / blade / twig (the canvas copies it when it is drawn).
