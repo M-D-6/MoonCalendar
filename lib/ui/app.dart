@@ -80,7 +80,7 @@ class _MoonCalendarAppState extends State<MoonCalendarApp> with WidgetsBindingOb
     // it is polled there. Android is refreshed on resume / brightness change /
     // settings change - a per-second platform-channel poll only costs frames.
     if (PlatformInfo.isWindows) {
-      _systemThemeTimer = Timer.periodic(const Duration(seconds: 1), (_) => _refreshSystemTheme());
+      _systemThemeTimer = Timer.periodic(const Duration(seconds: 5), (_) => _refreshSystemTheme());
     }
   }
 

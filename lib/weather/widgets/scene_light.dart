@@ -6,10 +6,6 @@ import 'package:flutter/material.dart';
 /// "life" in front of the scene (drifting petals / leaves, fireflies, birds).
 /// The landscape itself is the vector illustration in scene_landscape.dart.
 
-double _hash(int n) {
-  final x = math.sin(n * 127.1 + 311.7) * 43758.5453;
-  return x - x.floorToDouble();
-}
 
 double _smooth(double edge0, double edge1, double x) {
   final t = ((x - edge0) / (edge1 - edge0)).clamp(0.0, 1.0).toDouble();

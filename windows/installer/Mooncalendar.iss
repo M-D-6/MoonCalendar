@@ -1,10 +1,10 @@
-﻿#define MyAppName "Mooncalendar"
+#define MyAppName "Mooncalendar"
 ; Version: taken from the MOONCALENDAR_VERSION environment variable when set
 ; (CI passes the release tag), otherwise the default below.
 #define MyAppVersion GetEnv("MOONCALENDAR_VERSION")
 #if MyAppVersion == ""
   #undef MyAppVersion
-  #define MyAppVersion "1.1.6"
+  #define MyAppVersion "1.1.7"
 #endif
 
 ; Flutter build folder: build\windows\<arch>\runner\Release.

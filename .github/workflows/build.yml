@@ -25,7 +25,6 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze --no-fatal-infos --no-fatal-warnings
       - run: flutter test
-        continue-on-error: true   # the project has no tests yet
 
   android:
     name: Android (APK)
@@ -41,17 +40,31 @@ jobs:
       - name: Android signing key
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          if [ -z "$KEYSTORE_BASE64" ]; then
-            echo "::warning::ANDROID_KEYSTORE_BASE64 is not set: the APK is signed with a temporary debug key and cannot update an installed release."
+          if [ -z "$KEYSTORE_BASE64" ] && [ -z "$KEYSTORE_PASSWORD" ] && [ -z "$KEY_ALIAS" ] && [ -z "$KEY_PASSWORD" ]; then
+            if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+              echo "::error::Android signing secrets are required for tagged releases. Refusing to publish an APK signed by the debug key, which cannot update the installed app."
+              exit 1
+            fi
+            echo "::warning::Android signing secrets are absent on this non-release build; the APK will use a debug key and is not suitable for public releases."
             exit 0
           fi
-          echo "$KEYSTORE_BASE64" | base64 -d > android/app/release.jks
+          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASSWORD" ]; then
+            echo "::error::Android signing configuration is partial. Set ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, and ANDROID_KEY_PASSWORD together."
+            exit 1
+          fi
+          if ! printf '%s' "$KEYSTORE_BASE64" | base64 -d > android/app/release.jks; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 could not be decoded."
+            exit 1
+          fi
           {
-            echo "storeFile=release.jks"
-            echo "storePassword=mooncalendar"
-            echo "keyAlias=mooncalendar"
-            echo "keyPassword=mooncalendar"
+            printf 'storeFile=release.jks\n'
+            printf 'storePassword=%s\n' "$KEYSTORE_PASSWORD"
+            printf 'keyAlias=%s\n' "$KEY_ALIAS"
+            printf 'keyPassword=%s\n' "$KEY_PASSWORD"
           } > android/key.properties
       - name: Build one APK per CPU architecture
         run: flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/symbols
@@ -75,13 +88,23 @@ jobs:
       - uses: subosito/flutter-action@v2
         with: { channel: stable, cache: true }
       - run: flutter pub get
-      - run: flutter build windows --release
-      - name: Version
+      - name: Verify release version
         shell: pwsh
         run: |
-          if ($env:GITHUB_REF -like 'refs/tags/v*') { $v = $env:GITHUB_REF_NAME.Substring(1) }
-          else { $v = ((Select-String -Path pubspec.yaml -Pattern '^version:\s*([0-9.]+)').Matches[0].Groups[1].Value) }
+          $match = Select-String -Path pubspec.yaml -Pattern '^version:\s*([0-9]+\.[0-9]+\.[0-9]+)\+(\d+)'
+          if (-not $match) { throw "Could not parse app version from pubspec.yaml" }
+          $declared = $match.Matches[0].Groups[1].Value
+          if ($env:GITHUB_REF -like 'refs/tags/v*') {
+            $tagVersion = $env:GITHUB_REF_NAME.Substring(1)
+            if ($tagVersion -ne $declared) {
+              throw "Release tag v$tagVersion does not match pubspec.yaml version $declared. Update all version metadata before tagging."
+            }
+            $v = $tagVersion
+          } else {
+            $v = $declared
+          }
           "MOONCALENDAR_VERSION=$v" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      - run: flutter build windows --release
       - name: Zip (portable)
         shell: pwsh
         run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath MoonCalendar-windows-x64.zip
@@ -199,7 +222,7 @@ jobs:
   release:
     name: Publish release
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [android, windows, linux, macos]
+    needs: [analyze, android, windows, linux, macos]
     runs-on: ubuntu-latest
     permissions:
       contents: write

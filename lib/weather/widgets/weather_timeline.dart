@@ -114,15 +114,17 @@ class _MarkerPainter extends CustomPainter {
   /// Soft tone taken from the theme (not pure white).
   final Color color;
 
-  /// Where the line ends: the top edge of the day cards.
+  /// Top edge of the marker band; the trail starts halfway down this band.
   final double top;
 
   @override
   void paint(Canvas canvas, Size size) {
     final x = size.width / 2;
     final bottom = size.height - 8;
-    final rect = Rect.fromLTRB(x - 2, top, x + 2, bottom);
-    // The line rises from the dot to the height of the day cards and fades out at its upper end.
+    // Keep the current-time trail to the lower half of the marker band.
+    final lineTop = top + (bottom - top) * 0.5;
+    final rect = Rect.fromLTRB(x - 2, lineTop, x + 2, bottom);
+    // The line rises from the dot and fades out at its upper end.
     final fade = LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
@@ -130,7 +132,7 @@ class _MarkerPainter extends CustomPainter {
       stops: const <double>[0.0, 0.38, 1.0],
     ).createShader(rect);
     canvas.drawLine(
-      Offset(x, top),
+      Offset(x, lineTop),
       Offset(x, bottom),
       Paint()
         ..shader = LinearGradient(
@@ -144,7 +146,7 @@ class _MarkerPainter extends CustomPainter {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.5),
     );
     canvas.drawLine(
-      Offset(x, top),
+      Offset(x, lineTop),
       Offset(x, bottom),
       Paint()
         ..shader = fade
@@ -342,7 +344,9 @@ class WeatherTimelineState extends State<WeatherTimeline> {
     if (!_scroll.hasClients) return;
     final selected = _timeAt(_scroll.offset);
     if (selected.difference(_selected).inMinutes.abs() < 2) return;
-    setState(() => _selected = selected);
+    // Selection is consumed by callbacks and jump-to-now; rebuilding every day card
+    // while the scroll position changes only adds work without changing this widget tree.
+    _selected = selected;
     widget.onSelected(selected);
     if (widget.hapticEnabled) {
       final local = inTimezone(selected, widget.timezone);
@@ -534,21 +538,6 @@ class WeatherTimelineState extends State<WeatherTimeline> {
                           child: Stack(
                             children: [
                               for (final day in _days) _dayCard(context, day, pad, now),
-                              // Hours after the last forecast point: dimmed and out of reach.
-                              Positioned(
-                                left: pad + _xOf(_dataEnd),
-                                width: math.max(0.0, _contentWidth - _xOf(_dataEnd)),
-                                top: _markerBand,
-                                bottom: 6,
-                                child: IgnorePointer(
-                                  child: DecoratedBox(
-                                    decoration: BoxDecoration(
-                                      borderRadius: const BorderRadius.horizontal(right: Radius.circular(16)),
-                                      color: Colors.black.withValues(alpha: 0.28),
-                                    ),
-                                  ),
-                                ),
-                              ),
                             ],
                           ),
                          ),

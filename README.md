@@ -102,3 +102,8 @@ project, derivative works must keep the same license and keep the original copyr
 Third-party licenses and attributions are listed in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
 برنامه تحت **GPLv3** منتشر شده است؛ چون از پروژهٔ GPLv3 «تقویم فارسی» مشتق شده، آثار مشتق باید همین مجوز و اعلان‌های حق نشر اصلی را حفظ کنند.
+
+
+## Latest patch release
+
+See [MoonCalendar 1.1.7 release notes](docs/RELEASE_NOTES_1.1.7.md) for updater reliability, Android notification improvements, and maintenance fixes. On Windows, run `tool/build_windows_release.ps1` to analyze, test, build the portable bundle, and compile the installer (Inno Setup 6 or 7 required).

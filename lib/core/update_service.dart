@@ -39,7 +39,7 @@ class UpdateInfo {
 /// Looks for a newer GitHub release of the app, downloads its installer / APK and starts it.
 /// Only Windows and Android take part; nothing is contacted unless the user turned the check on or asked for it.
 ///
-/// Downloads follow the same rules as desktop messengers:
+/// Downloads use an interruption-safe, integrity-checked flow:
 ///  * the file is written as `*.part` and only renamed once it is complete and verified, so a download that was
 ///    cut off (network, app closed) never leaves a usable-looking broken file behind;
 ///  * a finished download is kept and reused if the install did not happen, instead of downloading again;
@@ -53,13 +53,42 @@ class UpdateService {
 
   static bool get isSupported => PlatformInfo.isAndroid || PlatformInfo.isWindows;
 
-  /// 1 when [a] is newer than [b], -1 when older, 0 when equal ("1.1.10" > "1.1.9", a leading "v" is ignored).
+  /// Compares semantic versions, ignoring build metadata (for example, `1.1.7+12` equals `v1.1.7`).
+  /// A stable release sorts after its pre-releases; numeric pre-release identifiers sort numerically.
   static int compareVersions(String a, String b) {
-    List<int> parts(String v) => v.replaceFirst(RegExp(r'^[vV]'), '').split(RegExp(r'[.+\-]')).map((p) => int.tryParse(p) ?? 0).toList();
-    final x = parts(a), y = parts(b);
-    for (var i = 0; i < 4; i++) {
-      final p = i < x.length ? x[i] : 0, q = i < y.length ? y[i] : 0;
+    ({List<int> core, List<String> pre}) parse(String input) {
+      var value = input.trim().replaceFirst(RegExp(r'^[vV]'), '');
+      value = value.split('+').first; // SemVer build metadata does not affect precedence.
+      final dash = value.indexOf('-');
+      final coreText = dash < 0 ? value : value.substring(0, dash);
+      final preText = dash < 0 ? '' : value.substring(dash + 1);
+      final core = coreText.split('.').map((part) => int.tryParse(part) ?? 0).toList();
+      final pre = preText.isEmpty ? <String>[] : preText.split('.');
+      return (core: core, pre: pre);
+    }
+
+    final x = parse(a), y = parse(b);
+    final coreLength = x.core.length > y.core.length ? x.core.length : y.core.length;
+    for (var i = 0; i < coreLength; i++) {
+      final p = i < x.core.length ? x.core[i] : 0;
+      final q = i < y.core.length ? y.core[i] : 0;
       if (p != q) return p > q ? 1 : -1;
+    }
+
+    if (x.pre.isEmpty && y.pre.isEmpty) return 0;
+    if (x.pre.isEmpty) return 1;
+    if (y.pre.isEmpty) return -1;
+    final preLength = x.pre.length > y.pre.length ? x.pre.length : y.pre.length;
+    for (var i = 0; i < preLength; i++) {
+      if (i >= x.pre.length) return -1;
+      if (i >= y.pre.length) return 1;
+      final p = x.pre[i], q = y.pre[i];
+      if (p == q) continue;
+      final pn = int.tryParse(p), qn = int.tryParse(q);
+      if (pn != null && qn != null) return pn > qn ? 1 : -1;
+      if (pn != null) return -1; // Numeric identifiers have lower precedence than non-numeric ones.
+      if (qn != null) return 1;
+      return p.compareTo(q) > 0 ? 1 : -1;
     }
     return 0;
   }
@@ -129,7 +158,7 @@ class UpdateService {
 
   /// Release file names that suit this device, best first.
   static Future<List<String>> _wantedAssetNames() async {
-    if (PlatformInfo.isWindows) return const ['MoonCalendar-windows-x64-setup.exe'];
+    if (PlatformInfo.isWindows) return const ['MoonCalendar-windows-x64.zip'];
     final abis = await AthanAndroid.supportedAbis();
     return [for (final abi in abis) 'MoonCalendar-android-$abi.apk'];
   }
@@ -280,9 +309,9 @@ class UpdateService {
 
   // ---------------------------------------------------------------------------------------- install
 
-  /// Starts the installer and returns "ok", "permission" (Android: allowing installs from this app is still needed)
-  /// or "error:<reason>". Windows: the app closes, a silent setup replaces the files and starts the new
-  /// version. Android: the system installer opens (the user may first be asked to allow installs from this app; the
+  /// Starts the updater and returns "ok", "permission" (Android: allowing installs from this app is still needed)
+  /// or an error string with a reason suffix. Windows: a detached helper stages the portable ZIP, swaps the app directory with
+  /// a rollback copy, and relaunches the app. Android: the system installer opens (the user may first be asked to allow installs from this app; the
   /// downloaded file is kept, so a second tap does not download again). Returns false when it could not be started.
   static Future<String> install(File file) async {
     _log('install: ${file.path} (${file.existsSync() ? file.lengthSync() : 'missing'} bytes)');
@@ -302,37 +331,140 @@ class UpdateService {
 
   static Future<String> _install(File file) async {
     if (PlatformInfo.isWindows) {
-      final logPath = '${file.parent.path}${Platform.pathSeparator}setup.log';
-      final args = ['/SILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/CLOSEAPPLICATIONS', '/LOG=$logPath'];
+      final launcherLogPath = '${file.parent.path}${Platform.pathSeparator}update-launcher.log';
+      String psLiteral(String value) => "'${value.replaceAll("'", "''")}'";
+
+      // Detached updater: stage and validate first, keep a complete rollback directory, then promote.
+      final script = r'''
+$ErrorActionPreference = 'Stop'
+$mooncalendarProcessId = __PARENT_PID__
+$zipPath = __ZIP_PATH__
+$launcherLogPath = __LAUNCHER_LOG_PATH__
+$installDir = __INSTALL_DIR__
+$exeName = 'mooncalendar.exe'
+$parentDir = Split-Path -Parent $installDir
+$leaf = Split-Path -Leaf $installDir
+$token = [Guid]::NewGuid().ToString('N')
+$stageDir = Join-Path $parentDir ('.' + $leaf + '.stage-' + $token)
+$backupDir = Join-Path $parentDir ('.' + $leaf + '.backup-' + $token)
+$promoted = $false
+function Log([string]$message) { try { Add-Content -LiteralPath $launcherLogPath -Value ((Get-Date -Format o) + ' ' + $message) } catch { } }
+try {
+  Log "Waiting for MoonCalendar PID $mooncalendarProcessId to exit. Install=$installDir"
+  try { $parent = [System.Diagnostics.Process]::GetProcessById($mooncalendarProcessId); if (-not $parent.WaitForExit(120000)) { throw 'Timed out waiting for MoonCalendar to exit.' } } catch [System.ArgumentException] { }
+  Start-Sleep -Milliseconds 400
+  if (-not (Test-Path -LiteralPath $zipPath -PathType Leaf)) { throw "Portable ZIP not found: $zipPath" }
+  if (-not (Test-Path -LiteralPath $installDir -PathType Container)) { throw "Install directory not found: $installDir" }
+
+  # Reject ZIP path traversal before extracting anything.
+  Add-Type -AssemblyName System.IO.Compression.FileSystem
+  $archive = [System.IO.Compression.ZipFile]::OpenRead($zipPath)
+  try {
+    $rootFull = [System.IO.Path]::GetFullPath($stageDir + [System.IO.Path]::DirectorySeparatorChar)
+    foreach ($entry in $archive.Entries) {
+      if ([string]::IsNullOrWhiteSpace($entry.FullName)) { continue }
+      $destination = [System.IO.Path]::GetFullPath((Join-Path $stageDir ($entry.FullName -replace '/', [System.IO.Path]::DirectorySeparatorChar)))
+      if (-not $destination.StartsWith($rootFull, [System.StringComparison]::OrdinalIgnoreCase)) { throw "Unsafe path in update archive: $($entry.FullName)" }
+    }
+  } finally { $archive.Dispose() }
+  New-Item -ItemType Directory -Path $stageDir -Force | Out-Null
+  [System.IO.Compression.ZipFile]::ExtractToDirectory($zipPath, $stageDir)
+  if (-not (Test-Path -LiteralPath (Join-Path $stageDir $exeName) -PathType Leaf)) { throw 'Portable ZIP is missing mooncalendar.exe at its root.' }
+  if (-not (Test-Path -LiteralPath (Join-Path $stageDir 'flutter_windows.dll') -PathType Leaf)) { throw 'Update bundle is missing flutter_windows.dll; installation was not changed.' }
+
+  # Persist recovery metadata and register a per-user RunOnce recovery before touching the current install.
+  # If Windows shuts down between directory renames, recovery runs at the next sign-in even if the app cannot launch.
+  $recoveryRoot = Join-Path $env:LOCALAPPDATA 'MoonCalendar\Updater'
+  New-Item -ItemType Directory -Path $recoveryRoot -Force | Out-Null
+  $statePath = Join-Path $recoveryRoot ('transaction-' + $token + '.json')
+  $recoveryScript = Join-Path $recoveryRoot 'recover-update.ps1'
+  $state = [ordered]@{ installDir = $installDir; backupDir = $backupDir; stageDir = $stageDir; status = 'pending' }
+  $state | ConvertTo-Json | Set-Content -LiteralPath $statePath -Encoding UTF8
+  @'
+param([Parameter(Mandatory=$true)][string]$StateFile)
+$ErrorActionPreference = 'Stop'
+try {
+  if (-not (Test-Path -LiteralPath $StateFile -PathType Leaf)) { exit 0 }
+  $s = Get-Content -LiteralPath $StateFile -Raw | ConvertFrom-Json
+  if ($s.status -eq 'committed') {
+    if (Test-Path -LiteralPath $s.backupDir) { Remove-Item -LiteralPath $s.backupDir -Recurse -Force -ErrorAction SilentlyContinue }
+    if (Test-Path -LiteralPath $s.stageDir) { Remove-Item -LiteralPath $s.stageDir -Recurse -Force -ErrorAction SilentlyContinue }
+  } elseif (Test-Path -LiteralPath $s.backupDir) {
+    if (Test-Path -LiteralPath $s.installDir) {
+      $failed = $s.installDir + '.recovery-failed-' + [Guid]::NewGuid().ToString('N')
+      Move-Item -LiteralPath $s.installDir -Destination $failed
+    }
+    Move-Item -LiteralPath $s.backupDir -Destination $s.installDir
+    if ($failed -and (Test-Path -LiteralPath $failed)) { Remove-Item -LiteralPath $failed -Recurse -Force -ErrorAction SilentlyContinue }
+  }
+  if (Test-Path -LiteralPath $s.stageDir) { Remove-Item -LiteralPath $s.stageDir -Recurse -Force -ErrorAction SilentlyContinue }
+  Remove-Item -LiteralPath $StateFile -Force -ErrorAction SilentlyContinue
+} catch { Add-Content -LiteralPath ($StateFile + '.log') -Value ((Get-Date -Format o) + ' recovery failed: ' + $_.ToString()) }
+'@ | Set-Content -LiteralPath $recoveryScript -Encoding UTF8
+  $runOnce = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce'
+  $runOnceName = '!MoonCalendarUpdateRecovery'
+  $runOnceCommand = 'powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "' + $recoveryScript + '" -StateFile "' + $statePath + '"'
+  New-Item -Path $runOnce -Force | Out-Null
+  Set-ItemProperty -Path $runOnce -Name $runOnceName -Value $runOnceCommand -Force
+
+  # Both directories are siblings, so renames stay on the same volume. Keep old files until new app survives startup.
+  Log "Staging validated. Moving current installation to rollback directory $backupDir"
+  Move-Item -LiteralPath $installDir -Destination $backupDir
+  try { Move-Item -LiteralPath $stageDir -Destination $installDir; $promoted = $true }
+  catch { if (-not (Test-Path -LiteralPath $installDir) -and (Test-Path -LiteralPath $backupDir)) { Move-Item -LiteralPath $backupDir -Destination $installDir }; throw }
+
+  $newExe = Join-Path $installDir $exeName
+  if (-not (Test-Path -LiteralPath $newExe -PathType Leaf)) { throw 'Promoted update is missing the app executable.' }
+  Log "Starting updated app: $newExe"
+  $newProcess = Start-Process -FilePath $newExe -WorkingDirectory $installDir -PassThru
+  Start-Sleep -Seconds 12
+  $newProcess.Refresh()
+  if ($newProcess.HasExited) { throw "Updated app exited during startup (exit code $($newProcess.ExitCode)); rolling back." }
+  Log "Updated app survived startup; removing rollback copy. PID=$($newProcess.Id)"
+  $state.status = 'committed'
+  $state | ConvertTo-Json | Set-Content -LiteralPath $statePath -Encoding UTF8
+  Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce' -Name '!MoonCalendarUpdateRecovery' -ErrorAction SilentlyContinue
+  Remove-Item -LiteralPath $backupDir -Recurse -Force
+  Remove-Item -LiteralPath $statePath -Force -ErrorAction SilentlyContinue
+  try { Remove-Item -LiteralPath $zipPath -Force } catch { }
+  try { Remove-Item -LiteralPath (Join-Path (Split-Path -Parent $zipPath) 'update.json') -Force } catch { }
+  Log 'Update completed successfully.'
+} catch {
+  Log ("FAILED: " + $_.ToString())
+  if ($promoted -and (Test-Path -LiteralPath $installDir)) {
+    try {
+      $failedDir = Join-Path $parentDir ('.' + $leaf + '.failed-' + $token)
+      Move-Item -LiteralPath $installDir -Destination $failedDir
+      if (Test-Path -LiteralPath $backupDir) { Move-Item -LiteralPath $backupDir -Destination $installDir }
+      Remove-Item -LiteralPath $failedDir -Recurse -Force -ErrorAction SilentlyContinue
+      Log 'Rollback completed; previous installation restored.'
+      $oldExe = Join-Path $installDir $exeName
+      if (Test-Path -LiteralPath $oldExe) { Start-Process -FilePath $oldExe -WorkingDirectory $installDir }
+    } catch { Log ("ROLLBACK FAILED: " + $_.ToString()) }
+  } elseif ((Test-Path -LiteralPath $backupDir) -and -not (Test-Path -LiteralPath $installDir)) {
+    try { Move-Item -LiteralPath $backupDir -Destination $installDir; Log 'Recovered installation directory from rollback copy.' } catch { Log ("RECOVERY FAILED: " + $_.ToString()) }
+  }
+  try { if (Test-Path -LiteralPath $stageDir) { Remove-Item -LiteralPath $stageDir -Recurse -Force -ErrorAction SilentlyContinue } } catch { }
+}
+'''
+      .replaceAll('__PARENT_PID__', pid.toString())
+      .replaceAll('__ZIP_PATH__', psLiteral(file.path))
+      .replaceAll('__LAUNCHER_LOG_PATH__', psLiteral(launcherLogPath))
+      .replaceAll('__INSTALL_DIR__', psLiteral(File(Platform.resolvedExecutable).parent.path));
+      final bytes = <int>[for (final unit in script.codeUnits) ...[unit & 0xFF, unit >> 8]];
       try {
-        // The setup is started directly and detached from this process. It waits by itself until the running app
-        // (its single-instance mutex) is gone, so the app only has to close right after.
-        await Process.start(file.path, args, mode: ProcessStartMode.detached);
-        _log('install: setup started directly, log $logPath');
+        await Process.start('powershell.exe', ['-NoProfile', '-NonInteractive', '-WindowStyle', 'Hidden', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', base64Encode(bytes)], mode: ProcessStartMode.detached);
+        _log('install: queued portable ZIP updater for PID $pid; log $launcherLogPath');
       } catch (e) {
-        _log('install: direct start failed ${e.runtimeType}: $e; trying the shell');
-        try {
-          final path = file.path.replaceAll("'", "''");
-          final list = args.map((a) => "'${a.replaceAll("'", "''")}'").join(',');
-          final script = 'Start-Process -FilePath \'$path\' -ArgumentList $list';
-          final bytes = <int>[for (final unit in script.codeUnits) ...[unit & 0xFF, unit >> 8]];
-          await Process.start(
-            'powershell.exe',
-            ['-NoProfile', '-NonInteractive', '-WindowStyle', 'Hidden', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', base64Encode(bytes)],
-            mode: ProcessStartMode.detached,
-          );
-          _log('install: setup started through the shell');
-        } catch (e2) {
-          return 'error:${e2.runtimeType}: $e2';
-        }
+        _log('install: could not start update launcher ${e.runtimeType}: $e');
+        return 'error:could not start update launcher: $e';
       }
-      Future<void>.delayed(const Duration(milliseconds: 1500), () => WindowsDesktopService.instance.exitApp());
+      Future<void>.delayed(const Duration(milliseconds: 500), () => WindowsDesktopService.instance.exitApp());
       return 'ok';
     }
     if (PlatformInfo.isAndroid) return AthanAndroid.installApk(file.path);
     return 'error:unsupported';
   }
-
   /// Opens the release page of GitHub in the browser (the fallback whenever the in-app update is not possible).
   static Future<void> openReleasePage([UpdateInfo? info]) async {
     final url = info?.pageUrl ?? 'https://github.com/$repository/releases/latest';

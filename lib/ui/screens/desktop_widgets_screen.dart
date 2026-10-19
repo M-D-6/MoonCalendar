@@ -280,6 +280,7 @@ class _DesktopWidgetAppState extends State<DesktopWidgetApp> with WindowListener
       );
 
   String get instanceId => widget.arguments['instanceId']?.toString() ?? 'widget';
+  String get readyToken => widget.arguments['readyToken']?.toString() ?? '';
   String get mainWindowId => widget.arguments['mainWindowId']?.toString() ?? '';
   late String _displayTitle;
 
@@ -348,14 +349,48 @@ class _DesktopWidgetAppState extends State<DesktopWidgetApp> with WindowListener
         await windowManager.setIgnoreMouseEvents(_clickThrough, forward: true);
         if (mounted) setState(() => _ready = true);
         WidgetsBinding.instance.addPostFrameCallback((_) async {
-          if (!mounted) return;
-          try { await windowManager.show(); } catch (_) {}
+          if (!mounted || _retired || mainWindowId.isEmpty) return;
+          // The main engine owns visibility. This handshake prevents a slow child engine
+          // from re-showing a widget after the user has turned all desktop widgets off.
+          try {
+            await WindowController.fromWindowId(mainWindowId)
+                .invokeMethod('widget_window_ready', <String, String>{'id': instanceId, 'token': readyToken})
+                .timeout(const Duration(seconds: 2));
+          } catch (_) {
+            // Keep the child hidden if its owner is not available; never create a stray widget.
+          }
         });
       },
     );
 
-    _tick = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted) setState(() {});
+    _scheduleTick();
+  }
+
+  // Most desktop widgets only display minute-level time. Avoid rebuilding the complete
+  // widget tree every second unless the user explicitly enabled seconds on the clock widget.
+  void _scheduleTick() {
+    _tick?.cancel();
+    final showSeconds = type == DesktopWidgetType.calendar &&
+        settings.widgetClock && settings.widgetShowSeconds;
+    if (showSeconds) {
+      _tick = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (mounted) setState(() {});
+      });
+      return;
+    }
+
+    // Align minute-level widgets to the wall clock instead of allowing their displayed time
+    // to drift by up to 59 seconds after the window starts.
+    final now = DateTime.now();
+    final untilNextMinute = Duration(
+      milliseconds: 60000 - now.second * 1000 - now.millisecond,
+    );
+    _tick = Timer(untilNextMinute, () {
+      if (!mounted) return;
+      setState(() {});
+      _tick = Timer.periodic(const Duration(minutes: 1), (_) {
+        if (mounted) setState(() {});
+      });
     });
   }
 
@@ -382,6 +417,7 @@ class _DesktopWidgetAppState extends State<DesktopWidgetApp> with WindowListener
         } else {
           await settings.load();
         }
+        _scheduleTick();
         if (mounted) setState(() {});
         return true;
       case 'system_theme':

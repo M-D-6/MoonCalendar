@@ -53,8 +53,8 @@ Future<void> main(List<String> args) async {
     imageCache.maximumSize = 32;
     imageCache.maximumSizeBytes = 8 * 1024 * 1024;
     // The renderer's GPU resource cache otherwise grows towards its (large) default on desktop; a smaller
-    // budget keeps the working set low and costs nothing visible (ignored when the engine has no such cache).
-    unawaited(SystemChannels.skia.invokeMethod<void>('Skia.setResourceCacheMaxBytes', 48 * 1024 * 1024).catchError((Object _) {}));
+    // budget limits native graphics memory; use 24 MB on Windows to reduce the renderer's peak cache footprint.
+    unawaited(SystemChannels.skia.invokeMethod<void>('Skia.setResourceCacheMaxBytes', 24 * 1024 * 1024).catchError((Object _) {}));
   }
 
   final settings = AppSettings();
