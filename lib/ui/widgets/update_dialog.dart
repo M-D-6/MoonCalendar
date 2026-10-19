@@ -97,10 +97,12 @@ class UpdateUi {
   }
 
   /// A failure dialog with the technical trace (selectable and copyable) so that the cause can be reported.
-  static Future<void> _showFailure(BuildContext context, String message, [UpdateInfo? info]) {
-    final report = UpdateService.report;
-    return showDialog<void>(
+  /// With [canRetry] it offers "Try again"; the result is true only when the user chose that.
+  static Future<bool> _showFailure(BuildContext context, String message, [UpdateInfo? info, bool canRetry = false, String? extra]) async {
+    final report = extra == null ? UpdateService.report : '${UpdateService.report}\n$extra';
+    final retry = await showDialog<bool>(
       context: context,
+      barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         title: const Text('خطا', textDirection: TextDirection.rtl),
         content: SizedBox(
@@ -118,10 +120,46 @@ class UpdateUi {
         actions: [
           TextButton(onPressed: () => Clipboard.setData(ClipboardData(text: report)), child: const Text('کپی جزئیات')),
           TextButton(onPressed: () => UpdateService.openReleasePage(info), child: const Text('صفحهٔ دانلود')),
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('بستن')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('بستن')),
+          if (canRetry) FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('تلاش دوباره')),
         ],
       ),
     );
+    return retry == true;
+  }
+
+  /// At start: an earlier update failed while the app was closed and the previous version was restored. The user
+  /// may try again with the already downloaded file; if not, every temporary file is deleted.
+  static Future<void> reportPreviousFailure(BuildContext context, AppSettings settings) async {
+    final detail = UpdateService.pendingFailure;
+    if (detail == null || !context.mounted) return;
+    UpdateService.pendingFailure = null;
+    final retry = await _showFailure(context, 'به‌روزرسانی قبلی کامل نشد و نسخهٔ قبلی بازیابی شد. می‌توانید دوباره تلاش کنید.', null, true, detail);
+    if (!retry || !context.mounted) {
+      UpdateService.purge();
+      return;
+    }
+    try {
+      final info = await UpdateService.checkLatest(force: true);
+      if (info == null || !info.hasAsset || !context.mounted) {
+        UpdateService.purge();
+        return;
+      }
+      await _downloadAndInstall(context, info);
+    } catch (_) {
+      UpdateService.purge();
+    }
+  }
+
+  /// A failed download / install: "Try again" reuses the downloaded file when it is intact; closing the dialog
+  /// without it deletes every temporary file.
+  static Future<void> _failedWithRetry(BuildContext context, String message, UpdateInfo info) async {
+    final retry = await _showFailure(context, message, info, true);
+    if (retry && context.mounted) {
+      await _downloadAndInstall(context, info);
+    } else {
+      UpdateService.purge();
+    }
   }
 
   static String _digits(String s) => toPersianDigits(s);
@@ -230,7 +268,19 @@ class UpdateUi {
         );
         if (ready != true || !context.mounted) return;
       }
+      if (PlatformInfo.isWindows && context.mounted) {
+        // Starting the helper and checking the archive can take several seconds.
+        showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => const AlertDialog(
+            title: Text('در حال آماده‌سازی جایگزینی', textDirection: TextDirection.rtl),
+            content: Column(mainAxisSize: MainAxisSize.min, children: [LinearProgressIndicator(), SizedBox(height: 10), Text('لطفاً صبر کنید…', textDirection: TextDirection.rtl)]),
+          ),
+        );
+      }
       final answer = await UpdateService.install(file);
+      if (PlatformInfo.isWindows) closeDialog();
       if (answer == 'permission') {
         // Android: the permission to install from this app is still missing (its settings page was opened). The
         // downloaded file is kept, so a second tap installs without downloading again.
@@ -240,12 +290,12 @@ class UpdateUi {
           action: SnackBarAction(label: tr('صفحهٔ دانلود'), onPressed: () => UpdateService.openReleasePage(info)),
         ));
       } else if (answer != 'ok') {
-        if (context.mounted) await _showFailure(context, 'نصب به‌روزرسانی شروع نشد. می‌توانید فایل را از صفحهٔ دانلود بگیرید.', info);
+        if (context.mounted) await _failedWithRetry(context, 'نصب به‌روزرسانی شروع نشد. می‌توانید دوباره تلاش کنید یا فایل را از صفحهٔ دانلود بگیرید.', info);
       }
     } catch (e) {
       closeDialog();
       if (!UpdateService.isCancelled(e) && context.mounted) {
-        await _showFailure(context, 'دریافت به‌روزرسانی ناموفق بود. می‌توانید فایل را از صفحهٔ دانلود بگیرید.', info);
+        await _failedWithRetry(context, 'دریافت به‌روزرسانی ناموفق بود. می‌توانید دوباره تلاش کنید یا فایل را از صفحهٔ دانلود بگیرید.', info);
       }
     } finally {
       progress.dispose();

@@ -199,6 +199,7 @@ class UpdateService {
   static Future<void> cleanup() async {
     if (!isSupported) return;
     await _ensureBase();
+    _scanUpdaterFolders();
     try {
       if (!_folder.existsSync()) return;
       for (final entity in _folder.listSync()) {
@@ -221,6 +222,73 @@ class UpdateService {
     } catch (_) {
       _deleteFolder();
     }
+  }
+
+  // ------------------------------------------------------------------------ Windows helper leftovers
+
+  /// Details of an update that failed while the application was closed (the helper rolled back), found at start.
+  static String? pendingFailure;
+
+  static bool _cleanupScheduled = false;
+
+  static Iterable<Directory> _updaterFolders() sync* {
+    if (!PlatformInfo.isWindows) return;
+    try {
+      for (final e in Directory.systemTemp.listSync(followLinks: false)) {
+        if (e is Directory && e.path.split(Platform.pathSeparator).last.startsWith('mooncalendar-updater-')) yield e;
+      }
+    } catch (_) {}
+  }
+
+  /// Reads a recorded failure, then removes helper folders that are no longer in use (a helper that is still
+  /// finishing its work keeps its folder, so younger ones are left and looked at again a little later).
+  static void _scanUpdaterFolders() {
+    var young = false;
+    for (final dir in _updaterFolders().toList()) {
+      try {
+        final failedFile = File('${dir.path}${Platform.pathSeparator}helper.failed');
+        if (pendingFailure == null && failedFile.existsSync()) {
+          final logFile = File('${dir.path}${Platform.pathSeparator}update.log');
+          final lines = logFile.existsSync() ? logFile.readAsLinesSync() : const <String>[];
+          pendingFailure = 'helper: ${failedFile.readAsStringSync().replaceFirst('\uFEFF', '').trim()}\n${lines.skip(lines.length > 12 ? lines.length - 12 : 0).join('\n')}';
+        }
+        final age = DateTime.now().difference(dir.statSync().modified);
+        if (age > const Duration(minutes: 5)) {
+          dir.deleteSync(recursive: true);
+        } else {
+          young = true;
+        }
+      } catch (_) {}
+    }
+    if (young && !_cleanupScheduled) {
+      _cleanupScheduled = true;
+      Timer(const Duration(minutes: 6), () {
+        _cleanupScheduled = false;
+        _scanUpdaterFolders();
+      });
+    }
+  }
+
+  /// Removes every temporary file of the update system: the download, the helper folders and the failure record.
+  /// Used when the user does not retry a failed update.
+  static void purge() {
+    pendingFailure = null;
+    _deleteFolder();
+    for (final dir in _updaterFolders().toList()) {
+      try {
+        dir.deleteSync(recursive: true);
+      } catch (_) {}
+    }
+  }
+
+  /// The updated application tells the waiting helper that it started properly; without this the helper
+  /// would roll the update back.
+  static Future<void> confirmHealthy() async {
+    final path = Platform.environment['MOONCALENDAR_UPDATE_HEALTH_FILE'];
+    if (path == null || path.isEmpty) return;
+    try {
+      await File(path).writeAsString('healthy', flush: true);
+    } catch (_) {}
   }
 
   /// A complete, verified download of exactly this release, or null.
@@ -334,6 +402,12 @@ class UpdateService {
       // The helper runs outside the Flutter process. It waits for this process to exit before
       // touching any locked DLL/EXE, stages the complete ZIP beside the install directory,
       // preserves Inno Setup's uninstaller files, swaps directories, and rolls back on failure.
+      // Folders of earlier attempts are no longer needed (no helper is running while the app is open).
+      for (final old in _updaterFolders().toList()) {
+        try {
+          old.deleteSync(recursive: true);
+        } catch (_) {}
+      }
       final tempDir = Directory.systemTemp.createTempSync('mooncalendar-updater-');
       final scriptFile = File('${tempDir.path}${Platform.pathSeparator}update.ps1');
       final logPath = '${tempDir.path}${Platform.pathSeparator}update.log';
@@ -351,6 +425,12 @@ $ErrorActionPreference = 'Stop'
 function Write-Log([string]$line) {
   try { Add-Content -LiteralPath $LogPath -Value ((Get-Date -Format o) + ' ' + $line) } catch {}
 }
+Write-Log 'Script entered.'
+$AbortPath = Join-Path (Split-Path -Parent $StartedPath) 'helper.abort'
+# Only one helper may run, however many times it was launched.
+$script:singleton = New-Object System.Threading.Mutex($false, 'Local\MoonCalendar.UpdateHelper')
+if (-not $script:singleton.WaitOne(0)) { Write-Log 'Another helper is already running.'; exit }
+if (Test-Path -LiteralPath $AbortPath) { Write-Log 'Aborted before start.'; exit }
 function Write-Status([string]$path, [string]$value) {
   $temp = $path + '.' + [Guid]::NewGuid().ToString('N') + '.tmp'
   [System.IO.File]::WriteAllText($temp, $value, [System.Text.Encoding]::UTF8)
@@ -503,6 +583,7 @@ try {
 
       # Ready is emitted only when download verification, ZIP inventory, extraction and runtime checks pass.
       Write-Status $ReadyPath 'ready'
+      if (Test-Path -LiteralPath $AbortPath) { throw 'Update was cancelled by the application.' }
       $status.Text = 'در انتظار بسته‌شدن برنامه…'
       $deadline = (Get-Date).AddSeconds(45)
       while ((Get-Process -Id $AppPid -ErrorAction SilentlyContinue) -and (Get-Date) -lt $deadline) { [System.Windows.Forms.Application]::DoEvents(); Start-Sleep -Milliseconds 150 }
@@ -616,42 +697,99 @@ try {
   if ($null -ne $form) { try { $form.Dispose() } catch {} }
 }
 """;
-      try {
-        await scriptFile.writeAsBytes(<int>[0xFF, 0xFE, ...ps.codeUnits.expand((unit) => <int>[unit & 0xFF, (unit >> 8) & 0xFF])], flush: true);
-        await Process.start(
-          'powershell.exe',
-          ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-STA', '-File', scriptFile.path,
-            archive, appExe, appPid.toString(), logPath, startedPath, readyPath, failurePath, helperExpectedHash, healthPath],
-          mode: ProcessStartMode.detached,
-        );
-        _log('install: ZIP helper process created');
-      } catch (e) {
-        _log('install: ZIP helper failed (${e.runtimeType})');
-        try { if (tempDir.existsSync()) tempDir.deleteSync(recursive: true); } catch (_) {}
-        return 'error:${e.runtimeType}';
-      }
-      // Never exit until the helper has initialized, verified the ZIP, extracted the staging tree,
-      // and checked the install parent. The actual directory rename is still guarded by rollback.
       final started = File(startedPath);
       final ready = File(readyPath);
       final failed = File(failurePath);
-      String readStatus(File file) {
-        try { return file.readAsStringSync().replaceFirst('\uFEFF', '').trim(); } catch (_) { return ''; }
+      String readStatus(File f) {
+        try { return f.readAsStringSync().replaceFirst('﻿', '').trim(); } catch (_) { return ''; }
       }
-      final startDeadline = DateTime.now().add(const Duration(seconds: 10));
-      while (readStatus(started) != 'started' && readStatus(failed).isEmpty && DateTime.now().isBefore(startDeadline)) {
-        await Future<void>.delayed(const Duration(milliseconds: 100));
+      Future<bool> waitStarted(Duration limit) async {
+        final deadline = DateTime.now().add(limit);
+        while (readStatus(started) != 'started' && readStatus(failed).isEmpty && DateTime.now().isBefore(deadline)) {
+          await Future<void>.delayed(const Duration(milliseconds: 150));
+        }
+        return readStatus(started) == 'started' && readStatus(failed).isEmpty;
       }
-      if (readStatus(started) != 'started' || readStatus(failed).isNotEmpty) {
-        _log('install: helper did not initialize');
+
+      Future<void> abortHelper() async {
+        try { File('${tempDir.path}${Platform.pathSeparator}helper.abort').writeAsStringSync('abort'); } catch (_) {}
+      }
+
+      Future<String> describeFailure() async {
+        // Collected for the technical report: what exists in the helper folder and whether PowerShell itself works.
+        try {
+          _log('install: helper folder holds ${[for (final e in tempDir.listSync()) e.path.split(Platform.pathSeparator).last]}');
+          final logFile = File(logPath);
+          if (logFile.existsSync()) {
+            final lines = logFile.readAsLinesSync();
+            _log('install: helper log\n${lines.skip(lines.length > 12 ? lines.length - 12 : 0).join('\n')}');
+          }
+        } catch (_) {}
+        try {
+          final probe = await Process.run(
+            'powershell.exe',
+            ['-NoProfile', '-NonInteractive', '-Command', r'$PSVersionTable.PSVersion.ToString() + " " + $ExecutionContext.SessionState.LanguageMode'],
+          ).timeout(const Duration(seconds: 25));
+          _log('install: PowerShell probe exit ${probe.exitCode}: ${'${probe.stdout}'.trim()} ${'${probe.stderr}'.trim()}');
+        } catch (e) {
+          _log('install: PowerShell probe failed (${e.runtimeType}: $e)');
+        }
         return 'error:helper_initialization_failed';
+      }
+
+      final psArgs = <String>[
+        '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-STA', '-WindowStyle', 'Hidden', '-File', scriptFile.path,
+        archive, appExe, appPid.toString(), logPath, startedPath, readyPath, failurePath, helperExpectedHash, healthPath,
+      ];
+      try {
+        await scriptFile.writeAsBytes(<int>[0xEF, 0xBB, 0xBF, ...utf8.encode(ps)], flush: true);
+      } catch (e) {
+        _log('install: could not write the helper script (${e.runtimeType}: $e)');
+        return 'error:${e.runtimeType}';
+      }
+      // Starting a hidden, fully independent PowerShell is the fragile step, so several ways are tried one after
+      // another; the helper itself refuses to run twice.
+      var launched = false;
+      try {
+        final r = await Process.run('cmd.exe', ['/d', '/c', 'start', '', '/min', 'powershell.exe', ...psArgs]).timeout(const Duration(seconds: 20));
+        _log('install: launch 1 (start) exit ${r.exitCode} ${'${r.stderr}'.trim()}');
+        launched = await waitStarted(const Duration(seconds: 25));
+      } catch (e) {
+        _log('install: launch 1 failed (${e.runtimeType}: $e)');
+      }
+      if (!launched && readStatus(failed).isEmpty) {
+        try {
+          await Process.start('powershell.exe', psArgs, mode: ProcessStartMode.detachedWithStdio);
+          _log('install: launch 2 (detached with pipes) created');
+          launched = await waitStarted(const Duration(seconds: 20));
+        } catch (e) {
+          _log('install: launch 2 failed (${e.runtimeType}: $e)');
+        }
+      }
+      if (!launched && readStatus(failed).isEmpty) {
+        try {
+          final process = await Process.start('powershell.exe', psArgs);
+          unawaited(process.stdout.drain<void>());
+          unawaited(process.stderr.drain<void>());
+          _log('install: launch 3 (attached) created');
+          launched = await waitStarted(const Duration(seconds: 20));
+        } catch (e) {
+          _log('install: launch 3 failed (${e.runtimeType}: $e)');
+        }
+      }
+      if (!launched) {
+        _log('install: helper did not initialize');
+        await abortHelper();
+        return describeFailure();
       }
       final readyDeadline = DateTime.now().add(const Duration(seconds: 120));
       while (readStatus(ready) != 'ready' && readStatus(failed).isEmpty && DateTime.now().isBefore(readyDeadline)) {
         await Future<void>.delayed(const Duration(milliseconds: 150));
       }
       if (readStatus(ready) != 'ready' || readStatus(failed).isNotEmpty) {
-        _log('install: helper preparation failed');
+        _log('install: helper preparation failed (${readStatus(failed)})');
+        await abortHelper();
+        await describeFailure();
         return 'error:helper_preparation_failed';
       }
       await WindowsDesktopService.instance.exitApp();
