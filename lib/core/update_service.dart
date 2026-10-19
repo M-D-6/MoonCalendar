@@ -55,11 +55,39 @@ class UpdateService {
 
   /// 1 when [a] is newer than [b], -1 when older, 0 when equal ("1.1.10" > "1.1.9", a leading "v" is ignored).
   static int compareVersions(String a, String b) {
-    List<int> parts(String v) => v.replaceFirst(RegExp(r'^[vV]'), '').split(RegExp(r'[.+\-]')).map((p) => int.tryParse(p) ?? 0).toList();
-    final x = parts(a), y = parts(b);
-    for (var i = 0; i < 4; i++) {
-      final p = i < x.length ? x[i] : 0, q = i < y.length ? y[i] : 0;
+    ({List<int> core, List<String> pre}) parse(String input) {
+      var value = input.trim().replaceFirst(RegExp(r'^[vV]'), '');
+      value = value.split('+').first; // SemVer build metadata does not affect precedence.
+      final dash = value.indexOf('-');
+      final coreText = dash < 0 ? value : value.substring(0, dash);
+      final preText = dash < 0 ? '' : value.substring(dash + 1);
+      final core = coreText.split('.').map((part) => int.tryParse(part) ?? 0).toList();
+      final pre = preText.isEmpty ? <String>[] : preText.split('.');
+      return (core: core, pre: pre);
+    }
+
+    final x = parse(a), y = parse(b);
+    final coreLength = x.core.length > y.core.length ? x.core.length : y.core.length;
+    for (var i = 0; i < coreLength; i++) {
+      final p = i < x.core.length ? x.core[i] : 0;
+      final q = i < y.core.length ? y.core[i] : 0;
       if (p != q) return p > q ? 1 : -1;
+    }
+
+    if (x.pre.isEmpty && y.pre.isEmpty) return 0;
+    if (x.pre.isEmpty) return 1;
+    if (y.pre.isEmpty) return -1;
+    final preLength = x.pre.length > y.pre.length ? x.pre.length : y.pre.length;
+    for (var i = 0; i < preLength; i++) {
+      if (i >= x.pre.length) return -1;
+      if (i >= y.pre.length) return 1;
+      final p = x.pre[i], q = y.pre[i];
+      if (p == q) continue;
+      final pn = int.tryParse(p), qn = int.tryParse(q);
+      if (pn != null && qn != null) return pn > qn ? 1 : -1;
+      if (pn != null) return -1; // Numeric identifiers have lower precedence than non-numeric ones.
+      if (qn != null) return 1;
+      return p.compareTo(q) > 0 ? 1 : -1;
     }
     return 0;
   }
