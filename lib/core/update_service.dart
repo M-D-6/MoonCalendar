@@ -129,7 +129,7 @@ class UpdateService {
 
   /// Release file names that suit this device, best first.
   static Future<List<String>> _wantedAssetNames() async {
-    if (PlatformInfo.isWindows) return const ['MoonCalendar-windows-x64-setup.exe'];
+    if (PlatformInfo.isWindows) return const ['MoonCalendar-windows-x64.zip'];
     final abis = await AthanAndroid.supportedAbis();
     return [for (final abi in abis) 'MoonCalendar-android-$abi.apk'];
   }
@@ -214,15 +214,15 @@ class UpdateService {
 
   static Future<String> _sha256Of(File file) async => (await sha256.bind(file.openRead()).first).toString();
 
-  /// Downloads the release file (or returns the one already downloaded). [onProgress] gets 0..1 (or null when the
-  /// size is unknown); [cancelled] aborts. Whatever goes wrong, no partial file stays behind.
-  static Future<File> download(UpdateInfo info, {required void Function(double? progress) onProgress, required bool Function() cancelled}) async {
-    _log('download: ${info.assetName} (${info.assetSize} bytes) ${info.assetUrl}');
+  /// Downloads the release file (or returns the one already downloaded). [onProgress] receives bytes received and
+  /// total bytes (null when unknown); [cancelled] aborts. Whatever goes wrong, no partial file stays behind.
+  static Future<File> download(UpdateInfo info, {required void Function(int receivedBytes, int? totalBytes) onProgress, required bool Function() cancelled}) async {
+    _log('download: ${info.assetName} (${info.assetSize} bytes)');
     if (info.sha256 == null || !_isTrustedUrl(info.assetUrl)) throw const HttpException('No published checksum or untrusted address; the file is not downloaded');
     final existing = await readyFile(info);
     if (existing != null) {
-      _log('download: reusing the verified file ${existing.path}');
-      onProgress(1);
+      _log('download: reusing the verified file');
+      onProgress(existing.lengthSync(), info.assetSize ?? existing.lengthSync());
       return existing;
     }
     _deleteFolder(); // older or damaged downloads
@@ -233,7 +233,7 @@ class UpdateService {
     try {
       final request = http.Request('GET', Uri.parse(info.assetUrl!))..headers['User-Agent'] = 'Mooncalendar/$appVersion';
       final response = await client.send(request).timeout(const Duration(seconds: 30));
-      _log('download: HTTP ${response.statusCode}, length ${response.contentLength}, folder ${_folder.path}');
+      _log('download: HTTP ${response.statusCode}, length ${response.contentLength}');
       if (response.statusCode != 200) throw HttpException('Download failed (${response.statusCode})');
       final total = response.contentLength ?? info.assetSize;
       var received = 0;
@@ -244,13 +244,14 @@ class UpdateService {
           if (cancelled()) throw const _Cancelled();
           sink.add(chunk);
           received += chunk.length;
-          onProgress(total == null || total <= 0 ? null : (received / total).clamp(0.0, 1.0).toDouble());
+          onProgress(received, total);
         }
       } finally {
         await sink.close();
       }
       _log('download: received $received of $total bytes');
       if (total != null && total > 0 && received != total) throw HttpException('The downloaded file is incomplete ($received of $total bytes)');
+      if (info.assetSize != null && received != info.assetSize) throw HttpException('The downloaded file size does not match GitHub metadata ($received of ${info.assetSize} bytes)');
       {
         final actual = await _sha256Of(part);
         _log('download: sha256 $actual, expected ${info.sha256}');
@@ -266,7 +267,7 @@ class UpdateService {
       }));
       return done;
     } catch (e) {
-      _log('download: failed ${e.runtimeType}: $e');
+      _log('download: failed (${e.runtimeType})');
       try {
         if (part.existsSync()) part.deleteSync();
       } catch (_) {}
@@ -280,12 +281,12 @@ class UpdateService {
 
   // ---------------------------------------------------------------------------------------- install
 
-  /// Starts the installer and returns "ok", "permission" (Android: allowing installs from this app is still needed)
-  /// or "error:<reason>". Windows: the app closes, a silent setup replaces the files and starts the new
-  /// version. Android: the system installer opens (the user may first be asked to allow installs from this app; the
+  /// Starts the update and returns "ok", "permission" (Android: allowing installs from this app is still needed)
+  /// or "error:<reason>". Windows: a detached helper safely swaps the verified ZIP and relaunches the app.
+  /// Android: the system installer opens (the user may first be asked to allow installs from this app; the
   /// downloaded file is kept, so a second tap does not download again). Returns false when it could not be started.
   static Future<String> install(File file) async {
-    _log('install: ${file.path} (${file.existsSync() ? file.lengthSync() : 'missing'} bytes)');
+    _log('install: file ${file.existsSync() ? file.lengthSync() : 'missing'} bytes');
     // Verify again right before starting: the file must still be exactly what GitHub published.
     final expected = _readMeta()?['sha256'] as String?;
     if (expected == null || !file.existsSync()) return 'error:the downloaded file cannot be verified';
@@ -295,87 +296,337 @@ class UpdateService {
       _deleteFolder();
       return 'error:the downloaded file does not match the published checksum and was deleted';
     }
-    final result = await _install(file);
+    final result = await _install(file, expected);
     _log('install: result $result');
     return result;
   }
 
-  static Future<String> _install(File file) async {
+  static Future<String> _install(File file, String expectedHash) async {
     if (PlatformInfo.isWindows) {
+      // The helper runs outside the Flutter process. It waits for this process to exit before
+      // touching any locked DLL/EXE, stages the complete ZIP beside the install directory,
+      // preserves Inno Setup's uninstaller files, swaps directories, and rolls back on failure.
       final tempDir = Directory.systemTemp.createTempSync('mooncalendar-updater-');
       final scriptFile = File('${tempDir.path}${Platform.pathSeparator}update.ps1');
       final logPath = '${tempDir.path}${Platform.pathSeparator}update.log';
+      final startedPath = '${tempDir.path}${Platform.pathSeparator}helper.started';
+      final readyPath = '${tempDir.path}${Platform.pathSeparator}helper.ready';
+      final failurePath = '${tempDir.path}${Platform.pathSeparator}helper.failed';
       final appExe = Platform.resolvedExecutable;
       final appPid = pid;
-      final installer = file.path;
+      final archive = file.path;
+      final healthPath = '${tempDir.path}${Platform.pathSeparator}helper.healthy';
+      final helperExpectedHash = expectedHash.toLowerCase();
       const ps = r"""
-param([string]$Installer, [string]$AppExe, [int]$AppPid, [string]$LogPath)
+param([string]$Archive, [string]$AppExe, [int]$AppPid, [string]$LogPath, [string]$StartedPath, [string]$ReadyPath, [string]$FailurePath, [string]$ExpectedSha256, [string]$HealthPath)
 $ErrorActionPreference = 'Stop'
-Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName System.Drawing
-function Write-Log([string]$line) { try { Add-Content -LiteralPath $LogPath -Value ((Get-Date -Format o) + ' ' + $line) } catch {} }
-$form = New-Object System.Windows.Forms.Form
-$form.Text = 'MoonCalendar - Update'
-$form.StartPosition = 'CenterScreen'
-$form.FormBorderStyle = 'FixedDialog'
-$form.MaximizeBox = $false
-$form.MinimizeBox = $false
-$form.ControlBox = $false
-$form.ClientSize = New-Object System.Drawing.Size(430,150)
-$form.TopMost = $true
-$title = New-Object System.Windows.Forms.Label
-$title.Text = 'در حال به‌روزرسانی MoonCalendar'
-$title.Font = New-Object System.Drawing.Font('Segoe UI', 12, [System.Drawing.FontStyle]::Bold)
-$title.AutoSize = $false; $title.TextAlign = 'MiddleCenter'; $title.SetBounds(15,15,400,30)
-$status = New-Object System.Windows.Forms.Label
-$status.Text = 'آماده‌سازی برای نصب…'
-$status.Font = New-Object System.Drawing.Font('Segoe UI', 9)
-$status.AutoSize = $false; $status.TextAlign = 'MiddleCenter'; $status.SetBounds(15,52,400,28)
-$bar = New-Object System.Windows.Forms.ProgressBar
-$bar.Style = 'Marquee'; $bar.MarqueeAnimationSpeed = 25; $bar.SetBounds(35,92,360,18)
-$form.Controls.AddRange(@($title,$status,$bar))
-$form.add_Shown({
+function Write-Log([string]$line) {
+  try { Add-Content -LiteralPath $LogPath -Value ((Get-Date -Format o) + ' ' + $line) } catch {}
+}
+function Write-Status([string]$path, [string]$value) {
+  $temp = $path + '.' + [Guid]::NewGuid().ToString('N') + '.tmp'
+  [System.IO.File]::WriteAllText($temp, $value, [System.Text.Encoding]::UTF8)
+  try { [System.IO.File]::Move($temp, $path) }
+  catch { try { Remove-Item -LiteralPath $temp -Force -ErrorAction SilentlyContinue } catch {}; throw }
+}
+function Test-ReservedWindowsName([string]$segment) {
+  $base = ($segment -split '\.')[0]
+  return $base -match '^(?i:CON|PRN|AUX|NUL|COM[1-9¹²³]|LPT[1-9¹²³])$'
+}
+function Get-SafeEntryName([string]$rawName) {
+  if ([string]::IsNullOrWhiteSpace($rawName)) { throw 'ZIP contains an empty entry name.' }
+  $name = $rawName.Replace('\','/')
+  if ($name.StartsWith('/') -or $name -match '^[A-Za-z]:' -or $name.Contains(':') -or $name.Contains([char]0)) { throw 'ZIP contains an absolute or invalid path.' }
+  $isDirectory = $name.EndsWith('/')
+  $trimmed = $name.TrimEnd('/')
+  if ([string]::IsNullOrWhiteSpace($trimmed)) { throw 'ZIP contains an invalid root entry.' }
+  $segments = $trimmed.Split('/')
+  foreach ($segment in $segments) {
+    if ($segment -eq '' -or $segment -eq '.' -or $segment -eq '..') { throw 'ZIP contains a traversal path.' }
+    if ($segment.EndsWith('.') -or $segment.EndsWith(' ')) { throw 'ZIP contains a Windows-ambiguous filename.' }
+    if ($segment -match '[<>"|?*]' -or $segment -match '[\x00-\x1F]') { throw 'ZIP contains an invalid Windows filename.' }
+    if (Test-ReservedWindowsName $segment) { throw 'ZIP contains a reserved Windows filename.' }
+  }
+  return [pscustomobject]@{ Name = ($segments -join '\'); IsDirectory = $isDirectory }
+}
+function Get-ArchiveInventory([string]$archivePath) {
+  $zip = [System.IO.Compression.ZipFile]::OpenRead($archivePath)
   try {
-    Write-Log 'Updater UI started.'
-    $status.Text = 'در حال بستن برنامه برای نصب…'
-    $waitUntil = (Get-Date).AddSeconds(30)
-    while ((Get-Process -Id $AppPid -ErrorAction SilentlyContinue) -and (Get-Date) -lt $waitUntil) { [System.Windows.Forms.Application]::DoEvents(); Start-Sleep -Milliseconds 150 }
-    $status.Text = 'در حال اجرای نصب‌کننده…'
-    Write-Log ('Starting installer: ' + $Installer)
-    $setupLog = Join-Path (Split-Path -Parent $Installer) 'setup.log'
-    $proc = Start-Process -FilePath $Installer -ArgumentList @('/SILENT','/SUPPRESSMSGBOXES','/NORESTART','/CLOSEAPPLICATIONS',('/LOG=' + $setupLog)) -PassThru
-    while (-not $proc.HasExited) { [System.Windows.Forms.Application]::DoEvents(); Start-Sleep -Milliseconds 150; $proc.Refresh() }
-    Write-Log ('Installer exit code: ' + $proc.ExitCode)
-    if ($proc.ExitCode -ne 0) { throw ('Installer exited with code ' + $proc.ExitCode) }
-    $status.Text = 'نصب کامل شد؛ در حال اجرای برنامه…'
-    Start-Sleep -Milliseconds 800
-    Start-Process -FilePath $AppExe
-    Write-Log 'Application relaunched.'
-  } catch {
-    Write-Log ('Updater failed: ' + $_.Exception.Message)
-    $status.Text = 'به‌روزرسانی کامل نشد؛ در حال اجرای دوبارهٔ برنامه…'
-    try { Start-Process -FilePath $AppExe } catch { Write-Log ('Relaunch failed: ' + $_.Exception.Message) }
-    $bar.Style = 'Blocks'; $bar.Value = 100
-    Start-Sleep -Seconds 4
-  } finally { $form.Close() }
-})
-[void]$form.ShowDialog()
+    if ($zip.Entries.Count -lt 1 -or $zip.Entries.Count -gt 50000) { throw 'ZIP entry count is outside the permitted range.' }
+    $seen = New-Object 'System.Collections.Generic.Dictionary[string,string]' ([System.StringComparer]::OrdinalIgnoreCase)
+    $totalLength = [int64]0
+    $hasExe = $false; $hasFlutterDll = $false; $hasAssets = $false
+    $entries = New-Object 'System.Collections.Generic.List[object]'
+    foreach ($entry in $zip.Entries) {
+      $safe = Get-SafeEntryName $entry.FullName
+      $normalized = $safe.Name
+      if ($seen.ContainsKey($normalized)) { throw 'ZIP contains duplicate paths that differ only by case or repeat.' }
+      $seen.Add($normalized, $(if ($safe.IsDirectory) { 'D' } else { 'F' }))
+      # Reject files used as parent directories (e.g. "data" and "data/file.dll").
+      $parts = $normalized.Split([char[]]@([char]92))
+      for ($i = 1; $i -lt $parts.Length; $i++) {
+        $ancestor = ($parts[0..($i - 1)] -join '\')
+        if ($seen.ContainsKey($ancestor) -and $seen[$ancestor] -eq 'F') { throw 'ZIP contains a file/directory path collision.' }
+      }
+      if (-not $safe.IsDirectory) {
+        if ($entry.Length -lt 0 -or $entry.Length -gt 1073741824) { throw 'ZIP contains an oversized file.' }
+        $totalLength += [int64]$entry.Length
+        if ($totalLength -gt 2147483648) { throw 'ZIP expands beyond the 2 GiB safety limit.' }
+        if ($normalized -ieq 'mooncalendar.exe') { $hasExe = $true }
+        if ($normalized -ieq 'flutter_windows.dll') { $hasFlutterDll = $true }
+        if ($normalized -match '(?i)^data\\flutter_assets\\') { $hasAssets = $true }
+      }
+      $entries.Add([pscustomobject]@{ Name = $normalized; IsDirectory = $safe.IsDirectory })
+    }
+    # Also reject a parent added after its child in the archive.
+    foreach ($item in $entries) {
+      $parts = $item.Name.Split([char[]]@([char]92))
+      for ($i = 1; $i -lt $parts.Length; $i++) {
+        $ancestor = ($parts[0..($i - 1)] -join '\')
+        if ($seen.ContainsKey($ancestor) -and $seen[$ancestor] -eq 'F') { throw 'ZIP contains a file/directory path collision.' }
+      }
+    }
+    if (-not $hasExe -or -not $hasFlutterDll -or -not $hasAssets) { throw 'ZIP is missing required Flutter Windows runtime files.' }
+    return ,$entries.ToArray()
+  } finally { $zip.Dispose() }
+}
+function Expand-SafeArchive([string]$archivePath, [string]$destination, [object[]]$inventory) {
+  $root = [System.IO.Path]::GetFullPath($destination).TrimEnd([char]92) + '\'
+  $zip = [System.IO.Compression.ZipFile]::OpenRead($archivePath)
+  try {
+    $entryMap = New-Object 'System.Collections.Generic.Dictionary[string,object]' ([System.StringComparer]::Ordinal)
+    foreach ($candidate in $zip.Entries) {
+      $candidateSafe = Get-SafeEntryName $candidate.FullName
+      if (-not $candidateSafe.IsDirectory) { $entryMap.Add($candidateSafe.Name, $candidate) }
+    }
+    foreach ($item in $inventory) {
+      $target = [System.IO.Path]::GetFullPath((Join-Path $destination $item.Name))
+      if (-not $target.StartsWith($root, [System.StringComparison]::OrdinalIgnoreCase)) { throw 'ZIP entry resolves outside staging directory.' }
+      if ($item.IsDirectory) {
+        [System.IO.Directory]::CreateDirectory($target) | Out-Null
+      } else {
+        $parent = [System.IO.Path]::GetDirectoryName($target)
+        [System.IO.Directory]::CreateDirectory($parent) | Out-Null
+        if (-not $entryMap.ContainsKey($item.Name)) { throw 'Validated ZIP entry could not be found during extraction.' }
+        [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entryMap[$item.Name], $target, $false)
+      }
+    }
+  } finally { $zip.Dispose() }
+}
+$form = $null
+try {
+  Write-Status $StartedPath 'started'
+  Add-Type -AssemblyName System.Windows.Forms
+  Add-Type -AssemblyName System.Drawing
+  Add-Type -AssemblyName System.IO.Compression
+  Add-Type -AssemblyName System.IO.Compression.FileSystem
+  $form = New-Object System.Windows.Forms.Form
+  $form.Text = 'MoonCalendar - Update'
+  $form.StartPosition = 'CenterScreen'
+  $form.FormBorderStyle = 'FixedDialog'
+  $form.MaximizeBox = $false; $form.MinimizeBox = $false; $form.ControlBox = $false
+  $form.ClientSize = New-Object System.Drawing.Size(460,170)
+  $form.TopMost = $true
+  $title = New-Object System.Windows.Forms.Label
+  $title.Text = 'در حال جایگزینی فایل‌های MoonCalendar'
+  $title.Font = New-Object System.Drawing.Font('Segoe UI', 12, [System.Drawing.FontStyle]::Bold)
+  $title.AutoSize = $false; $title.TextAlign = 'MiddleCenter'; $title.SetBounds(15,15,430,30)
+  $status = New-Object System.Windows.Forms.Label
+  $status.Text = 'آماده‌سازی…'
+  $status.Font = New-Object System.Drawing.Font('Segoe UI', 9)
+  $status.AutoSize = $false; $status.TextAlign = 'MiddleCenter'; $status.SetBounds(15,52,430,30)
+  $bar = New-Object System.Windows.Forms.ProgressBar
+  $bar.Style = 'Marquee'; $bar.MarqueeAnimationSpeed = 25; $bar.SetBounds(35,100,390,18)
+  $form.Controls.AddRange(@($title,$status,$bar))
+  $form.add_Shown({
+    $appRoot = [System.IO.Path]::GetFullPath((Split-Path -Parent $AppExe))
+    $parent = Split-Path -Parent $appRoot
+    $leaf = Split-Path -Leaf $appRoot
+    $token = [Guid]::NewGuid().ToString('N')
+    $stage = Join-Path $parent ('.' + $leaf + '.stage-' + $token)
+    $backup = Join-Path $parent ('.' + $leaf + '.backup-' + $token)
+    $newRootActive = $false
+    $appExited = $false
+    $newProcessId = 0
+    try {
+      Write-Log 'Helper started.'
+      if (-not (Test-Path -LiteralPath $Archive -PathType Leaf)) { throw 'Downloaded ZIP is missing.' }
+      $actualHash = (Get-FileHash -LiteralPath $Archive -Algorithm SHA256).Hash.ToLowerInvariant()
+      if ($actualHash -ne $ExpectedSha256.ToLowerInvariant()) { throw 'Downloaded ZIP checksum changed before extraction.' }
+      if ($ExpectedSha256 -notmatch '^[0-9a-fA-F]{64}$') { throw 'Expected checksum is invalid.' }
+      if (-not (Test-Path -LiteralPath $appRoot -PathType Container)) { throw 'Install directory not found.' }
+      $parentProbe = Join-Path $parent ('.mooncalendar-update-probe-' + $token)
+      [System.IO.File]::WriteAllText($parentProbe, 'probe')
+      Remove-Item -LiteralPath $parentProbe -Force
+
+      $status.Text = 'در حال بررسی و استخراج فایل‌ها…'
+      $inventory = Get-ArchiveInventory $Archive
+      New-Item -ItemType Directory -Path $stage | Out-Null
+      Expand-SafeArchive $Archive $stage $inventory
+      $stagedExe = Join-Path $stage 'mooncalendar.exe'
+      if (-not (Test-Path -LiteralPath $stagedExe -PathType Leaf) -or (Get-Item -LiteralPath $stagedExe).Length -lt 1024) { throw 'Staged executable is missing or too small.' }
+      if (-not (Test-Path -LiteralPath (Join-Path $stage 'flutter_windows.dll') -PathType Leaf)) { throw 'Staged Flutter runtime is missing.' }
+      if (-not (Test-Path -LiteralPath (Join-Path $stage 'data\flutter_assets') -PathType Container)) { throw 'Staged Flutter assets are missing.' }
+
+      # Keep Inno Setup uninstall metadata; the updater is only for the app files, not installer registration.
+      Get-ChildItem -LiteralPath $appRoot -Force -ErrorAction Stop |
+        Where-Object { $_.Name -match '^unins.*\.(exe|dat|msg)$' -and $_ -is [System.IO.FileInfo] } |
+        ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $stage -Force -ErrorAction Stop }
+
+      # Ready is emitted only when download verification, ZIP inventory, extraction and runtime checks pass.
+      Write-Status $ReadyPath 'ready'
+      $status.Text = 'در انتظار بسته‌شدن برنامه…'
+      $deadline = (Get-Date).AddSeconds(45)
+      while ((Get-Process -Id $AppPid -ErrorAction SilentlyContinue) -and (Get-Date) -lt $deadline) { [System.Windows.Forms.Application]::DoEvents(); Start-Sleep -Milliseconds 150 }
+      if (Get-Process -Id $AppPid -ErrorAction SilentlyContinue) { throw 'MoonCalendar did not exit within 45 seconds.' }
+      $appExited = $true
+
+      $status.Text = 'در حال جایگزینی نسخهٔ فعلی…'
+      # Record transaction intent before changing directory names; all paths are on the same volume.
+      Write-Log ('Swap transaction started. backup=' + (Split-Path -Leaf $backup))
+      Move-Item -LiteralPath $appRoot -Destination $backup -ErrorAction Stop
+      try {
+        Move-Item -LiteralPath $stage -Destination $appRoot -ErrorAction Stop
+        $newRootActive = $true
+      } catch {
+        if (-not (Test-Path -LiteralPath $appRoot) -and (Test-Path -LiteralPath $backup)) { Move-Item -LiteralPath $backup -Destination $appRoot -ErrorAction Stop }
+        throw
+      }
+
+      $status.Text = 'در حال اجرای آزمایشی نسخهٔ جدید…'
+      Write-Log 'Directory swap completed. Starting updated application for health confirmation.'
+      $env:MOONCALENDAR_UPDATE_HEALTH_FILE = $HealthPath
+      $started = Start-Process -FilePath (Join-Path $appRoot 'mooncalendar.exe') -PassThru -WorkingDirectory $appRoot -ErrorAction Stop
+      $newProcessId = $started.Id
+      $healthDeadline = (Get-Date).AddSeconds(45)
+      $healthy = $false
+      while ((Get-Date) -lt $healthDeadline) {
+        $started.Refresh()
+        if ($started.HasExited) { throw ('Updated application exited before health confirmation, code=' + $started.ExitCode) }
+        if (Test-Path -LiteralPath $HealthPath -PathType Leaf) {
+          $healthy = ([System.IO.File]::ReadAllText($HealthPath).Trim() -eq 'healthy')
+          if ($healthy) {
+            # A brief stabilization window catches an immediate crash after the application writes its marker.
+            $stableUntil = (Get-Date).AddSeconds(3)
+            while ((Get-Date) -lt $stableUntil) {
+              $started.Refresh()
+              if ($started.HasExited) { throw ('Updated application exited immediately after health confirmation, code=' + $started.ExitCode) }
+              [System.Windows.Forms.Application]::DoEvents()
+              Start-Sleep -Milliseconds 250
+            }
+            break
+          }
+        }
+        [System.Windows.Forms.Application]::DoEvents()
+        Start-Sleep -Milliseconds 250
+      }
+      if (-not $healthy) { throw 'Updated application did not report a healthy startup within 45 seconds.' }
+      Write-Log ('Updated application health confirmed and stable. pid=' + $started.Id)
+      # Keep exactly one recent rollback directory; older backups are removed best-effort.
+      Get-ChildItem -LiteralPath $parent -Directory -Force -ErrorAction SilentlyContinue |
+        Where-Object { ($_.Name -like ('.' + $leaf + '.backup-*') -and $_.FullName -ne $backup) -or $_.Name -like ('.' + $leaf + '.failed-*') } |
+        Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+      $status.Text = 'تمام شد. برنامه با موفقیت اجرا شد.'
+      $bar.Style = 'Blocks'; $bar.Value = 100
+      Start-Sleep -Seconds 2
+    } catch {
+      $failureType = $_.Exception.GetType().Name
+      Write-Log ('Update failed: ' + $failureType)
+      try { Write-Status $FailurePath $failureType } catch { Write-Log 'Could not write failure status.' }
+      $status.Text = 'به‌روزرسانی ناموفق بود؛ نسخهٔ قبلی بازیابی می‌شود…'
+      if ($newProcessId -ne 0) {
+        try {
+          $newProc = Get-Process -Id $newProcessId -ErrorAction SilentlyContinue
+          if ($null -ne $newProc) {
+            Stop-Process -Id $newProcessId -Force -ErrorAction SilentlyContinue
+            [void]$newProc.WaitForExit(5000)
+          }
+        } catch { Write-Log ('Could not stop updated process: ' + $_.Exception.GetType().Name) }
+      }
+      if ((Test-Path -LiteralPath $backup) -and (Test-Path -LiteralPath $appRoot)) {
+        try {
+          $failedRoot = $appRoot + '.failed-' + [Guid]::NewGuid().ToString('N')
+          Move-Item -LiteralPath $appRoot -Destination $failedRoot -ErrorAction Stop
+          $newRootActive = $false
+        } catch { Write-Log ('Could not move failed app directory aside: ' + $_.Exception.GetType().Name) }
+      }
+      $previousAvailable = $false
+      if ((Test-Path -LiteralPath $backup) -and -not (Test-Path -LiteralPath $appRoot)) {
+        try {
+          Move-Item -LiteralPath $backup -Destination $appRoot -ErrorAction Stop
+          $previousAvailable = $true
+          Write-Log 'Rollback completed.'
+        } catch { Write-Log ('Could not restore rollback directory: ' + $_.Exception.GetType().Name) }
+      } elseif ((Test-Path -LiteralPath $appRoot) -and -not (Test-Path -LiteralPath $backup)) {
+        # The swap had not started or the old directory was already restored by the nested promotion guard.
+        $previousAvailable = $true
+      }
+      if (Test-Path -LiteralPath $stage) { try { Remove-Item -LiteralPath $stage -Recurse -Force -ErrorAction Stop } catch { Write-Log ('Could not remove staging directory: ' + $_.Exception.GetType().Name) } }
+      if ($appExited -and $previousAvailable -and (Test-Path -LiteralPath $AppExe)) {
+        try { Start-Process -FilePath $AppExe -WorkingDirectory (Split-Path -Parent $AppExe) -ErrorAction Stop; Write-Log 'Previous application relaunched.' }
+        catch { Write-Log ('Previous application relaunch failed: ' + $_.Exception.GetType().Name); $previousAvailable = $false }
+      }
+      if ($previousAvailable) {
+        $status.Text = 'به‌روزرسانی ناموفق بود؛ نسخهٔ قبلی بازیابی شد.'
+      } else {
+        $status.Text = 'بازیابی خودکار کامل نشد؛ گزارش موقت به‌روزرسانی را بررسی کنید.'
+        Write-Log 'Automatic rollback could not be fully confirmed.'
+      }
+      $bar.Style = 'Blocks'; $bar.Value = 100
+      Start-Sleep -Seconds 6
+    } finally {
+      try { Remove-Item Env:\MOONCALENDAR_UPDATE_HEALTH_FILE -ErrorAction SilentlyContinue } catch {}
+    }
+  })
+  [void]$form.ShowDialog()
+} catch {
+  $failureType = $_.Exception.GetType().Name
+  Write-Log ('Helper bootstrap failed: ' + $failureType)
+  try { Write-Status $FailurePath ('bootstrap:' + $failureType) } catch {}
+  try { Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.MessageBox]::Show('MoonCalendar update helper could not start. Check the updater log in the temporary directory.', 'MoonCalendar Update', 'OK', 'Error') | Out-Null } catch {}
+} finally {
+  if ($null -ne $form) { try { $form.Dispose() } catch {} }
+}
 """;
       try {
         await scriptFile.writeAsString(ps, flush: true);
         await Process.start(
           'powershell.exe',
-          ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-STA', '-File', scriptFile.path,
-            installer, appExe, '$appPid', logPath],
+          ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-STA', '-File', scriptFile.path,
+            archive, appExe, appPid.toString(), logPath, startedPath, readyPath, failurePath, helperExpectedHash, healthPath],
           mode: ProcessStartMode.detached,
         );
-        _log('install: progress UI started, log $logPath');
+        _log('install: ZIP helper process created');
       } catch (e) {
-        _log('install: progress UI failed ${e.runtimeType}: $e');
+        _log('install: ZIP helper failed (${e.runtimeType})');
         try { if (tempDir.existsSync()) tempDir.deleteSync(recursive: true); } catch (_) {}
-        return 'error:${e.runtimeType}: $e';
+        return 'error:${e.runtimeType}';
       }
-      Future<void>.delayed(const Duration(milliseconds: 700), () => WindowsDesktopService.instance.exitApp());
+      // Never exit until the helper has initialized, verified the ZIP, extracted the staging tree,
+      // and checked the install parent. The actual directory rename is still guarded by rollback.
+      final started = File(startedPath);
+      final ready = File(readyPath);
+      final failed = File(failurePath);
+      String readStatus(File file) {
+        try { return file.readAsStringSync().replaceFirst('\uFEFF', '').trim(); } catch (_) { return ''; }
+      }
+      final startDeadline = DateTime.now().add(const Duration(seconds: 10));
+      while (readStatus(started) != 'started' && readStatus(failed).isEmpty && DateTime.now().isBefore(startDeadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+      }
+      if (readStatus(started) != 'started' || readStatus(failed).isNotEmpty) {
+        _log('install: helper did not initialize');
+        return 'error:helper_initialization_failed';
+      }
+      final readyDeadline = DateTime.now().add(const Duration(seconds: 120));
+      while (readStatus(ready) != 'ready' && readStatus(failed).isEmpty && DateTime.now().isBefore(readyDeadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+      }
+      if (readStatus(ready) != 'ready' || readStatus(failed).isNotEmpty) {
+        _log('install: helper preparation failed');
+        return 'error:helper_preparation_failed';
+      }
+      await WindowsDesktopService.instance.exitApp();
       return 'ok';
     }
     if (PlatformInfo.isAndroid) return AthanAndroid.installApk(file.path);

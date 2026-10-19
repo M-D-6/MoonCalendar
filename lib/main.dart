@@ -1,6 +1,7 @@
 import 'core/platform_info.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:window_manager/window_manager.dart';
@@ -140,6 +141,23 @@ Future<void> _finishWindowsStartup(AppSettings settings) async {
     }
   } catch (_) {}
   AthanService.instance.attach(settings);
+  _signalUpdateHealth();
+}
+
+/// Confirms that the normal Windows app startup reached its post-frame initialization point.
+/// The updater passes this private process-local environment variable only to the trial launch.
+void _signalUpdateHealth() {
+  if (!PlatformInfo.isWindows) return;
+  final markerPath = Platform.environment['MOONCALENDAR_UPDATE_HEALTH_FILE'];
+  if (markerPath == null || markerPath.trim().isEmpty) return;
+  try {
+    final marker = File(markerPath);
+    final temporary = File('$markerPath.tmp');
+    temporary.writeAsStringSync('healthy', flush: true);
+    temporary.renameSync(marker.path);
+  } catch (_) {
+    // Health signaling is best-effort; the external updater will time out and roll back if absent.
+  }
 }
 
 Future<void> _finishStartup(AppSettings settings, {bool alreadyLoaded = false}) async {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Text;
 import 'package:flutter/services.dart';
+import '../../core/platform_info.dart';
 
 import '../../core/app_version.dart';
 import '../../core/calendar_math.dart' show toPersianDigits;
@@ -172,7 +173,7 @@ class UpdateUi {
   }
 
   static Future<void> _downloadAndInstall(BuildContext context, UpdateInfo info) async {
-    final progress = ValueNotifier<double?>(null);
+    final progress = ValueNotifier<({int received, int? total})>((received: 0, total: info.assetSize));
     var cancelled = false;
     final messenger = ScaffoldMessenger.of(context);
     showDialog<void>(
@@ -180,13 +181,23 @@ class UpdateUi {
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         title: const Text('در حال دریافت به‌روزرسانی', textDirection: TextDirection.rtl),
-        content: ValueListenableBuilder<double?>(
+        content: ValueListenableBuilder<({int received, int? total})>(
           valueListenable: progress,
-          builder: (_, value, _) => Column(mainAxisSize: MainAxisSize.min, children: [
-            LinearProgressIndicator(value: value),
-            const SizedBox(height: 10),
-            PlainText(value == null ? '…' : _digits('${(value * 100).round()}%')),
-          ]),
+          builder: (_, value, _) {
+            final total = value.total;
+            final ratio = total == null || total <= 0 ? null : (value.received / total).clamp(0.0, 1.0).toDouble();
+            String size(int bytes) => bytes >= 1024 * 1024
+                ? '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB'
+                : '${(bytes / 1024).toStringAsFixed(0)} KB';
+            final amount = total == null || total <= 0
+                ? size(value.received)
+                : '${size(value.received)} از ${size(total)}';
+            return Column(mainAxisSize: MainAxisSize.min, children: [
+              LinearProgressIndicator(value: ratio),
+              const SizedBox(height: 10),
+              PlainText(ratio == null ? amount : _digits('${(ratio * 100).round()}%  •  $amount')),
+            ]);
+          },
         ),
         actions: [TextButton(onPressed: () => cancelled = true, child: const Text('انصراف'))],
       ),
@@ -196,8 +207,29 @@ class UpdateUi {
     }
 
     try {
-      final file = await UpdateService.download(info, onProgress: (v) => progress.value = v, cancelled: () => cancelled);
+      final file = await UpdateService.download(
+        info,
+        onProgress: (received, total) => progress.value = (received: received, total: total),
+        cancelled: () => cancelled,
+      );
       closeDialog();
+      if (!context.mounted) return;
+      if (PlatformInfo.isWindows) {
+        final size = file.lengthSync();
+        final ready = await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            title: const Text('دانلود کامل شد', textDirection: TextDirection.rtl),
+            content: PlainText('''فایل به‌روزرسانی با موفقیت دریافت و اعتبارسنجی شد.\nحجم: ${(size / (1024 * 1024)).toStringAsFixed(1)} MB\nنسخه: ${_digits(info.version)}\n\nبرای جایگزینی فایل‌های برنامه و اجرای مجدد، روی دکمهٔ زیر بزنید.'''),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('بعداً')),
+              FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('شروع جایگزینی و اجرای مجدد')),
+            ],
+          ),
+        );
+        if (ready != true || !context.mounted) return;
+      }
       final answer = await UpdateService.install(file);
       if (answer == 'permission') {
         // Android: the permission to install from this app is still missing (its settings page was opened). The
