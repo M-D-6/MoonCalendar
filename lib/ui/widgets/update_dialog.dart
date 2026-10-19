@@ -151,6 +151,18 @@ class UpdateUi {
     }
   }
 
+  /// Shown by the new version after an update: the helper started it, and it has just passed its startup check.
+  static Future<void> showUpdated(BuildContext context) {
+    return showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('به‌روزرسانی انجام شد', textDirection: TextDirection.rtl),
+        content: PlainText('${tr('برنامه به‌روزرسانی شد.')}\n${tr('نسخهٔ فعلی')}: ${_digits(appVersion)}\n${tr('تست سلامت برنامه: موفق')}'),
+        actions: [FilledButton(onPressed: () => Navigator.pop(ctx), child: const Text('تأیید'))],
+      ),
+    );
+  }
+
   /// A failed download / install: "Try again" reuses the downloaded file when it is intact; closing the dialog
   /// without it deletes every temporary file.
   static Future<void> _failedWithRetry(BuildContext context, String message, UpdateInfo info) async {

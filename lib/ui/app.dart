@@ -332,7 +332,15 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
 
   Future<void> _initializeNativeParity() async {
     // After an update the helper waits for this message before it keeps the new version.
-    Future<void>.delayed(const Duration(seconds: 4), () => unawaited(UpdateService.confirmHealthy()));
+    Future<void>.delayed(const Duration(seconds: 2), () async {
+      final updated = await UpdateService.confirmHealthy();
+      if (updated && mounted) {
+        unawaited(UpdateUi.showUpdated(context));
+        // Once the message is on screen the update window may close.
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        await UpdateService.markResultShown();
+      }
+    });
     final action = await PlatformServices.getLaunchAction();
     final shortcut = _shortcutPage(action);
     if (shortcut != null) _applyLaunchAction(action);

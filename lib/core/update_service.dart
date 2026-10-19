@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 
 import 'app_version.dart';
 import 'athan/athan_android.dart';
+import 'l10n/l10n.dart';
 import 'platform_info.dart';
 import 'windows_desktop_service.dart';
 
@@ -283,11 +284,23 @@ class UpdateService {
 
   /// The updated application tells the waiting helper that it started properly; without this the helper
   /// would roll the update back.
-  static Future<void> confirmHealthy() async {
+  static Future<bool> confirmHealthy() async {
+    final path = Platform.environment['MOONCALENDAR_UPDATE_HEALTH_FILE'];
+    if (path == null || path.isEmpty) return false;
+    try {
+      await File(path).writeAsString('healthy', flush: true);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Tells the helper window that the result message is on screen, so it can close.
+  static Future<void> markResultShown() async {
     final path = Platform.environment['MOONCALENDAR_UPDATE_HEALTH_FILE'];
     if (path == null || path.isEmpty) return;
     try {
-      await File(path).writeAsString('healthy', flush: true);
+      await File('$path.shown').writeAsString('shown', flush: true);
     } catch (_) {}
   }
 
@@ -420,8 +433,15 @@ class UpdateService {
       final healthPath = '${tempDir.path}${Platform.pathSeparator}helper.healthy';
       final helperExpectedHash = expectedHash.toLowerCase();
       const ps = r"""
-param([string]$Archive, [string]$AppExe, [int]$AppPid, [string]$LogPath, [string]$StartedPath, [string]$ReadyPath, [string]$FailurePath, [string]$ExpectedSha256, [string]$HealthPath)
+param([string]$Archive, [string]$AppExe, [int]$AppPid, [string]$LogPath, [string]$StartedPath, [string]$ReadyPath, [string]$FailurePath, [string]$ExpectedSha256, [string]$HealthPath, [string]$Lang)
 $ErrorActionPreference = 'Stop'
+# Window texts in the language the application was using when it closed.
+$Strings = @{
+  fa = @{ title = 'به‌روزرسانی برنامه'; check = 'بررسی فایل به‌روزرسانی…'; extract = 'در حال استخراج فایل‌ها…'; waitClose = 'در انتظار بسته‌شدن برنامه…'; replace = 'در حال جایگزینی نسخه…'; health = 'تست سلامت برنامه…'; result = 'در حال نمایش نتیجه در برنامه…'; done = 'تمام شد.'; failRestoring = 'به‌روزرسانی ناموفق بود؛ نسخهٔ قبلی بازیابی می‌شود…'; failRestored = 'به‌روزرسانی ناموفق بود؛ نسخهٔ قبلی بازیابی شد.'; failManual = 'بازیابی خودکار کامل نشد؛ گزارش موقت به‌روزرسانی را بررسی کنید.'; close = 'بستن'; rtl = $true }
+  en = @{ title = 'Updating the app'; check = 'Checking the update file…'; extract = 'Extracting files…'; waitClose = 'Waiting for the app to close…'; replace = 'Replacing the version…'; health = 'App health check…'; result = 'Showing the result in the app…'; done = 'Done.'; failRestoring = 'The update failed; restoring the previous version…'; failRestored = 'The update failed; the previous version was restored.'; failManual = 'Automatic recovery could not be completed; check the temporary update log.'; close = 'Close'; rtl = $false }
+  ar = @{ title = 'تحديث التطبيق'; check = 'جارٍ فحص ملف التحديث…'; extract = 'جارٍ استخراج الملفات…'; waitClose = 'في انتظار إغلاق التطبيق…'; replace = 'جارٍ استبدال الإصدار…'; health = 'فحص سلامة التطبيق…'; result = 'جارٍ عرض النتيجة في التطبيق…'; done = 'تم.'; failRestoring = 'فشل التحديث؛ تتم استعادة الإصدار السابق…'; failRestored = 'فشل التحديث؛ تمت استعادة الإصدار السابق.'; failManual = 'تعذّر إكمال الاستعادة التلقائية؛ راجع سجل التحديث المؤقت.'; close = 'إغلاق'; rtl = $true }
+}
+$T = if ($Strings.ContainsKey($Lang)) { $Strings[$Lang] } else { $Strings['fa'] }
 function Write-Log([string]$line) {
   try { Add-Content -LiteralPath $LogPath -Value ((Get-Date -Format o) + ' ' + $line) } catch {}
 }
@@ -531,23 +551,38 @@ try {
   Add-Type -AssemblyName System.IO.Compression
   Add-Type -AssemblyName System.IO.Compression.FileSystem
   $form = New-Object System.Windows.Forms.Form
-  $form.Text = 'MoonCalendar - Update'
+  # Follow the Windows app theme (dark / light).
+  $dark = $false
+  try { $dark = ((Get-ItemPropertyValue -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize' -Name 'AppsUseLightTheme' -ErrorAction Stop) -eq 0) } catch {}
+  $back = if ($dark) { [System.Drawing.Color]::FromArgb(32,32,32) } else { [System.Drawing.Color]::FromArgb(243,243,243) }
+  $fore = if ($dark) { [System.Drawing.Color]::FromArgb(245,245,245) } else { [System.Drawing.Color]::FromArgb(20,20,20) }
+  $form.Text = 'MoonCalendar'
   $form.StartPosition = 'CenterScreen'
   $form.FormBorderStyle = 'FixedDialog'
-  $form.MaximizeBox = $false; $form.MinimizeBox = $false; $form.ControlBox = $false
-  $form.ClientSize = New-Object System.Drawing.Size(460,170)
+  $form.MaximizeBox = $false; $form.MinimizeBox = $false; $form.ControlBox = $true
+  $form.ClientSize = New-Object System.Drawing.Size(460,190)
   $form.TopMost = $true
+  $form.BackColor = $back; $form.ForeColor = $fore
+  if ($T.rtl) { $form.RightToLeft = [System.Windows.Forms.RightToLeft]::Yes; $form.RightToLeftLayout = $true }
+  $script:finished = $false
+  # Closing the window while the update runs only hides it: the update itself must never be interrupted.
+  $form.add_FormClosing({ param($sender, $e) if (-not $script:finished) { $e.Cancel = $true; $sender.Hide() } })
   $title = New-Object System.Windows.Forms.Label
-  $title.Text = 'در حال جایگزینی فایل‌های MoonCalendar'
+  $title.Text = $T.title
   $title.Font = New-Object System.Drawing.Font('Segoe UI', 12, [System.Drawing.FontStyle]::Bold)
-  $title.AutoSize = $false; $title.TextAlign = 'MiddleCenter'; $title.SetBounds(15,15,430,30)
+  $title.AutoSize = $false; $title.TextAlign = 'MiddleCenter'; $title.SetBounds(15,15,430,30); $title.ForeColor = $fore
   $status = New-Object System.Windows.Forms.Label
-  $status.Text = 'آماده‌سازی…'
+  $status.Text = $T.check
   $status.Font = New-Object System.Drawing.Font('Segoe UI', 9)
-  $status.AutoSize = $false; $status.TextAlign = 'MiddleCenter'; $status.SetBounds(15,52,430,30)
+  $status.AutoSize = $false; $status.TextAlign = 'MiddleCenter'; $status.SetBounds(15,52,430,30); $status.ForeColor = $fore
   $bar = New-Object System.Windows.Forms.ProgressBar
   $bar.Style = 'Marquee'; $bar.MarqueeAnimationSpeed = 25; $bar.SetBounds(35,100,390,18)
-  $form.Controls.AddRange(@($title,$status,$bar))
+  $closeButton = New-Object System.Windows.Forms.Button
+  $closeButton.Text = $T.close
+  $closeButton.SetBounds(180,140,100,32)
+  $closeButton.FlatStyle = 'System'
+  $closeButton.add_Click({ if ($script:finished) { $form.Close() } else { $form.Hide() } })
+  $form.Controls.AddRange(@($title,$status,$bar,$closeButton))
   $form.add_Shown({
     $appRoot = [System.IO.Path]::GetFullPath((Split-Path -Parent $AppExe))
     $parent = Split-Path -Parent $appRoot
@@ -569,7 +604,7 @@ try {
       [System.IO.File]::WriteAllText($parentProbe, 'probe')
       Remove-Item -LiteralPath $parentProbe -Force
 
-      $status.Text = 'در حال بررسی و استخراج فایل‌ها…'
+      $status.Text = $T.extract
       $inventory = Get-ArchiveInventory $Archive
       New-Item -ItemType Directory -Path $stage | Out-Null
       Expand-SafeArchive $Archive $stage $inventory
@@ -586,13 +621,13 @@ try {
       # Ready is emitted only when download verification, ZIP inventory, extraction and runtime checks pass.
       Write-Status $ReadyPath 'ready'
       if (Test-Path -LiteralPath $AbortPath) { throw 'Update was cancelled by the application.' }
-      $status.Text = 'در انتظار بسته‌شدن برنامه…'
+      $status.Text = $T.waitClose
       $deadline = (Get-Date).AddSeconds(45)
       while ((Get-Process -Id $AppPid -ErrorAction SilentlyContinue) -and (Get-Date) -lt $deadline) { [System.Windows.Forms.Application]::DoEvents(); Start-Sleep -Milliseconds 150 }
       if (Get-Process -Id $AppPid -ErrorAction SilentlyContinue) { throw 'MoonCalendar did not exit within 45 seconds.' }
       $appExited = $true
 
-      $status.Text = 'در حال جایگزینی نسخهٔ فعلی…'
+      $status.Text = $T.replace
       # Record transaction intent before changing directory names; all paths are on the same volume.
       Write-Log ('Swap transaction started. backup=' + (Split-Path -Leaf $backup))
       Move-Item -LiteralPath $appRoot -Destination $backup -ErrorAction Stop
@@ -604,7 +639,7 @@ try {
         throw
       }
 
-      $status.Text = 'در حال اجرای آزمایشی نسخهٔ جدید…'
+      $status.Text = $T.health
       Write-Log 'Directory swap completed. Starting updated application for health confirmation.'
       $env:MOONCALENDAR_UPDATE_HEALTH_FILE = $HealthPath
       $started = Start-Process -FilePath (Join-Path $appRoot 'mooncalendar.exe') -PassThru -WorkingDirectory $appRoot -ErrorAction Stop
@@ -618,35 +653,46 @@ try {
           $healthy = ([System.IO.File]::ReadAllText($HealthPath).Trim() -eq 'healthy')
           if ($healthy) {
             # A brief stabilization window catches an immediate crash after the application writes its marker.
-            $stableUntil = (Get-Date).AddSeconds(3)
+            $stableUntil = (Get-Date).AddSeconds(1.5)
             while ((Get-Date) -lt $stableUntil) {
               $started.Refresh()
               if ($started.HasExited) { throw ('Updated application exited immediately after health confirmation, code=' + $started.ExitCode) }
               [System.Windows.Forms.Application]::DoEvents()
-              Start-Sleep -Milliseconds 250
+              Start-Sleep -Milliseconds 100
             }
             break
           }
         }
         [System.Windows.Forms.Application]::DoEvents()
-        Start-Sleep -Milliseconds 250
+        Start-Sleep -Milliseconds 100
       }
       if (-not $healthy) { throw 'Updated application did not report a healthy startup within 45 seconds.' }
       Write-Log ('Updated application health confirmed and stable. pid=' + $started.Id)
-      # Keep exactly one recent rollback directory; older backups are removed best-effort.
+      # The new version is confirmed: the rollback copy and any leftovers of earlier attempts are no longer needed.
       Get-ChildItem -LiteralPath $parent -Directory -Force -ErrorAction SilentlyContinue |
-        Where-Object { ($_.Name -like ('.' + $leaf + '.backup-*') -and $_.FullName -ne $backup) -or $_.Name -like ('.' + $leaf + '.failed-*') } |
+        Where-Object { $_.Name -like ('.' + $leaf + '.backup-*') -or $_.Name -like ('.' + $leaf + '.failed-*') -or $_.Name -like ('.' + $leaf + '.stage-*') } |
         Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
-      $status.Text = 'تمام شد. برنامه با موفقیت اجرا شد.'
+      # Stay open until the application shows its result message (it drops a marker file), at most 20 seconds.
+      $status.Text = $T.result
+      $shownMarker = $HealthPath + '.shown'
+      $shownDeadline = (Get-Date).AddSeconds(20)
+      while (-not (Test-Path -LiteralPath $shownMarker) -and (Get-Date) -lt $shownDeadline -and -not $started.HasExited) {
+        [System.Windows.Forms.Application]::DoEvents()
+        Start-Sleep -Milliseconds 100
+      }
+      $status.Text = $T.done
       $bar.Style = 'Blocks'; $bar.Value = 100
-      Start-Sleep -Seconds 2
+      [System.Windows.Forms.Application]::DoEvents()
+      Start-Sleep -Milliseconds 800
+      $script:finished = $true
+      $form.Close()
     } catch {
       $failureType = $_.Exception.GetType().Name
       $failureText = $failureType + ': ' + $_.Exception.Message
       if ($failureText.Length -gt 300) { $failureText = $failureText.Substring(0, 300) }
       Write-Log ('Update failed: ' + $failureText)
       try { Write-Status $FailurePath $failureText } catch { Write-Log 'Could not write failure status.' }
-      $status.Text = 'به‌روزرسانی ناموفق بود؛ نسخهٔ قبلی بازیابی می‌شود…'
+      $status.Text = $T.failRestoring
       if ($newProcessId -ne 0) {
         try {
           $newProc = Get-Process -Id $newProcessId -ErrorAction SilentlyContinue
@@ -680,13 +726,15 @@ try {
         catch { Write-Log ('Previous application relaunch failed: ' + $_.Exception.GetType().Name); $previousAvailable = $false }
       }
       if ($previousAvailable) {
-        $status.Text = 'به‌روزرسانی ناموفق بود؛ نسخهٔ قبلی بازیابی شد.'
+        $status.Text = $T.failRestored
       } else {
-        $status.Text = 'بازیابی خودکار کامل نشد؛ گزارش موقت به‌روزرسانی را بررسی کنید.'
+        $status.Text = $T.failManual
         Write-Log 'Automatic rollback could not be fully confirmed.'
       }
       $bar.Style = 'Blocks'; $bar.Value = 100
-      Start-Sleep -Seconds 6
+      # The failure stays visible until it is closed (the application shows the details at its next start).
+      $script:finished = $true
+      $form.Visible = $true
     } finally {
       try { Remove-Item Env:\MOONCALENDAR_UPDATE_HEALTH_FILE -ErrorAction SilentlyContinue } catch {}
     }
@@ -743,7 +791,7 @@ try {
 
       final psArgs = <String>[
         '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-STA', '-WindowStyle', 'Hidden', '-File', scriptFile.path,
-        archive, appExe, appPid.toString(), logPath, startedPath, readyPath, failurePath, helperExpectedHash, healthPath,
+        archive, appExe, appPid.toString(), logPath, startedPath, readyPath, failurePath, helperExpectedHash, healthPath, L10n.lang.code,
       ];
       try {
         await scriptFile.writeAsBytes(<int>[0xEF, 0xBB, 0xBF, ...utf8.encode(ps)], flush: true);

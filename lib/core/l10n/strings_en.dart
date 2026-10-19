@@ -1663,6 +1663,16 @@ const Map<String, String> enStrings = <String, String>{
   'جزئیات فنی': 'Technical details',
   'کپی جزئیات': 'Copy details',
   'حتی اگر نسخهٔ جدیدتری نباشد، فایل نصب آخرین انتشار دریافت و نصب می‌شود': 'Even without a newer version, the installer of the latest release is downloaded and installed',
+  'به‌روزرسانی انجام شد': 'Update completed',
+  'تست سلامت برنامه: موفق': 'App health check: passed',
+  'برنامه به‌روزرسانی شد.': 'The app was updated.',
+  'به‌روزرسانی قبلی کامل نشد و نسخهٔ قبلی بازیابی شد. می‌توانید دوباره تلاش کنید.': 'The previous update did not finish and the earlier version was restored. You can try again.',
+  'دانلود کامل شد': 'Download complete',
+  'در حال آماده‌سازی جایگزینی': 'Preparing the replacement',
+  'دریافت به‌روزرسانی ناموفق بود. می‌توانید دوباره تلاش کنید یا فایل را از صفحهٔ دانلود بگیرید.': 'The update download failed. You can try again or get the file from the download page.',
+  'شروع جایگزینی و اجرای مجدد': 'Replace and restart',
+  'لطفاً صبر کنید…': 'Please wait…',
+  'نصب به‌روزرسانی شروع نشد. می‌توانید دوباره تلاش کنید یا فایل را از صفحهٔ دانلود بگیرید.': 'The update could not be started. You can try again or get the file from the download page.',
 };
 
 const Map<String, String> enTemplates = <String, String>{
