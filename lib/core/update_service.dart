@@ -426,6 +426,8 @@ function Write-Log([string]$line) {
   try { Add-Content -LiteralPath $LogPath -Value ((Get-Date -Format o) + ' ' + $line) } catch {}
 }
 Write-Log 'Script entered.'
+# The helper is started from the application folder; as its current directory that folder could not be renamed.
+try { Set-Location -LiteralPath $env:SystemRoot; [System.Environment]::CurrentDirectory = $env:SystemRoot } catch { Write-Log ('Could not leave the working directory: ' + $_.Exception.Message) }
 $AbortPath = Join-Path (Split-Path -Parent $StartedPath) 'helper.abort'
 # Only one helper may run, however many times it was launched.
 $script:singleton = New-Object System.Threading.Mutex($false, 'Local\MoonCalendar.UpdateHelper')
@@ -640,8 +642,10 @@ try {
       Start-Sleep -Seconds 2
     } catch {
       $failureType = $_.Exception.GetType().Name
-      Write-Log ('Update failed: ' + $failureType)
-      try { Write-Status $FailurePath $failureType } catch { Write-Log 'Could not write failure status.' }
+      $failureText = $failureType + ': ' + $_.Exception.Message
+      if ($failureText.Length -gt 300) { $failureText = $failureText.Substring(0, 300) }
+      Write-Log ('Update failed: ' + $failureText)
+      try { Write-Status $FailurePath $failureText } catch { Write-Log 'Could not write failure status.' }
       $status.Text = 'به‌روزرسانی ناموفق بود؛ نسخهٔ قبلی بازیابی می‌شود…'
       if ($newProcessId -ne 0) {
         try {
@@ -751,7 +755,7 @@ try {
       // another; the helper itself refuses to run twice.
       var launched = false;
       try {
-        final r = await Process.run('cmd.exe', ['/d', '/c', 'start', '', '/min', 'powershell.exe', ...psArgs]).timeout(const Duration(seconds: 20));
+        final r = await Process.run('cmd.exe', ['/d', '/c', 'start', '', '/min', 'powershell.exe', ...psArgs], workingDirectory: tempDir.path).timeout(const Duration(seconds: 20));
         _log('install: launch 1 (start) exit ${r.exitCode} ${'${r.stderr}'.trim()}');
         launched = await waitStarted(const Duration(seconds: 25));
       } catch (e) {
@@ -759,7 +763,7 @@ try {
       }
       if (!launched && readStatus(failed).isEmpty) {
         try {
-          await Process.start('powershell.exe', psArgs, mode: ProcessStartMode.detachedWithStdio);
+          await Process.start('powershell.exe', psArgs, mode: ProcessStartMode.detachedWithStdio, workingDirectory: tempDir.path);
           _log('install: launch 2 (detached with pipes) created');
           launched = await waitStarted(const Duration(seconds: 20));
         } catch (e) {
@@ -768,7 +772,7 @@ try {
       }
       if (!launched && readStatus(failed).isEmpty) {
         try {
-          final process = await Process.start('powershell.exe', psArgs);
+          final process = await Process.start('powershell.exe', psArgs, workingDirectory: tempDir.path);
           unawaited(process.stdout.drain<void>());
           unawaited(process.stderr.drain<void>());
           _log('install: launch 3 (attached) created');
