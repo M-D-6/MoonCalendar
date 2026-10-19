@@ -65,12 +65,6 @@
 | 🎨 | Many themes, custom colour, liquid-glass UI | تم‌های متنوع، رنگ دلخواه و ظاهر شیشه‌ای |
 | 🌍 | Persian, English and Arabic — RTL / LTR, instantly switchable | فارسی، انگلیسی و عربی با تغییر آنی زبان |
 
-## 🔒 Privacy · حریم خصوصی
-
-- The in-app update checker contacts the GitHub Releases API at `api.github.com` only when automatic update checks are enabled or a user initiates a check. It requests public release metadata and does not send calendar entries, clipboard contents, or other app content.
-- When an update is downloaded, the app retrieves the selected public release asset from GitHub over HTTPS and verifies its published SHA-256 digest and file size before offering installation. Network providers may receive standard connection metadata such as IP address and request headers.
-- No analytics or advertising tracker is included by the update system.
-
 ## ⚙️ Requirements · پیش‌نیازها
 
 - Flutter 3.x (Dart 3.9+)
@@ -90,8 +84,6 @@ flutter build apk --release --split-per-abi   # one smaller APK per CPU architec
 flutter build windows --release
 # installer (Inno Setup 6): iscc windows/installer/Mooncalendar.iss
 ```
-
-Android release builds in CI require the repository secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, and `ANDROID_KEY_PASSWORD`. These values are never stored in the source tree.
 
 ---
 
@@ -114,4 +106,4 @@ Third-party licenses and attributions are listed in [`THIRD_PARTY_NOTICES.md`](T
 
 ## Latest patch release
 
-See [MoonCalendar 1.1.7 release notes](docs/RELEASE_NOTES_1.1.7.md) for the Windows updater progress window and release details.
+See [MoonCalendar 1.1.7 release notes](docs/RELEASE_NOTES_1.1.7.md) for updater reliability, Android notification improvements, and maintenance fixes. On Windows, run `tool/build_windows_release.ps1` to analyze, test, build the portable bundle, and compile the installer (Inno Setup 6 or 7 required).

@@ -669,6 +669,7 @@ class _LevelScreenState extends State<LevelScreen>
   StreamSubscription<LevelReading>? _subscription;
 
   bool _isStopped = false;
+  bool _appActive = true;
   bool _cmInchFlip = false;
   bool _isFullscreen = false;
   bool _available = true;
@@ -710,10 +711,12 @@ class _LevelScreenState extends State<LevelScreen>
       },
     );
     _model.onIsLevel = _onIsLevel;
+    // Keep the ticker stopped until the level sensor is actually active. A permanently
+    // running no-op ticker still schedules frames and wastes CPU/GPU while idle.
     _ticker = createTicker((elapsed) {
-      if (_isStopped || _subscription == null) return;
+      if (_isStopped || !_appActive || _subscription == null) return;
       _model.step(DateTime.now().millisecondsSinceEpoch);
-    })..start();
+    });
     unawaited(_loadDpi());
     unawaited(_startListening());
   }
@@ -736,15 +739,19 @@ class _LevelScreenState extends State<LevelScreen>
       setState(() => _available = false);
       return;
     }
-    if (_subscription != null || _isStopped) return;
+    if (_subscription != null || _isStopped || !_appActive) return;
     _subscription = PlatformServices.levelReadings().listen(_onReading);
     await PlatformServices.startLevel();
     if (mounted && !_available) setState(() => _available = true);
+    if (mounted && _appActive && !_isStopped && !_ticker.isActive) {
+      _ticker.start();
+    }
   }
 
   Future<void> _stopListening() async {
     final sub = _subscription;
     _subscription = null;
+    if (_ticker.isActive) _ticker.stop();
     await sub?.cancel();
     unawaited(PlatformServices.stopLevel());
   }
@@ -800,8 +807,10 @@ class _LevelScreenState extends State<LevelScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      _appActive = true;
       if (!_isStopped) unawaited(_startListening());
     } else if (state == AppLifecycleState.paused) {
+      _appActive = false;
       unawaited(_stopListening());
     }
   }

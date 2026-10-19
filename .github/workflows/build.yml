@@ -11,47 +11,55 @@ concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
-
 env:
   FLUTTER_CHANNEL: stable
 
 jobs:
   analyze:
-    name: Analyze
+    name: Analyze & test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
-      - uses: subosito/flutter-action@v2.23.0
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
         with: { channel: stable, cache: true }
       - run: flutter pub get
       - run: flutter analyze --no-fatal-infos --no-fatal-warnings
+      - run: flutter test
 
   android:
     name: Android (APK)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
-      - uses: actions/setup-java@v4.7.1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: '17' }
-      - uses: subosito/flutter-action@v2.23.0
+      - uses: subosito/flutter-action@v2
         with: { channel: stable, cache: true }
       - run: flutter pub get
+      # A fixed signing key lets each APK update the previous one. Secret: ANDROID_KEYSTORE_BASE64.
       - name: Android signing key
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        shell: bash
         run: |
-          set -euo pipefail
-          if [[ -z "$KEYSTORE_BASE64" || -z "$KEYSTORE_PASSWORD" || -z "$KEY_ALIAS" || -z "$KEY_PASSWORD" ]]; then
-            echo "Android release signing requires ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, and ANDROID_KEY_PASSWORD repository secrets." >&2
+          if [ -z "$KEYSTORE_BASE64" ] && [ -z "$KEYSTORE_PASSWORD" ] && [ -z "$KEY_ALIAS" ] && [ -z "$KEY_PASSWORD" ]; then
+            if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+              echo "::error::Android signing secrets are required for tagged releases. Refusing to publish an APK signed by the debug key, which cannot update the installed app."
+              exit 1
+            fi
+            echo "::warning::Android signing secrets are absent on this non-release build; the APK will use a debug key and is not suitable for public releases."
+            exit 0
+          fi
+          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASSWORD" ]; then
+            echo "::error::Android signing configuration is partial. Set ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, and ANDROID_KEY_PASSWORD together."
             exit 1
           fi
-          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/app/release.jks
+          if ! printf '%s' "$KEYSTORE_BASE64" | base64 -d > android/app/release.jks; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 could not be decoded."
+            exit 1
+          fi
           {
             printf 'storeFile=release.jks\n'
             printf 'storePassword=%s\n' "$KEYSTORE_PASSWORD"
@@ -67,7 +75,7 @@ jobs:
             abi="${f#app-}"; abi="${abi%-release.apk}"
             mv "$f" "MoonCalendar-android-$abi.apk"
           done
-      - uses: actions/upload-artifact@v4.6.2
+      - uses: actions/upload-artifact@v4
         with:
           name: MoonCalendar-android-apk
           path: build/app/outputs/flutter-apk/MoonCalendar-android-*.apk
@@ -76,17 +84,27 @@ jobs:
     name: Windows
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4.2.2
-      - uses: subosito/flutter-action@v2.23.0
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
         with: { channel: stable, cache: true }
       - run: flutter pub get
-      - run: flutter build windows --release
-      - name: Version
+      - name: Verify release version
         shell: pwsh
         run: |
-          if ($env:GITHUB_REF -like 'refs/tags/v*') { $v = $env:GITHUB_REF_NAME.Substring(1) }
-          else { $v = ((Select-String -Path pubspec.yaml -Pattern '^version:\s*([0-9.]+)').Matches[0].Groups[1].Value) }
+          $match = Select-String -Path pubspec.yaml -Pattern '^version:\s*([0-9]+\.[0-9]+\.[0-9]+)\+(\d+)'
+          if (-not $match) { throw "Could not parse app version from pubspec.yaml" }
+          $declared = $match.Matches[0].Groups[1].Value
+          if ($env:GITHUB_REF -like 'refs/tags/v*') {
+            $tagVersion = $env:GITHUB_REF_NAME.Substring(1)
+            if ($tagVersion -ne $declared) {
+              throw "Release tag v$tagVersion does not match pubspec.yaml version $declared. Update all version metadata before tagging."
+            }
+            $v = $tagVersion
+          } else {
+            $v = $declared
+          }
           "MOONCALENDAR_VERSION=$v" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      - run: flutter build windows --release
       - name: Zip (portable)
         shell: pwsh
         run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath MoonCalendar-windows-x64.zip
@@ -116,7 +134,7 @@ jobs:
           # A new major version is a deliberate upgrade, not something a runner image update should do silently.
           if (-not $version.StartsWith('6.')) { throw "Unexpected Inno Setup version '$version' (expected 6.x)" }
           Move-Item "windows/installer/Output/MoonCalendar-Setup-x64.exe" "MoonCalendar-windows-x64-setup.exe"
-      - uses: actions/upload-artifact@v4.6.2
+      - uses: actions/upload-artifact@v4
         with:
           name: MoonCalendar-windows-x64
           path: |
@@ -127,20 +145,20 @@ jobs:
     name: Linux
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v4
       - name: Linux build dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev \
             libayatana-appindicator3-dev libkeybinder-3.0-dev libsecret-1-dev
-      - uses: subosito/flutter-action@v2.23.0
+      - uses: subosito/flutter-action@v2
         with: { channel: stable, cache: true }
       - run: bash tool/ci_prepare_platforms.sh
       - run: flutter pub get
       - run: flutter build linux --release
       - name: Pack
         run: tar -C build/linux/x64/release/bundle -czf MoonCalendar-linux-x64.tar.gz .
-      - uses: actions/upload-artifact@v4.6.2
+      - uses: actions/upload-artifact@v4
         with:
           name: MoonCalendar-linux-x64
           path: MoonCalendar-linux-x64.tar.gz
@@ -149,8 +167,8 @@ jobs:
     name: macOS
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4.2.2
-      - uses: subosito/flutter-action@v2.23.0
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
         with: { channel: stable, cache: true }
       - run: bash tool/ci_prepare_platforms.sh
       - run: flutter pub get
@@ -159,7 +177,7 @@ jobs:
         run: |
           cd build/macos/Build/Products/Release
           ditto -c -k --sequesterRsrc --keepParent *.app "$GITHUB_WORKSPACE/MoonCalendar-macos.zip"
-      - uses: actions/upload-artifact@v4.6.2
+      - uses: actions/upload-artifact@v4
         with:
           name: MoonCalendar-macos
           path: MoonCalendar-macos.zip
@@ -169,8 +187,8 @@ jobs:
     runs-on: macos-latest
     continue-on-error: true   # needs signing to install; kept as a compile check + unsigned .ipa
     steps:
-      - uses: actions/checkout@v4.2.2
-      - uses: subosito/flutter-action@v2.23.0
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
         with: { channel: stable, cache: true }
       - run: bash tool/ci_prepare_platforms.sh
       - run: flutter pub get
@@ -179,7 +197,7 @@ jobs:
         run: |
           mkdir -p Payload && cp -R build/ios/iphoneos/Runner.app Payload/
           zip -qr MoonCalendar-ios-unsigned.ipa Payload
-      - uses: actions/upload-artifact@v4.6.2
+      - uses: actions/upload-artifact@v4
         with:
           name: MoonCalendar-ios-unsigned
           path: MoonCalendar-ios-unsigned.ipa
@@ -189,14 +207,14 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true   # some desktop-only plugins may not compile for the web yet
     steps:
-      - uses: actions/checkout@v4.2.2
-      - uses: subosito/flutter-action@v2.23.0
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
         with: { channel: stable, cache: true }
       - run: bash tool/ci_prepare_platforms.sh
       - run: flutter pub get
       - run: flutter build web --release
       - run: tar -C build/web -czf MoonCalendar-web.tar.gz .
-      - uses: actions/upload-artifact@v4.6.2
+      - uses: actions/upload-artifact@v4
         with:
           name: MoonCalendar-web
           path: MoonCalendar-web.tar.gz
@@ -204,16 +222,16 @@ jobs:
   release:
     name: Publish release
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [android, windows, linux, macos]
+    needs: [analyze, android, windows, linux, macos]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v4.3.0
+      - uses: actions/download-artifact@v4
         with:
           path: dist
           merge-multiple: true
-      - uses: softprops/action-gh-release@v2.2.2
+      - uses: softprops/action-gh-release@v2
         with:
           files: dist/*
           generate_release_notes: true

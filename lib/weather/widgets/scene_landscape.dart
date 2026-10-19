@@ -196,7 +196,7 @@ class _Group {
 
 /// Everything parsed from scene_vec.json.
 class SceneData {
-  SceneData._(this.regions, this.groups, this.waterPath, this.rippleClip, this.twigs, this.blossoms, this.blades, this.chimney, this.canopyGroup, this.waterHook, this.animalHook, this.hill);
+  SceneData._(this.regions, this.groups, this.waterPath, this.rippleClip, this.twigs, this.blossoms, this.chimney, this.canopyGroup, this.waterHook, this.animalHook, this.hill);
 
   // ignore: library_private_types_in_public_api
   final List<_Region> regions;
@@ -208,7 +208,6 @@ class SceneData {
   final Path rippleClip;
   final List<List<double>> twigs;
   final List<Offset> blossoms;
-  final List<List<double>> blades;
   final Offset chimney;
   final int canopyGroup;
 
@@ -270,10 +269,9 @@ class SceneData {
     final clip = wp;
     final tw = (m['twigs'] as List<dynamic>).map((s) => (s as List<dynamic>).map((e) => (e as num).toDouble()).toList()).toList();
     final bl = (m['blossoms'] as List<dynamic>).map((s) => Offset((s[0] as num).toDouble(), (s[1] as num).toDouble())).toList();
-    final bd = (m['blades'] as List<dynamic>).map((s) => (s as List<dynamic>).map((e) => (e as num).toDouble()).toList()).toList();
     final ch = (m['chimney'] as List<dynamic>);
     final cg = gl.indexWhere((g) => g.kind == 'canopy');
-    return SceneData._(rs, gl, wp, clip, tw, bl, bd, Offset((ch[0] as num).toDouble(), (ch[1] as num).toDouble()), cg, hook, (m['animalHook'] as num?)?.toInt() ?? -1, ((m['hill'] as List<dynamic>?) ?? <dynamic>[]).map((e) => (e as num).toDouble()).toList());
+    return SceneData._(rs, gl, wp, clip, tw, bl, Offset((ch[0] as num).toDouble(), (ch[1] as num).toDouble()), cg, hook, (m['animalHook'] as num?)?.toInt() ?? -1, ((m['hill'] as List<dynamic>?) ?? <dynamic>[]).map((e) => (e as num).toDouble()).toList());
   }
 }
 
@@ -681,7 +679,12 @@ class ImageLandscapeRenderer {
       case _K.water:
         final depth = ((y - 600) / 290).clamp(0.0, 1.0).toDouble();
         final k = (1 - _frozen * 1.6).clamp(0.0, 1.0).toDouble();
-        return Offset(math.sin(clock * 1.8 + y * 0.15 + x * 0.01) * (1.0 + 4.5 * depth) * k, math.sin(clock * 2.4 + x * 0.08 + y * 0.12) * 1.4 * k);
+        // Low-amplitude overlapping waves. A little crosswind changes the surface without
+        // pulling the river geometry around enough to shimmer or demand heavy repainting.
+        final longWave = math.sin(clock * 1.25 + y * 0.085 + x * 0.006);
+        final crossWave = math.sin(clock * 0.48 + x * 0.025 + y * 0.012) * windX * 0.45;
+        final shortWave = math.sin(clock * 1.7 + x * 0.055 + y * 0.09);
+        return Offset((longWave * (0.55 + 2.2 * depth) + crossWave) * k, shortWave * 0.65 * k);
       default:
         return Offset.zero;
     }
@@ -766,7 +769,7 @@ class ImageLandscapeRenderer {
   /// Everything the still picture depends on (the look, the light grade and lit windows).
   String _stillKey() {
     int q(double v, [double k = 20]) => (v * k).round();
-    return '${_lookKey()}|${q(light.overcast)}|${q(light.sunVisible)}|${q(light.moonVisible)}|${q(windX, 10)}|${q(_wind, 1)}|${solarDay.floor()}';
+    return '${_lookKey()}|${q(light.overcast)}|${q(light.sunVisible)}|${q(light.moonVisible)}|${q(windX, 10)}|${q(_wind, 1)}|${q(rain)}|${q(fog)}|${q(wind, 1)}|${solarDay.floor()}';
   }
 
   /// The colour graded part: shapes, grass, flowers, twigs and blossoms.
@@ -795,16 +798,45 @@ class ImageLandscapeRenderer {
         if (fade) canvas.restore();
       }
     }
-    _blades(canvas, d);
     _flowers(canvas, d, disp);
     _bareTree(canvas, d);
     _blossoms(canvas, d);
     canvas.restore();
   }
 
-  /// Window light, drawn over the graded part.
+  /// Window light and lightweight chimney smoke, drawn over the graded part.
   void _overlays(Canvas canvas, SceneData d) {
     _windowLight(canvas);
+    _smoke(canvas, d);
+  }
+
+  /// A short translucent plume, carried by the reported wind direction. Every frame reuses
+  /// one Paint and three cached blur filters; only nine soft circles are drawn on desktop.
+  void _smoke(Canvas canvas, SceneData d) {
+    if (_frozen > 0.55 || (rain > 0.9 && wind > 65)) return;
+    final cold = 1.0 + seasons.winter * 0.38;
+    final tone = Color.lerp(const Color(0xFFE6EEF6), const Color(0xFFA0A9B8), _night)!;
+    final windFactor = (_wind / 1.6).clamp(0.05, 2.4).toDouble();
+    final wetAir = (1 - light.overcast * 0.22 - rain * 0.36 - fog * 0.15).clamp(0.30, 1.0).toDouble();
+    final height = 86 * cold * wetAir;
+    for (var k = 0; k < _smokePuffs; k++) {
+      final i = _smokePuffs - 1 - k; // oldest puff first, newest nearest the chimney
+      final t = reduced ? i / _smokePuffs : ((clock * 0.045 + i / _smokePuffs) % 1.0);
+      final rise = 1 - math.pow(1 - t, 1.55).toDouble();
+      final drift = windX * windFactor * 49 * math.pow(t, 1.35).toDouble();
+      final turbulence = reduced
+          ? 0.0
+          : math.sin(clock * 0.78 + i * 1.65 + t * 5.2) * (1.0 + 4.0 * t) * (0.55 + 0.18 * windFactor);
+      final x = d.chimney.dx + drift + turbulence;
+      final y = d.chimney.dy - rise * height;
+      final radius = 2.0 + 10.5 * math.pow(t, 0.82).toDouble();
+      final alpha = math.pow(1 - t, 1.2).toDouble() * math.min(1.0, t * 7.0) * 0.30 * wetAir;
+      if (alpha < 0.008) continue;
+      _smokePaint
+        ..color = tone.withValues(alpha: alpha.clamp(0.0, 1.0).toDouble())
+        ..maskFilter = _smokeBlurFilters[t < 0.32 ? 0 : (t < 0.70 ? 1 : 2)];
+      canvas.drawCircle(Offset(x, y), radius, _smokePaint);
+    }
   }
 
   // ------------------------------------------------------------------------ river
@@ -820,7 +852,7 @@ class ImageLandscapeRenderer {
     for (var i = 0; i < _rippleCount; i++) {
       final u = math.pow(_hash(i * 7 + 1), 0.9).toDouble();
       final y = 600 + u * (SceneFrame.refHeight - 600);
-      final speed = live * (9 + _hash(i * 5 + 3) * 16) * (0.4 + u);
+      final speed = live * (7 + _hash(i * 5 + 3) * 12) * (0.4 + u);
       final x = ((_hash(i * 13 + 2) * span + clock * speed) % span) - 150;
       final length = (18 + _hash(i * 3 + 9) * 70) * (0.4 + u);
       final tw = reduced ? 0.7 : 0.5 + 0.5 * math.sin(clock * 0.9 + i * 1.7);
@@ -830,10 +862,12 @@ class ImageLandscapeRenderer {
         ..color = (dark ? const Color(0xFF1E6FD0) : const Color(0xFFFFFFFF)).withValues(alpha: (dark ? a * 1.2 : a).clamp(0.0, 1.0).toDouble())
         ..strokeWidth = 1.0 + u * 2.2;
       final path = (_scratch..reset())..moveTo(x, y);
-      const n = 6;
+      const n = 4;
       for (var j = 1; j <= n; j++) {
         final px = x + length * j / n;
-        path.lineTo(px, y + math.sin(clock * 2.2 * live + px * 0.09 + i) * (0.8 + u * 2.0));
+        final wave = math.sin(clock * 1.65 * live + px * 0.065 + i) * (0.45 + u * 1.35);
+        final crossWind = math.sin(clock * 0.42 + px * 0.015 + i) * windX * 0.28;
+        path.lineTo(px, y + wave + crossWind);
       }
       p.style = PaintingStyle.stroke;
       canvas.drawPath(path, p);
@@ -864,45 +898,22 @@ class ImageLandscapeRenderer {
     canvas.restore();
   }
 
-  // ------------------------------------------------------------------ grass blades
+  // ------------------------------------------------------------------ water and smoke effects
 
-  /// Hundreds of grass blades along the hill ridges; each leans and springs back in the wind.
   // The browser rasterises in WebAssembly: fewer ripple streaks there look the same at a glance.
-  static final int _rippleCount = PlatformInfo.isWeb ? 32 : 60;
+  static final int _rippleCount = PlatformInfo.isWeb ? 18 : 36;
+  static const int _smokePuffs = PlatformInfo.isWeb ? 5 : 9;
+  // Reuse only three native blur filters and one Paint. The old plume created many different
+  // blur sizes; that produced a large cache of native filters for a tiny decorative effect.
+  static final List<ui.MaskFilter> _smokeBlurFilters = <ui.MaskFilter>[
+    ui.MaskFilter.blur(ui.BlurStyle.normal, 1.8),
+    ui.MaskFilter.blur(ui.BlurStyle.normal, 2.8),
+    ui.MaskFilter.blur(ui.BlurStyle.normal, 4.0),
+  ];
+  static final Paint _smokePaint = Paint()..isAntiAlias = true;
 
-  // One path reused by every per-frame stroke / blade / twig (the canvas copies it when it is drawn).
+  // One path reused by per-frame strokes and twigs (the canvas copies it when it is drawn).
   static final Path _scratch = Path();
-
-  void _blades(Canvas canvas, SceneData d) {
-    final paint = Paint()..isAntiAlias = true;
-    var lastHex = -1;
-    const white = Color(0xFFEEF4F8);
-    for (var i = 0; i < d.blades.length; i++) {
-      final b = d.blades[i];
-      final x = b[0], y = b[1], h = b[2];
-      final hex = b[3].toInt();
-      if (hex != lastHex) {
-        lastHex = hex;
-        var c = Color(0xFF000000 | hex);
-        c = _mix(c, const Color(0xFFA6DD5E), 0.22 * seasons.spring);
-        c = _mix(c, const Color(0xFFC2A44A), 0.55 * seasons.autumn);
-        c = _mix(c, white, 0.93 * _snowAmt);
-        paint.color = c;
-      }
-      var lean = 0.0;
-      if (!reduced) {
-        final gust = (0.65 + 0.35 * math.sin(clock * 0.31 + x * 0.004)) * _wind;
-        lean = (math.sin(clock * 1.9 + x * 0.045 + i * 0.7) * 0.55 + math.sin(clock * 3.7 + x * 0.11 + i) * 0.2) * h * 0.9 * gust;
-      }
-      final w = 0.9 + h * 0.12;
-      final path = (_scratch..reset())
-        ..moveTo(x - w, y + 1.5)
-        ..quadraticBezierTo(x - w * 0.4 + lean * 0.25, y - h * 0.55, x + lean, y - h)
-        ..quadraticBezierTo(x + w * 0.4 + lean * 0.25, y - h * 0.55, x + w, y + 1.5)
-        ..close();
-      canvas.drawPath(path, paint);
-    }
-  }
 
   // ------------------------------------------------------------- bare tree, blossoms
 

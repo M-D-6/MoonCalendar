@@ -589,7 +589,7 @@ try {
 }
 """;
       try {
-        await scriptFile.writeAsString(ps, flush: true);
+        await scriptFile.writeAsBytes(<int>[0xEF, 0xBB, 0xBF, ...utf8.encode(ps)], flush: true);
         await Process.start(
           'powershell.exe',
           ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-STA', '-File', scriptFile.path,

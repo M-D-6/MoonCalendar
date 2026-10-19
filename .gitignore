@@ -70,11 +70,3 @@ android/**/GeneratedPluginRegistrant.java
 
 # Installer
 windows/installer/Output/
-
-# Signing credentials and certificates
-*.pfx
-*.p12
-*.pem
-*.snk
-*.mobileprovision
-*.provisionprofile

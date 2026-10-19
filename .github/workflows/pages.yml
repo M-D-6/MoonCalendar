@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 concurrency:
   group: pages
@@ -15,12 +17,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: read
     steps:
-      - uses: actions/checkout@v4.2.2
-      - uses: subosito/flutter-action@v2.23.0
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
         with: { channel: stable, cache: true }
       - run: bash tool/ci_prepare_platforms.sh
       - run: flutter pub get
@@ -28,20 +27,17 @@ jobs:
       - run: flutter build web --release --base-href "/${{ github.event.repository.name }}/"
       # Single-page fallback so that deep links do not end in a 404.
       - run: cp build/web/index.html build/web/404.html
-      - uses: actions/configure-pages@v5.0.0
-      - uses: actions/upload-pages-artifact@v3.0.1
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: build/web
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4.0.5
+        uses: actions/deploy-pages@v4
