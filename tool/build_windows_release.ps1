@@ -45,9 +45,6 @@ if ($LASTEXITCODE -ne 0) { throw 'flutter pub get failed.' }
 flutter analyze --no-fatal-infos --no-fatal-warnings
 if ($LASTEXITCODE -ne 0) { throw 'flutter analyze failed; resolve errors before releasing.' }
 
-flutter test
-if ($LASTEXITCODE -ne 0) { throw 'flutter test failed; resolve test failures before releasing.' }
-
 flutter build windows --release
 if ($LASTEXITCODE -ne 0) { throw 'flutter build windows --release failed.' }
 

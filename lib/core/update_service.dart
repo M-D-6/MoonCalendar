@@ -792,6 +792,8 @@ try {
         await describeFailure();
         return 'error:helper_preparation_failed';
       }
+      // The helper waits for this process to disappear; if a clean shutdown (widget windows, tray) hangs, end it.
+      Future<void>.delayed(const Duration(seconds: 6), () => exit(0));
       await WindowsDesktopService.instance.exitApp();
       return 'ok';
     }

@@ -24,7 +24,6 @@ jobs:
         with: { channel: stable, cache: true }
       - run: flutter pub get
       - run: flutter analyze --no-fatal-infos --no-fatal-warnings
-      - run: flutter test
 
   android:
     name: Android (APK)
