@@ -114,7 +114,13 @@ class AthanChannel(private val activity: Activity) : MethodChannel.MethodCallHan
             "showTemperature" -> {
                 TemperatureNotification.show(
                     activity,
+                    call.argument<String>("city").orEmpty(),
                     call.argument<String>("temperature").orEmpty(),
+                    call.argument<String>("wind").orEmpty(),
+                    call.argument<Double>("windDegrees") ?: -1.0,
+                    call.argument<String>("feelsLike").orEmpty(),
+                    call.argument<ByteArray>("icon"),
+                    call.argument<Boolean>("rtl") ?: true,
                     call.argument<Boolean>("lockScreen") ?: true,
                 )
                 result.success(null)

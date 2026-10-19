@@ -106,4 +106,4 @@ Third-party licenses and attributions are listed in [`THIRD_PARTY_NOTICES.md`](T
 
 ## Latest patch release
 
-See [MoonCalendar 1.1.7 release notes](docs/RELEASE_NOTES_1.1.7.md) for updater reliability, Android notification improvements, and maintenance fixes. On Windows, run `tool/build_windows_release.ps1` to analyze, test, build the portable bundle, and compile the installer (Inno Setup 6 or 7 required).
+See [MoonCalendar 1.1.7 release notes](docs/RELEASE_NOTES_1.1.7.md) for the Windows updater progress window and release details.

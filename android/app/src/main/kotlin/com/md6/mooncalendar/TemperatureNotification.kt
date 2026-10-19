@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.RectF
 import android.graphics.Typeface
 import android.os.Build
 import androidx.core.app.NotificationCompat
@@ -40,12 +41,8 @@ internal object TemperatureNotification {
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val s = size.toFloat()
-        // Use only the numeric value in the status-bar glyph: never include C/F or a frame.
-        // The degree sign is drawn separately as a small superscript ring.
-        val digits = text.trim()
-            .replace(Regex("""[°º]\s*[CFcf]?$"""), "")
-            .trim()
-            .ifEmpty { "--" }
+        // Digits only (the degree sign is drawn as a small ring at the top corner, like a superscript).
+        val digits = text.trim().replace("°", "").ifEmpty { "--" }
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
             typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
@@ -84,7 +81,17 @@ internal object TemperatureNotification {
         (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) runCatching { temperatureIcon(context, temperature) }.getOrNull() else null)
             ?: IconCompat.createWithResource(context, R.drawable.ic_stat_mooncalendar)
 
-    fun show(context: Context, temperature: String, lockScreen: Boolean) {
+    fun show(
+        context: Context,
+        city: String,
+        temperature: String,
+        wind: String,
+        windDegrees: Double,
+        feelsLike: String,
+        icon: ByteArray?,
+        rtl: Boolean,
+        lockScreen: Boolean,
+    ) {
         if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return
         val manager = context.getSystemService(NotificationManager::class.java) ?: return
         val key = "$temperature|$lockScreen"

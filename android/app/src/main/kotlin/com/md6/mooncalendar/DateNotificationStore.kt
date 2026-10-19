@@ -98,8 +98,8 @@ internal object DateNotificationStore {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(smallIcon(context, payload))
             .setContentTitle(styledLine(title, styleTokens.getOrNull(0), isTitle = true))
-            // Match the Windows row order: title first, then body rows. The collapsed
-            // notification shows the first body row; expansion preserves every row.
+            // Collapsed view: line 1 (title) and, on its own row, line 2 only.
+            // The remaining lines are shown when the notification is expanded.
             .setContentText(bodyLines.firstOrNull()?.let { styledLine(it, styleTokens.getOrNull(1), isTitle = false) })
             .setOngoing(true)
             .setSilent(true)
@@ -116,8 +116,8 @@ internal object DateNotificationStore {
         if (contentIntent != null) builder.setContentIntent(contentIntent)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            // Custom collapsed and expanded layouts preserve the configured row order and
-            // use the selected text direction. System decoration follows Android conventions.
+            // Same design as the Persian Calendar app: custom collapsed + expanded views, decorated by the system,
+            // with the layout direction chosen by the user (default: app language).
             val direction = if (p.getBoolean(KEY_RTL, true)) View.LAYOUT_DIRECTION_RTL else View.LAYOUT_DIRECTION_LTR
             val titleText = styledLine(title, styleTokens.getOrNull(0), isTitle = true)
             val firstLine = bodyLines.firstOrNull()?.let { styledLine(it, styleTokens.getOrNull(1), isTitle = false) }

@@ -170,12 +170,6 @@ class DesktopWidgetService extends ChangeNotifier {
   final Set<String> _openingWidgets = <String>{};
   final Set<String> _recreatingWidgets = <String>{};
   final Set<String> _removingInstances = <String>{};
-  // Child windows report their first rendered frame here. A ready event may arrive
-  // before WindowController.create returns, so remember it until the controller is registered.
-  final Set<String> _readyWidgets = <String>{};
-  // Tokens distinguish a newly-created child engine from a late readiness message
-  // sent by an older engine while the same widget instance is being recreated.
-  final Map<String, String> _widgetReadyTokens = <String, String>{};
   final StreamController<String> _launchActions = StreamController<String>.broadcast();
 
   /// Widget taps (e.g. the moon widget -> astronomy page, the map widget -> map page), like the
@@ -189,8 +183,6 @@ class DesktopWidgetService extends ChangeNotifier {
   bool _shutdownStarted = false;
   bool _lastShowDesktopWidgets = true;
   Timer? _themeTimer;
-  bool _pollingTheme = false;
-  Future<void> _saveTail = Future<void>.value();
   SystemThemeData _theme = SystemThemeData.fallback;
 
   bool get initialized => _initialized;
@@ -209,7 +201,7 @@ class DesktopWidgetService extends ChangeNotifier {
     _lastShowDesktopWidgets = settings.showDesktopWidgets;
     _theme = await PlatformServices.systemTheme();
     await PlatformServices.setNativeMenuTheme(dark: _theme.dark);
-    _themeTimer = Timer.periodic(const Duration(seconds: 5), (_) => unawaited(_pollTheme()));
+    _themeTimer = Timer.periodic(const Duration(seconds: 2), (_) => unawaited(_pollTheme()));
     await _load();
 
     if (_settings!.showDesktopWidgets && (_settings!.runInBackground || instances.any((e) => e.visible))) {
@@ -270,53 +262,35 @@ class DesktopWidgetService extends ChangeNotifier {
                 },
               ),
         );
+      await _save();
     } catch (_) {
-      // Ignore corrupt saved settings without letting them affect app startup.
       instances.clear();
-      return;
     }
-    // Persistence is best-effort after parsing: a disk/plugin error must not erase
-    // the valid in-memory widgets that have already been recovered.
-    try { await _save(); } catch (_) {}
   }
 
-  Future<void> _save() {
-    // Snapshot at call time, then serialize writes so slower earlier writes cannot
-    // overwrite a newer widget position/visibility update.
-    final snapshot = jsonEncode(instances.map((e) => e.toJson()).toList(growable: false));
-    final save = _saveTail.then((_) async {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_prefsKey, snapshot);
-    });
-    // A failed save should reach its caller but must not poison the queue for all future saves.
-    _saveTail = save.catchError((Object _) {});
-    return save;
+  Future<void> _save() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      _prefsKey,
+      jsonEncode(instances.map((e) => e.toJson()).toList(growable: false)),
+    );
   }
 
   Future<void> _pollTheme() async {
-    if (_pollingTheme || _shutdownStarted) return;
-    _pollingTheme = true;
-    try {
-      final next = await PlatformServices.systemTheme().timeout(const Duration(seconds: 3));
-      if (next.seedColor == _theme.seedColor && next.dark == _theme.dark) return;
-      _theme = next;
-      try { await PlatformServices.setNativeMenuTheme(dark: next.dark); } catch (_) {}
-      final themeArgs = <String, dynamic>{'seedColor': next.seedColor, 'dark': next.dark};
-      for (final controller in List<WindowController>.from(_controllers.values)) {
-        try {
-          await controller.invokeMethod('system_theme', themeArgs);
-        } catch (_) {}
-      }
-      for (final controller in List<WindowController>.from(_settingsControllers.values)) {
-        try {
-          await controller.invokeMethod('system_theme', themeArgs);
-        } catch (_) {}
-      }
-    } catch (_) {
-      // Theme polling is best-effort; a transient Windows/plugin error must not
-      // leave an unhandled timer exception or stop later polls.
-    } finally {
-      _pollingTheme = false;
+    final next = await PlatformServices.systemTheme();
+    if (next.seedColor == _theme.seedColor && next.dark == _theme.dark) return;
+    _theme = next;
+    await PlatformServices.setNativeMenuTheme(dark: next.dark);
+    final themeArgs = <String, dynamic>{'seedColor': next.seedColor, 'dark': next.dark};
+    for (final controller in List<WindowController>.from(_controllers.values)) {
+      try {
+        await controller.invokeMethod('system_theme', themeArgs);
+      } catch (_) {}
+    }
+    for (final controller in List<WindowController>.from(_settingsControllers.values)) {
+      try {
+        await controller.invokeMethod('system_theme', themeArgs);
+      } catch (_) {}
     }
   }
 
@@ -409,35 +383,6 @@ class DesktopWidgetService extends ChangeNotifier {
       case 'widget_settings_ready':
         // The settings child has installed its command handler. Keeping the
         // controller in the map prevents duplicate windows for this instance.
-        return true;
-      case 'widget_window_ready':
-        if (args is! Map) return false;
-        final id = args['id']?.toString();
-        final token = args['token']?.toString();
-        final instance = id == null ? null : byId(id);
-        if (id == null || id.isEmpty || token == null ||
-            _widgetReadyTokens[id] != token || instance == null ||
-            _removingInstances.contains(id) || _shutdownStarted) {
-          return false;
-        }
-        if (!instance.visible) {
-          final hiddenController = _controllers[id];
-          if (hiddenController != null) {
-            try { await hiddenController.hide(); } catch (_) {}
-          }
-          return true;
-        }
-        _readyWidgets.add(id);
-        final controller = _controllers[id];
-        if (controller != null) {
-          try {
-            if (_canShowWidget(id)) {
-              await controller.show();
-            } else {
-              await controller.hide();
-            }
-          } catch (_) {}
-        }
         return true;
       case 'hide_widget_settings_window':
         if (args != null) await hideSettingsWindow(args.toString());
@@ -622,15 +567,6 @@ class DesktopWidgetService extends ChangeNotifier {
     return instance;
   }
 
-  bool _canShowWidget(String id) {
-    final instance = byId(id);
-    return !_shutdownStarted &&
-        !_removingInstances.contains(id) &&
-        _settings?.showDesktopWidgets != false &&
-        instance != null &&
-        instance.visible;
-  }
-
   Future<void> _open(DesktopWidgetInstance instance, {bool restore = false}) async {
     if (_shutdownStarted ||
         _settings?.showDesktopWidgets == false ||
@@ -641,24 +577,16 @@ class DesktopWidgetService extends ChangeNotifier {
     final existing = _controllers[instance.id];
     if (existing != null) {
       try {
-        if (_readyWidgets.contains(instance.id) && _canShowWidget(instance.id)) {
-          await existing.show();
-        } else {
-          await existing.hide();
-        }
+        await existing.show();
       } catch (_) {
         _controllers.remove(instance.id);
-        _readyWidgets.remove(instance.id);
       }
       if (_controllers.containsKey(instance.id)) return;
     }
     if (!_openingWidgets.add(instance.id)) return;
-    final readyToken = '${instance.id}_${DateTime.now().microsecondsSinceEpoch.toRadixString(36)}';
-    _widgetReadyTokens[instance.id] = readyToken;
     final config = <String, dynamic>{
       'business': _businessId,
       'instanceId': instance.id,
-      'readyToken': readyToken,
       'type': instance.type.name,
       'displayTitle': displayTitle(instance.id),
       'mainWindowId': mainWindowId,
@@ -685,8 +613,6 @@ class DesktopWidgetService extends ChangeNotifier {
       // If the user removed the instance while the managed engine was being
       // created, do not leave a ghost widget window behind.
       if (byId(instance.id) == null || !instance.visible) {
-        _readyWidgets.remove(instance.id);
-        _widgetReadyTokens.remove(instance.id);
         try {
           await controller.invokeMethod('retire_window').timeout(const Duration(milliseconds: 700));
         } catch (_) {
@@ -696,26 +622,18 @@ class DesktopWidgetService extends ChangeNotifier {
       }
       _controllers[instance.id] = controller;
       instance.windowId = controller.windowId;
-      // Only the parent decides visibility, after the child reports its first themed
-      // frame. This closes the startup race with the global/per-widget visibility toggles.
-      if (_readyWidgets.contains(instance.id)) {
-        try {
-          if (_canShowWidget(instance.id)) {
-            await controller.show();
-          } else {
-            await controller.hide();
-          }
-        } catch (_) {}
-      } else {
-        // hiddenAtLaunch is a safety net if the child's readiness callback is delayed.
+      // A global Hide may race the child-engine creation. Keep the controller
+      // registered so it can be shown again when the user re-enables widgets,
+      // but make sure it never becomes visible after the global switch is off.
+      if (_settings?.showDesktopWidgets == false) {
         try { await controller.hide(); } catch (_) {}
       }
+      // The child window is created with hiddenAtLaunch=true and shows itself
+      // only after its first themed Flutter frame is ready.
       await _save();
     } catch (_) {
       instance.windowId = null;
       _controllers.remove(instance.id);
-      _readyWidgets.remove(instance.id);
-      _widgetReadyTokens.remove(instance.id);
     } finally {
       _openingWidgets.remove(instance.id);
     }
@@ -737,8 +655,6 @@ class DesktopWidgetService extends ChangeNotifier {
       // running a settings callback.
       final settingsController = _settingsControllers.remove(id);
       final widgetController = _controllers.remove(id);
-      _readyWidgets.remove(id);
-      _widgetReadyTokens.remove(id);
       instance.windowId = null;
 
       // Retire child windows immediately. Persistence and title refresh are
@@ -823,7 +739,6 @@ class DesktopWidgetService extends ChangeNotifier {
       if (_recreatingWidgets.add(instance.id)) {
         try {
           final old = _controllers.remove(instance.id);
-          _readyWidgets.remove(instance.id);
           if (old != null) {
             try { await old.invokeMethod('retire_window').timeout(const Duration(milliseconds: 700)); } catch (_) {}
             try { await old.hide(); } catch (_) {}
@@ -905,18 +820,12 @@ class DesktopWidgetService extends ChangeNotifier {
     final controller = _controllers[id];
     if (controller != null) {
       try {
-        if (_readyWidgets.contains(id) && _canShowWidget(id)) {
-          await controller.show();
-        } else {
-          await controller.hide();
-        }
+        await controller.show();
         await _save();
         notifyListeners();
         return;
       } catch (_) {
         _controllers.remove(id);
-        _readyWidgets.remove(id);
-        _widgetReadyTokens.remove(id);
         instance.windowId = null;
       }
     }
@@ -958,8 +867,6 @@ class DesktopWidgetService extends ChangeNotifier {
     _settingsCreation.clear();
     _recreatingWidgets.clear();
     _removingInstances.clear();
-    _readyWidgets.clear();
-    _widgetReadyTokens.clear();
 
     // Global exit must be immediate. Do not await every child Flutter engine
     // one after another (or even wait for the whole collection), because that
@@ -987,8 +894,6 @@ class DesktopWidgetService extends ChangeNotifier {
     _themeTimer?.cancel();
     _settings?.removeListener(_onSettingsChanged);
     _settingsControllers.clear();
-    _readyWidgets.clear();
-    _widgetReadyTokens.clear();
     super.dispose();
   }
 }

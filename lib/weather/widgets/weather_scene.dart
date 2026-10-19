@@ -18,8 +18,8 @@ import 'scene_landscape.dart';
 /// formulas for the selected time and location (so they glide across the sky while the
 /// timeline is scrolled and never pop in or out), the sky colour is a function of the sun
 /// altitude (no fixed "day/night" buckets), and every weather quantity (cloud, rain, snow,
-/// fog, thunder) eases smoothly towards its target instead of switching. The scene stays alive
-/// across weather updates, but stops when it is removed from the visible page.
+/// fog, thunder) eases smoothly towards its target instead of switching. The widget is
+/// never re-created, so animations are not restarted when the weather changes.
 class WeatherScene extends StatefulWidget {
   const WeatherScene({
     super.key,
@@ -64,26 +64,13 @@ class _WeatherSceneState extends State<WeatherScene> with WidgetsBindingObserver
   static const Duration _frameIntervalOther = Duration(milliseconds: 66);
   static Duration get _frameInterval => PlatformInfo.isWindows ? _frameIntervalWindows : _frameIntervalOther;
 
-  bool _lifecycleAllowsAnimation(AppLifecycleState? state) {
-    if (state == null) return true;
-    // On desktop, inactive means the window lost input focus, not that it stopped
-    // being visible. Keep animating a weather window shown on another monitor.
-    if (PlatformInfo.isWindows) {
-      return state == AppLifecycleState.resumed || state == AppLifecycleState.inactive;
-    }
-    // On mobile, inactive can mean a system surface (for example, notification shade)
-    // is covering the app, so keep the stricter resumed-only policy.
-    return state == AppLifecycleState.resumed;
-  }
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    _appActive = _lifecycleAllowsAnimation(state);
+    _appActive = state == AppLifecycleState.resumed;
+    // Nothing is animated while the window is unfocused, hidden, or minimized.
     if (!_appActive) _stopAnimation();
-    if (state == AppLifecycleState.hidden ||
-        state == AppLifecycleState.paused ||
-        state == AppLifecycleState.detached) {
-      // Hidden/minimized: release native pictures/shaders; they are recreated when visible.
+    if (state == AppLifecycleState.hidden || state == AppLifecycleState.paused) {
+      // Minimized or in the tray: release native pictures/shaders; they are recreated on resume.
       ImageLandscapeRenderer.disposeCache();
       _ScenePainter.releaseCaches();
     }
@@ -143,7 +130,7 @@ class _WeatherSceneState extends State<WeatherScene> with WidgetsBindingObserver
     SceneAssets.load().then((_) {
       if (mounted) _repaint.value++;
     });
-    _appActive = _lifecycleAllowsAnimation(WidgetsBinding.instance.lifecycleState);
+    _appActive = WidgetsBinding.instance.lifecycleState == null || WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
     _startAnimation();
   }
 
@@ -472,17 +459,6 @@ class _ScenePainter extends CustomPainter {
   static final List<List<double>> _stars = _buildStars();
   static final List<List<double>> _drops = _buildDrops(260);
   static final List<List<double>> _flakes = _buildDrops(160);
-
-  // Reusable typed-data buffers keep rain and snow painting from allocating several lists plus
-  // copied Float32Lists on every animation frame. The painter runs on one UI isolate.
-  static final Float32List _rainFarPoints = Float32List(260 * 4);
-  static final Float32List _rainNearPoints = Float32List(260 * 4);
-  static final Float32List _snowSmallPoints = Float32List(160 * 2);
-  static final Float32List _snowMediumPoints = Float32List(160 * 2);
-  static final Float32List _snowLargePoints = Float32List(160 * 2);
-  static final Paint _rainFarPaint = Paint()..strokeCap = StrokeCap.round;
-  static final Paint _rainNearPaint = Paint()..strokeCap = StrokeCap.round;
-  static final Paint _snowPaint = Paint()..strokeCap = StrokeCap.round;
 
   // Gradients and the moon's lit shape are rebuilt only when their inputs change (they live in native memory).
   static final Map<int, Shader> _cloudShaders = <int, Shader>{};
@@ -844,11 +820,11 @@ class _ScenePainter extends CustomPainter {
 
   void _drawRain(Canvas canvas, Size size) {
     final m = model;
-    final count = (_drops.length * m.rain).round().clamp(0, _drops.length).toInt();
+    final count = (_drops.length * m.rain).round();
     if (count == 0) return;
     final gust = 0.20 + 0.05 * math.sin(m.clock * 0.35);
-    var farLength = 0;
-    var nearLength = 0;
+    final far = <double>[];
+    final near = <double>[];
     for (var i = 0; i < count; i++) {
       final drop = _drops[i];
       final speed = 0.55 + drop[2] * 0.9; // screens per second
@@ -856,39 +832,18 @@ class _ScenePainter extends CustomPainter {
       final progress = (drop[1] + m.clock * speed * 0.9) % 1.0;
       final y = progress * (size.height + length) - length;
       final x = ((drop[0] + y / size.height * gust) % 1.0) * size.width;
-      final points = drop[2] > 0.9 ? _rainNearPoints : _rainFarPoints;
-      final offset = drop[2] > 0.9 ? nearLength : farLength;
-      points[offset] = x;
-      points[offset + 1] = y;
-      points[offset + 2] = x - length * gust;
-      points[offset + 3] = y + length;
-      if (drop[2] > 0.9) {
-        nearLength += 4;
-      } else {
-        farLength += 4;
-      }
+      final target = drop[2] > 0.9 ? near : far;
+      target..add(x)..add(y)..add(x - length * gust)..add(y + length);
     }
-    if (farLength > 0) {
-      _rainFarPaint
-        ..color = Colors.white.withValues(alpha: 0.20 * m.rain)
-        ..strokeWidth = 1.0;
-      canvas.drawRawPoints(PointMode.lines, Float32List.sublistView(_rainFarPoints, 0, farLength), _rainFarPaint);
-    }
-    if (nearLength > 0) {
-      _rainNearPaint
-        ..color = Colors.white.withValues(alpha: 0.34 * m.rain)
-        ..strokeWidth = 1.7;
-      canvas.drawRawPoints(PointMode.lines, Float32List.sublistView(_rainNearPoints, 0, nearLength), _rainNearPaint);
-    }
+    canvas.drawRawPoints(PointMode.lines, Float32List.fromList(far), Paint()..color = Colors.white.withValues(alpha: 0.20 * m.rain)..strokeWidth = 1.0..strokeCap = StrokeCap.round);
+    canvas.drawRawPoints(PointMode.lines, Float32List.fromList(near), Paint()..color = Colors.white.withValues(alpha: 0.34 * m.rain)..strokeWidth = 1.7..strokeCap = StrokeCap.round);
   }
 
   void _drawSnow(Canvas canvas, Size size) {
     final m = model;
-    final count = (_flakes.length * m.snow).round().clamp(0, _flakes.length).toInt();
+    final count = (_flakes.length * m.snow).round();
     if (count == 0) return;
-    var smallLength = 0;
-    var mediumLength = 0;
-    var largeLength = 0;
+    final groups = <List<double>>[<double>[], <double>[], <double>[]];
     for (var i = 0; i < count; i++) {
       final flake = _flakes[i];
       final speed = 0.05 + flake[2] * 0.09;
@@ -896,28 +851,19 @@ class _ScenePainter extends CustomPainter {
       final sway = math.sin(m.clock * (0.6 + flake[3]) + flake[0] * 20) * 0.018;
       final x = ((flake[0] + sway + m.clock * 0.004) % 1.0) * size.width;
       final group = flake[3] < 0.33 ? 0 : (flake[3] < 0.66 ? 1 : 2);
-      final points = group == 0 ? _snowSmallPoints : (group == 1 ? _snowMediumPoints : _snowLargePoints);
-      final offset = group == 0 ? smallLength : (group == 1 ? mediumLength : largeLength);
-      points[offset] = x;
-      points[offset + 1] = y;
-      if (group == 0) {
-        smallLength += 2;
-      } else if (group == 1) {
-        mediumLength += 2;
-      } else {
-        largeLength += 2;
-      }
+      groups[group]..add(x)..add(y);
     }
     const widths = [2.0, 3.2, 4.6];
     const alphas = [0.5, 0.65, 0.85];
-    final buffers = [_snowSmallPoints, _snowMediumPoints, _snowLargePoints];
-    final lengths = [smallLength, mediumLength, largeLength];
-    for (var g = 0; g < buffers.length; g++) {
-      if (lengths[g] == 0) continue;
-      _snowPaint
-        ..color = Colors.white.withValues(alpha: alphas[g] * m.snow.clamp(0.0, 1.0))
-        ..strokeWidth = widths[g];
-      canvas.drawRawPoints(PointMode.points, Float32List.sublistView(buffers[g], 0, lengths[g]), _snowPaint);
+    for (var g = 0; g < 3; g++) {
+      canvas.drawRawPoints(
+        PointMode.points,
+        Float32List.fromList(groups[g]),
+        Paint()
+          ..color = Colors.white.withValues(alpha: alphas[g] * m.snow.clamp(0.0, 1.0))
+          ..strokeWidth = widths[g]
+          ..strokeCap = StrokeCap.round,
+      );
     }
   }
 

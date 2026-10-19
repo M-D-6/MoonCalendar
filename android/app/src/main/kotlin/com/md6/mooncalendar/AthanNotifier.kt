@@ -67,13 +67,15 @@ object AthanNotifier {
         val builder = NotificationCompat.Builder(app, notificationChannelId)
             .setAutoCancel(true)
             .setWhen(System.currentTimeMillis())
-            // Use the same calendar/day-number icon style as the persistent date notification.
+            // Exactly the same status-bar icon as the persistent date notification
+            // (calendar frame with today's day number).
             .setSmallIcon(DateNotificationStore.smallIcon(app))
             .setContentTitle(alarm.title)
             .setContentText(alarm.body)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setGroup("mooncalendar_athan")
             .setSound(soundUri, AudioManager.STREAM_NOTIFICATION)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

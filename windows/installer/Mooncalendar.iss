@@ -1,4 +1,4 @@
-#define MyAppName "Mooncalendar"
+﻿#define MyAppName "Mooncalendar"
 ; Version: taken from the MOONCALENDAR_VERSION environment variable when set
 ; (CI passes the release tag), otherwise the default below.
 #define MyAppVersion GetEnv("MOONCALENDAR_VERSION")

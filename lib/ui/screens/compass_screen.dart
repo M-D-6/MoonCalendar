@@ -823,20 +823,5 @@ class _ReferenceCompassPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _ReferenceCompassPainter oldDelegate) =>
-      oldDelegate.heading != heading ||
-      oldDelegate.declination != declination ||
-      oldDelegate.trueNorth != trueNorth ||
-      oldDelegate.qiblaHeading != qiblaHeading ||
-      oldDelegate.qiblaDistance != qiblaDistance ||
-      oldDelegate.snapshot != snapshot ||
-      oldDelegate.time != time ||
-      oldDelegate.latitude != latitude ||
-      oldDelegate.longitude != longitude ||
-      oldDelegate.altitude != altitude ||
-      oldDelegate.surface != surface ||
-      oldDelegate.zoom != zoom ||
-      oldDelegate.enterAngle != enterAngle ||
-      oldDelegate.sunImage != sunImage ||
-      oldDelegate.moonImage != moonImage;
+  bool shouldRepaint(covariant _ReferenceCompassPainter oldDelegate) => true;
 }

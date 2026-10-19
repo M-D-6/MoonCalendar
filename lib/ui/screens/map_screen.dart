@@ -1296,22 +1296,7 @@ class _WorldMapPainter extends CustomPainter {
 
 
   @override
-  bool shouldRepaint(covariant _WorldMapPainter oldDelegate) =>
-      oldDelegate.assets != assets ||
-      oldDelegate.zoom != zoom ||
-      oldDelegate.offsetX != offsetX ||
-      oldDelegate.offsetY != offsetY ||
-      oldDelegate.displayLocation != displayLocation ||
-      oldDelegate.displayGrid != displayGrid ||
-      oldDelegate.markedLat != markedLat ||
-      oldDelegate.markedLon != markedLon ||
-      oldDelegate.markedLocationName != markedLocationName ||
-      oldDelegate.showQibla != showQibla ||
-      oldDelegate.destinationLat != destinationLat ||
-      oldDelegate.destinationLon != destinationLon ||
-      oldDelegate.mask != mask ||
-      oldDelegate.mapType != mapType ||
-      oldDelegate.colorScheme != colorScheme;
+  bool shouldRepaint(covariant _WorldMapPainter oldDelegate) => true;
 }
 
 class _GlobeShaderPainter extends CustomPainter {
