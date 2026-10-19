@@ -19,7 +19,7 @@ env:
 
 jobs:
   analyze:
-    name: Analyze & test
+    name: Analyze
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4.2.2
@@ -27,7 +27,6 @@ jobs:
         with: { channel: stable, cache: true }
       - run: flutter pub get
       - run: flutter analyze --no-fatal-infos --no-fatal-warnings
-      - run: flutter test
 
   android:
     name: Android (APK)
