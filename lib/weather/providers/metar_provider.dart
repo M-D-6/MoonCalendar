@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:mooncalendar/weather/models/location.dart';
 import 'package:mooncalendar/weather/models/observation.dart';
 
+import '../../core/app_version.dart';
 import 'retrying_dio.dart';
 
 /// Nearest-airport METAR observation from the NOAA/NWS Aviation Weather Center
@@ -49,7 +50,7 @@ class MetarProvider {
     final response = await client.get(
       'https://aviationweather.gov/api/data/metar',
       queryParameters: {'bbox': bbox, 'format': 'json', 'hours': 3},
-      headers: {'User-Agent': 'Mooncalendar/1.1.7 ($projectUrl)', 'Accept': 'application/json'},
+      headers: {'User-Agent': 'Mooncalendar/$appVersion ($projectUrl)', 'Accept': 'application/json'},
     );
     if (response.statusCode != 200 || response.data is! List) return null;
 

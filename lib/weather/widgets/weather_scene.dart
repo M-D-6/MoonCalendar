@@ -10,6 +10,7 @@ import 'package:mooncalendar/weather/utils/moon_phase.dart';
 import '../../core/platform.dart';
 import '../../core/platform_info.dart';
 import 'scene_light.dart';
+import 'wx_icon.dart' show clearWxIconCache;
 import 'scene_landscape.dart';
 
 /// Live background landscape.
@@ -498,6 +499,7 @@ class _ScenePainter extends CustomPainter {
     _cloudShaders.clear();
     _moonLit = null;
     _moonKey = 0;
+    clearWxIconCache();
   }
 
   static Shader _cloudShader(Color c, Color shade, double alpha) {

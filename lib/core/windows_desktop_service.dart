@@ -1,7 +1,10 @@
 import 'platform_info.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart' show ValueNotifier;
 import 'package:flutter/painting.dart' show PaintingBinding;
+import 'package:flutter/services.dart' show SystemChannels;
+import 'package:flutter/widgets.dart' show WidgetsBinding;
 
 import 'package:tray_manager/tray_manager.dart' as tray;
 import 'package:window_manager/window_manager.dart';
@@ -16,6 +19,11 @@ class WindowsDesktopService with WindowListener, tray.TrayListener {
   WindowsDesktopService._();
 
   static final WindowsDesktopService instance = WindowsDesktopService._();
+
+  /// True while the main window is hidden (tray) or minimized: the page is removed from the widget tree then.
+  static final ValueNotifier<bool> uiSuspended = ValueNotifier<bool>(false);
+  Timer? _suspendTimer;
+  Timer? _trimTimer;
 
   AppSettings? _settings;
   bool _trayCreated = false;
@@ -260,6 +268,7 @@ class WindowsDesktopService with WindowListener, tray.TrayListener {
   Future<void> startHiddenInTray() async {
     _forceTray = true;
     await _syncSettings();
+    _suspendUi(const Duration(seconds: 2));
   }
 
   /// Applies the remembered maximized state; call right before the window is first shown.
@@ -271,6 +280,7 @@ class WindowsDesktopService with WindowListener, tray.TrayListener {
 
   Future<void> showWindow({bool fromTray = false}) async {
     if (!PlatformInfo.isWindows) return;
+    _resumeUi();
     try {
       await applyPendingMaximize();
       if (await windowManager.isMinimized()) {
@@ -311,21 +321,63 @@ class WindowsDesktopService with WindowListener, tray.TrayListener {
     if (_exiting) return;
     final settings = _settings;
     if (settings?.runInBackground == true) {
-      unawaited(windowManager.hide());
+      unawaited(hideWindow());
     } else {
       unawaited(exitApp());
     }
   }
 
-  /// Hides the main window; the app keeps running from the tray icon.
+  /// Hides the main window; the app keeps running from the tray icon with as little memory as possible.
   Future<void> hideWindow() async {
     if (!PlatformInfo.isWindows) return;
     try { await windowManager.hide(); } catch (_) {}
-    // Hidden in the tray: decoded images (scenery, flags, icons) are not needed until the window returns.
+    _suspendUi(const Duration(milliseconds: 300));
+  }
+
+  /// Takes the page out of the tree (after [delay]) and then returns what can be returned: cached images, the
+  /// renderer's cache and, at the end, the process working set.
+  void _suspendUi(Duration delay) {
+    _suspendTimer?.cancel();
+    _suspendTimer = Timer(delay, () {
+      if (_exiting) return;
+      uiSuspended.value = true;
+      // A hidden window may not schedule frames by itself; force one so the page is really disposed.
+      WidgetsBinding.instance.scheduleForcedFrame();
+      _trimTimer?.cancel();
+      // First pass once the page has been disposed, a second one after the garbage collector had its turn.
+      _trimTimer = Timer(const Duration(milliseconds: 900), () {
+        unawaited(_releaseMemory());
+        _trimTimer = Timer(const Duration(seconds: 6), () => unawaited(_releaseMemory()));
+      });
+    });
+  }
+
+  void _resumeUi() {
+    _suspendTimer?.cancel();
+    _trimTimer?.cancel();
+    if (uiSuspended.value) uiSuspended.value = false;
+  }
+
+  Future<void> _releaseMemory() async {
     try {
       PaintingBinding.instance.imageCache.clear();
       PaintingBinding.instance.imageCache.clearLiveImages();
+      // A budget of zero empties the renderer's cache; the normal budget is restored right after.
+      await SystemChannels.skia.invokeMethod<void>('Skia.setResourceCacheMaxBytes', 0);
+      await SystemChannels.skia.invokeMethod<void>('Skia.setResourceCacheMaxBytes', 24 * 1024 * 1024);
     } catch (_) {}
+    await PlatformServices.trimWorkingSet();
+  }
+
+  @override
+  void onWindowMinimize() => _suspendUi(const Duration(seconds: 1));
+
+  @override
+  void onWindowRestore() => _resumeUi();
+
+  @override
+  void onWindowFocus() {
+    if (uiSuspended.value) _resumeUi();
   }
 
   Future<void> exitApp() async {

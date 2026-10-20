@@ -80,7 +80,9 @@ class _MoonCalendarAppState extends State<MoonCalendarApp> with WidgetsBindingOb
     // it is polled there. Android is refreshed on resume / brightness change /
     // settings change - a per-second platform-channel poll only costs frames.
     if (PlatformInfo.isWindows) {
-      _systemThemeTimer = Timer.periodic(const Duration(seconds: 5), (_) => _refreshSystemTheme());
+      _systemThemeTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+        if (!WindowsDesktopService.uiSuspended.value) unawaited(_refreshSystemTheme());
+      });
     }
   }
 
@@ -334,12 +336,7 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
     // After an update the helper waits for this message before it keeps the new version.
     Future<void>.delayed(const Duration(seconds: 2), () async {
       final updated = await UpdateService.confirmHealthy();
-      if (updated && mounted) {
-        unawaited(UpdateUi.showUpdated(context));
-        // Once the message is on screen the update window may close.
-        await Future<void>.delayed(const Duration(milliseconds: 500));
-        await UpdateService.markResultShown();
-      }
+      if (updated && mounted) unawaited(UpdateUi.showUpdated(context));
     });
     final action = await PlatformServices.getLaunchAction();
     final shortcut = _shortcutPage(action);
@@ -595,6 +592,7 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
     _widgetTimer?.cancel();
     _widgetSyncDebounce?.cancel();
     _midnightTimer?.cancel();
+    _pageReleaseTimer?.cancel();
     _temperatureNotifier.dispose();
     _weatherCtl?.dispose();
     super.dispose();
@@ -762,7 +760,17 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
       },
       // RepaintBoundary: during the 380 ms transition the fade / slide / scale run on a cached layer of the
       // page instead of re-painting the whole page (calendar grid, map, astronomy) every frame.
-      child: KeyedSubtree(key: ValueKey<String>(_pageKey()), child: RepaintBoundary(child: bodyFor())),
+      child: KeyedSubtree(
+        key: ValueKey<String>(_pageKey()),
+        // While the window is hidden or minimized the page is taken out of the tree completely: nothing is built,
+        // painted or animated, and its memory (scene, images, caches) can be freed.
+        child: RepaintBoundary(
+          child: ValueListenableBuilder<bool>(
+            valueListenable: WindowsDesktopService.uiSuspended,
+            builder: (context, suspended, _) => suspended ? const SizedBox.expand() : bodyFor(),
+          ),
+        ),
+      ),
     );
   }
 
@@ -924,8 +932,25 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
     });
   }
 
+  // After the user has moved to another page, what the previous one left behind (decoded images, renderer cache,
+  // freed-but-unreturned memory) is given back a few seconds later, so only the page in use costs memory.
+  Timer? _pageReleaseTimer;
+  AppPage? _releasedFor;
+
+  void _scheduleMemoryRelease() {
+    if (_releasedFor == _page) return;
+    _releasedFor = _page;
+    _pageReleaseTimer?.cancel();
+    _pageReleaseTimer = Timer(const Duration(seconds: 3), () {
+      PaintingBinding.instance.imageCache.clear();
+      PaintingBinding.instance.imageCache.clearLiveImages();
+      if (PlatformInfo.isWindows) unawaited(PlatformServices.trimWorkingSet());
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    _scheduleMemoryRelease();
     final bool wide = MediaQuery.sizeOf(context).width >= 920;
     final body = Row(
       children: [

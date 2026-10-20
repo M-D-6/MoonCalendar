@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:consensus_engine/consensus_engine.dart';
 import 'package:mooncalendar/weather/models/location.dart';
 
+import '../../core/app_version.dart';
 import 'retrying_dio.dart';
 import 'weather_provider.dart';
 
@@ -41,7 +42,7 @@ class BrightSkyProvider implements WeatherProvider {
         'tz': 'UTC',
         'max_dist': maxDistanceM,
       },
-      headers: {'User-Agent': 'Mooncalendar/1.1.7 ($projectUrl)', 'Accept': 'application/json'},
+      headers: {'User-Agent': 'Mooncalendar/$appVersion ($projectUrl)', 'Accept': 'application/json'},
     );
     if (response.statusCode != 200) {
       throw StateError('Bright Sky: no DWD station within ${maxDistanceM ~/ 1000} km (HTTP ${response.statusCode})');

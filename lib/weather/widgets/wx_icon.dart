@@ -20,6 +20,9 @@ class WxIcon extends StatelessWidget {
       );
 }
 
+/// Drops the recorded icon pictures (they are recorded again when an icon is next drawn).
+void clearWxIconCache() => _WxIconPainter.clearCache();
+
 class _WxIconPainter extends CustomPainter {
   const _WxIconPainter(this.condition, this.isDay);
 
@@ -29,6 +32,13 @@ class _WxIconPainter extends CustomPainter {
   // The icon is designed on a 100 x 100 canvas.
   // Each variant is recorded once (boolean geometry and gradients are costly) and replayed for every cell.
   static final Map<int, ui.Picture> _pictures = <int, ui.Picture>{};
+
+  static void clearCache() {
+    for (final picture in _pictures.values) {
+      picture.dispose();
+    }
+    _pictures.clear();
+  }
 
   @override
   void paint(Canvas canvas, Size size) {

@@ -2,6 +2,7 @@ import 'package:consensus_engine/consensus_engine.dart';
 import 'package:mooncalendar/weather/models/location.dart';
 
 import 'package:mooncalendar/weather/utils/http_date.dart';
+import '../../core/app_version.dart';
 import 'retrying_dio.dart';
 import 'weather_provider.dart';
 
@@ -15,7 +16,7 @@ class MetNorwayProvider implements WeatherProvider {
   @override
   String get id => 'met-no';
 
-  String get userAgent => 'Mooncalendar/1.1.7 ($projectUrl)';
+  String get userAgent => 'Mooncalendar/$appVersion ($projectUrl)';
 
   @override
   Future<ProviderForecast> fetch(LocationCoordinate location, {ProviderCacheState? cacheState}) async {

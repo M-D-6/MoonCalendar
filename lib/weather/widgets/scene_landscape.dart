@@ -462,6 +462,8 @@ class ImageLandscapeRenderer {
     _cache.still?.dispose();
     _cache.still = null;
     _cache.stillKey = '';
+    _filterCache = null;
+    _filterKey = 0;
   }
 
   /// Ambient value of the artwork itself (golden hour): the picture is shown ungraded here.

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:consensus_engine/consensus_engine.dart';
 import 'package:mooncalendar/weather/models/location.dart';
 
+import '../../core/app_version.dart';
 import 'retrying_dio.dart';
 import 'weather_provider.dart';
 
@@ -33,7 +34,7 @@ class NwsProvider implements WeatherProvider {
 
   @override
   Future<ProviderForecast> fetch(LocationCoordinate location, {ProviderCacheState? cacheState}) async {
-    final headers = {'User-Agent': 'Mooncalendar/1.1.7 ($projectUrl)', 'Accept': 'application/geo+json'};
+    final headers = {'User-Agent': 'Mooncalendar/$appVersion ($projectUrl)', 'Accept': 'application/geo+json'};
     final lat = location.safeLatitude.toStringAsFixed(4);
     final lon = location.safeLongitude.toStringAsFixed(4);
 

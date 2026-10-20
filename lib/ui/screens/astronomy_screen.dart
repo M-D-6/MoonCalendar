@@ -303,6 +303,16 @@ class _AstronomyScreenState extends State<AstronomyScreen>
   @override
   void dispose() {
     _timer?.cancel();
+    // The decoded planet pictures are no longer needed once the screen is gone.
+    _assetsFuture.then((a) {
+      a.sun.dispose();
+      a.moon.dispose();
+      a.earth.dispose();
+      for (final image in a.planetBadges.values) {
+        image.dispose();
+      }
+    }).catchError((Object _) {});
+    _AndroidAstronomyPainter._textCache.clear();
     _timeSpring.dispose();
     _scaleSpring.dispose();
     _offXSpring.dispose();

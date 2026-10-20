@@ -295,15 +295,6 @@ class UpdateService {
     }
   }
 
-  /// Tells the helper window that the result message is on screen, so it can close.
-  static Future<void> markResultShown() async {
-    final path = Platform.environment['MOONCALENDAR_UPDATE_HEALTH_FILE'];
-    if (path == null || path.isEmpty) return;
-    try {
-      await File('$path.shown').writeAsString('shown', flush: true);
-    } catch (_) {}
-  }
-
   /// A complete, verified download of exactly this release, or null.
   static Future<File?> readyFile(UpdateInfo info) async {
     await _ensureBase();
@@ -557,7 +548,12 @@ try {
   $back = if ($dark) { [System.Drawing.Color]::FromArgb(32,32,32) } else { [System.Drawing.Color]::FromArgb(243,243,243) }
   $fore = if ($dark) { [System.Drawing.Color]::FromArgb(245,245,245) } else { [System.Drawing.Color]::FromArgb(20,20,20) }
   $form.Text = 'MoonCalendar'
-  $form.StartPosition = 'CenterScreen'
+  # The window stays invisible while everything goes well; it is shown only when the update failed and the
+  # previous version could not be started again.
+  $form.StartPosition = 'Manual'
+  $form.Location = New-Object System.Drawing.Point(-32000, -32000)
+  $form.Opacity = 0
+  $form.ShowInTaskbar = $false
   $form.FormBorderStyle = 'FixedDialog'
   $form.MaximizeBox = $false; $form.MinimizeBox = $false; $form.ControlBox = $true
   $form.ClientSize = New-Object System.Drawing.Size(460,190)
@@ -565,6 +561,16 @@ try {
   $form.BackColor = $back; $form.ForeColor = $fore
   if ($T.rtl) { $form.RightToLeft = [System.Windows.Forms.RightToLeft]::Yes; $form.RightToLeftLayout = $true }
   $script:finished = $false
+  function Show-Window {
+    try {
+      $area = [System.Windows.Forms.Screen]::PrimaryScreen.WorkingArea
+      $form.Location = New-Object System.Drawing.Point(($area.X + [int](($area.Width - $form.Width) / 2)), ($area.Y + [int](($area.Height - $form.Height) / 2)))
+      $form.ShowInTaskbar = $true
+      $form.Opacity = 1
+      $form.Visible = $true
+      $form.Activate()
+    } catch { Write-Log ('Could not show the window: ' + $_.Exception.Message) }
+  }
   # Closing the window while the update runs only hides it: the update itself must never be interrupted.
   $form.add_FormClosing({ param($sender, $e) if (-not $script:finished) { $e.Cancel = $true; $sender.Hide() } })
   $title = New-Object System.Windows.Forms.Label
@@ -672,18 +678,7 @@ try {
       Get-ChildItem -LiteralPath $parent -Directory -Force -ErrorAction SilentlyContinue |
         Where-Object { $_.Name -like ('.' + $leaf + '.backup-*') -or $_.Name -like ('.' + $leaf + '.failed-*') -or $_.Name -like ('.' + $leaf + '.stage-*') } |
         Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
-      # Stay open until the application shows its result message (it drops a marker file), at most 20 seconds.
-      $status.Text = $T.result
-      $shownMarker = $HealthPath + '.shown'
-      $shownDeadline = (Get-Date).AddSeconds(20)
-      while (-not (Test-Path -LiteralPath $shownMarker) -and (Get-Date) -lt $shownDeadline -and -not $started.HasExited) {
-        [System.Windows.Forms.Application]::DoEvents()
-        Start-Sleep -Milliseconds 100
-      }
       $status.Text = $T.done
-      $bar.Style = 'Blocks'; $bar.Value = 100
-      [System.Windows.Forms.Application]::DoEvents()
-      Start-Sleep -Milliseconds 800
       $script:finished = $true
       $form.Close()
     } catch {
@@ -732,9 +727,10 @@ try {
         Write-Log 'Automatic rollback could not be fully confirmed.'
       }
       $bar.Style = 'Blocks'; $bar.Value = 100
-      # The failure stays visible until it is closed (the application shows the details at its next start).
+      # With the previous version running again, the application itself reports the failure at its start;
+      # the window appears only when even that did not work out, and then it stays until it is closed.
       $script:finished = $true
-      $form.Visible = $true
+      if (-not $previousAvailable) { Show-Window } else { $form.Close() }
     } finally {
       try { Remove-Item Env:\MOONCALENDAR_UPDATE_HEALTH_FILE -ErrorAction SilentlyContinue } catch {}
     }

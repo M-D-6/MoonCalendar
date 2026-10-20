@@ -1,3 +1,4 @@
+import '../../core/app_version.dart';
 import '../../core/platform_info.dart';
 import '../../core/l10n/l10n.dart';
 import '../widgets/tr_text.dart';
@@ -272,7 +273,7 @@ class AboutScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                 decoration: BoxDecoration(color: scheme.primaryContainer.withValues(alpha: .7), borderRadius: BorderRadius.circular(20)),
-                child: Text('نسخه ۱.۱.۳', style: text.labelLarge?.copyWith(color: scheme.onPrimaryContainer)),
+                child: PlainText('${tr('نسخه')} ${L10n.digits(appVersion)}', style: text.labelLarge?.copyWith(color: scheme.onPrimaryContainer)),
               ),
               const SizedBox(height: 16),
               Text(

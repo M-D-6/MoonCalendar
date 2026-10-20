@@ -7,6 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
 import 'athan/athan_android.dart';
+import 'app_version.dart';
 import 'locations_repository.dart';
 
 /// A human readable place for a coordinate (city + country), the Flutter
@@ -181,7 +182,7 @@ class LocationService {
       final response = await http.get(uri, headers: const <String, String>{
         'Accept': 'application/json',
         'Accept-Language': 'fa,en',
-        'User-Agent': 'MooncalendarFlutter/1.1.7',
+        'User-Agent': 'MooncalendarFlutter/$appVersion',
       }).timeout(const Duration(seconds: 4));
       if (response.statusCode != 200) return null;
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));

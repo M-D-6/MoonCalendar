@@ -1673,6 +1673,7 @@ const Map<String, String> enStrings = <String, String>{
   'شروع جایگزینی و اجرای مجدد': 'Replace and restart',
   'لطفاً صبر کنید…': 'Please wait…',
   'نصب به‌روزرسانی شروع نشد. می‌توانید دوباره تلاش کنید یا فایل را از صفحهٔ دانلود بگیرید.': 'The update could not be started. You can try again or get the file from the download page.',
+  'نسخه': 'Version',
 };
 
 const Map<String, String> enTemplates = <String, String>{

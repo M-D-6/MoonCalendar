@@ -80,10 +80,18 @@ class _CompassScreenState extends State<CompassScreen> with TickerProviderStateM
       ),
     );
     loadAstronomyImage('assets/images/android_astronomy/ic_sun.png').then((v) {
-      if (mounted) setState(() => _sunImage = v);
+      if (!mounted) {
+        v.dispose();
+        return;
+      }
+      setState(() => _sunImage = v);
     });
     loadAstronomyImage('assets/images/android_astronomy/ic_moon.png').then((v) {
-      if (mounted) setState(() => _moonImage = v);
+      if (!mounted) {
+        v.dispose();
+        return;
+      }
+      setState(() => _moonImage = v);
     });
     _timeAnimation = AnimationController(vsync: this, duration: const Duration(seconds: 10));
     _timeAnimation.addListener(() {
@@ -176,6 +184,8 @@ class _CompassScreenState extends State<CompassScreen> with TickerProviderStateM
     _subscription = null;
     _timeAnimation.dispose();
     _enter.dispose();
+    _sunImage?.dispose();
+    _moonImage?.dispose();
     PlatformServices.stopCompass();
     super.dispose();
   }
