@@ -4,11 +4,16 @@
 #define MyAppVersion GetEnv("MOONCALENDAR_VERSION")
 #if MyAppVersion == ""
   #undef MyAppVersion
-  #define MyAppVersion "1.1.8"
+  #define MyAppVersion "1.1.9"
 #endif
 
-; Flutter build folder: build\windows\<arch>\runner\Release.
-#define MyArch "x64"
+; Target architecture: MOONCALENDAR_ARCH is "x64" (default) or "arm64". It selects the Flutter build
+; folder (build\windows\<arch>\runner\Release) and the installer's architecture rules.
+#define MyArch GetEnv("MOONCALENDAR_ARCH")
+#if MyArch != "arm64"
+  #undef MyArch
+  #define MyArch "x64"
+#endif
 
 #define MyAppPublisher "M-D-6"
 #define MyAppPublisherURL "https://github.com/M-D-6/MoonCalendar"
@@ -50,13 +55,20 @@ SetupIconFile={#MyAppIcon}
 UninstallDisplayIcon={app}\{#MyAppExeName}
 UninstallDisplayName={#MyAppName}
 
-; 64-bit app, installed in 64-bit mode (also runs on Arm64 Windows 11 via emulation).
+#if MyArch == "arm64"
+; Native Arm64 app: installs only on Arm64 Windows.
+ArchitecturesAllowed=arm64
+ArchitecturesInstallIn64BitMode=arm64
+#else
+; 64-bit app, installed in 64-bit mode.
 ; SetupArchitecture needs Inno Setup 7+; older compilers just use a 64-bit loader (UseSetupLdr below).
 #if Ver >= 0x07000000
 SetupArchitecture=x64
 #endif
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
+UseSetupLdr=x64
+#endif
 
 ; Per-user install: no administrator rights; {autopf} resolves to %LocalAppData%\Programs.
 PrivilegesRequired=lowest
@@ -89,8 +101,6 @@ RedirectionGuard=yes
 
 Compression=lzma
 SolidCompression=yes
-
-UseSetupLdr=x64
 
 OutputManifestFile=MoonCalendar-Setup-{#MyArch}.manifest
 

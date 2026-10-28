@@ -140,7 +140,7 @@ class LocationService {
   static DateTime _lastWebRequest = DateTime.fromMillisecondsSinceEpoch(0);
 
   /// City/country for a coordinate. Android uses the system Geocoder first
-  /// (exactly like the Persian Calendar app); every platform, Windows included, falls
+  ///); every platform, Windows included, falls
   /// back to OpenStreetMap Nominatim, so names work on both systems.
   static Future<PlaceName?> reverseGeocode(double latitude, double longitude) async {
     if (!latitude.isFinite || !longitude.isFinite || latitude.abs() > 90 || longitude.abs() > 180) return null;

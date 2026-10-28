@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:astronomia/astronomia.dart' as astro;
 import 'package:astronomia/sidereal.dart' as sidereal;
+import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide Text;
 import 'package:flutter/scheduler.dart' show Ticker;
@@ -68,7 +69,7 @@ class _MapAssets {
   })  : _timeZonesText = timeZonesText,
         _tectonicPlatesText = tectonicPlatesText;
 
-  // Parsed only when that map type is first shown (like the Persian Calendar app's lazy paths): most visits never
+  // Parsed only when that map type is first shown): most visits never
   // open them, and parsing these two big path files would delay every map start.
   late final MapGeometry timeZones = parseMapPath(
     _timeZonesText,
@@ -78,6 +79,139 @@ class _MapAssets {
     _tectonicPlatesText,
     transform: (x, y) => ui.Offset(x * 0.17586713 * 16, 2498.6112 - y * 0.074727945 * 16),
   );
+}
+
+class _MaskData {
+  final Uint8List bytes;
+  final double sunX;
+  final double sunY;
+  final double moonX;
+  final double moonY;
+  const _MaskData(this.bytes, this.sunX, this.sunY, this.moonX, this.moonY);
+}
+
+/// Runs in a background isolate: [args] is `[map type index, time in milliseconds]`.
+_MaskData _computeMaskData(List<int> args) {
+  final type = _MapType.values[args[0]];
+  final time = DateTime.fromMillisecondsSinceEpoch(args[1]);
+    const width = 360;
+    const height = 180;
+    final bytes = Uint8List(width * height * 4);
+    var sunMax = -1.0;
+    var moonMax = -1.0;
+    double sunX = 180;
+    double sunY = 90;
+    double moonX = 180;
+    double moonY = 90;
+
+    final jd = AstronomyMath.dateTimeToJd(time.toUtc());
+    final eps = astro.meanObliquity(jd);
+    final gast = AstronomyMath.normalizeRadians(sidereal.apparent(jd) / 86400 * math.pi * 2);
+    final sunEq = _maskEclipticToEquatorial(AstronomyMath.sunPosition(jd), eps);
+    final moonEq = _maskEclipticToEquatorial(AstronomyMath.moonPosition(jd), eps);
+    final sunLon = AstronomyMath.normalizeDegrees((sunEq.$1 - gast) * 180 / math.pi);
+    final moonLon = AstronomyMath.normalizeDegrees((moonEq.$1 - gast) * 180 / math.pi);
+
+    for (var y = 0; y < height; y++) {
+      final lat = 89.5 - y;
+      final latRad = lat * math.pi / 180;
+      for (var x = 0; x < width; x++) {
+        final lon = -179.5 + x;
+        final sunSinAlt = _maskSinAltitude(latRad, lon, sunLon, sunEq.$2);
+        final moonSinAlt = _maskSinAltitude(latRad, lon, moonLon, moonEq.$2);
+        final p = (y * width + x) * 4;
+        switch (type) {
+          case _MapType.dayNight:
+            if (sunSinAlt < 0) {
+              final alpha = math.min(120, (-sunSinAlt * 90 * 7).toInt());
+              bytes[p] = 0;
+              bytes[p + 1] = 0;
+              bytes[p + 2] = 0;
+              bytes[p + 3] = alpha;
+            }
+            break;
+          case _MapType.moonVisibility:
+            if (moonSinAlt > 0) {
+              final alpha = math.min(120, (moonSinAlt * 90 * 7).toInt());
+              bytes[p] = 244;
+              bytes[p + 1] = 244;
+              bytes[p + 2] = 244;
+              bytes[p + 3] = alpha;
+            }
+            break;
+          case _MapType.magneticStrength:
+          case _MapType.magneticDeclination:
+          case _MapType.magneticInclination:
+            final field = AospGeomagneticField(
+              latitudeDeg: lat,
+              longitudeDeg: lon,
+              altitudeMeters: 0,
+              timeMillis: time.millisecondsSinceEpoch,
+            );
+            if (type == _MapType.magneticStrength) {
+              final alpha = (field.fieldStrength / 68000 * 255).truncate().clamp(0, 255);
+              bytes[p] = 0;
+              bytes[p + 1] = 0;
+              bytes[p + 2] = 0;
+              bytes[p + 3] = alpha;
+            } else {
+              final value = type == _MapType.magneticDeclination
+                  ? field.declination
+                  : field.inclination;
+              int argbAlpha;
+              int rgb;
+              if (value > 1) {
+                argbAlpha = (value * 255 / 180).truncate().clamp(0, 255);
+                rgb = 0xFF0000;
+              } else if (value < -1) {
+                argbAlpha = (-value * 255 / 180).truncate().clamp(0, 255);
+                rgb = 0x0000FF;
+              } else {
+                argbAlpha = (30 - value.abs() * 30).truncate().clamp(0, 30);
+                rgb = 0x00FF00;
+              }
+              bytes[p] = (rgb >> 16) & 0xFF;
+              bytes[p + 1] = (rgb >> 8) & 0xFF;
+              bytes[p + 2] = rgb & 0xFF;
+              bytes[p + 3] = argbAlpha;
+            }
+            break;
+          default:
+            break;
+        }
+        if (sunSinAlt > sunMax) {
+          sunMax = sunSinAlt;
+          sunX = lon + 180;
+          sunY = 90 - lat;
+        }
+        if (moonSinAlt > moonMax) {
+          moonMax = moonSinAlt;
+          moonX = lon + 180;
+          moonY = 90 - lat;
+        }
+      }
+    }
+
+  return _MaskData(bytes, sunX, sunY, moonX, moonY);
+}
+
+(double, double) _maskEclipticToEquatorial(EclipticPoint p, double eps) {
+  final lon = p.lon;
+  final lat = p.lat;
+  final ra = math.atan2(
+    math.sin(lon) * math.cos(eps) - math.tan(lat) * math.sin(eps),
+    math.cos(lon),
+  );
+  final dec = math.asin(
+    (math.sin(lat) * math.cos(eps) + math.cos(lat) * math.sin(eps) * math.sin(lon)).clamp(-1.0, 1.0),
+  );
+  return (ra, dec);
+}
+
+double _maskSinAltitude(double latRad, double lon, double subsolarLon, double declination) {
+  final h = (lon - subsolarLon) * math.pi / 180;
+  return math.sin(latRad) * math.sin(declination) +
+      math.cos(latRad) * math.cos(declination) * math.cos(h);
 }
 
 class _MaskResult {
@@ -111,6 +245,7 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
   late Future<_MapAssets> _assetsFuture;
   _MaskResult? _mask;
   bool _maskBusy = false;
+  bool _maskPending = false;
   Timer? _clockTimer;
   // Drives the globe's continuous rotation in step with the display (a 16 ms Timer drifts against vsync).
   Ticker? _globeTicker;
@@ -195,6 +330,11 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
         _mapType == _MapType.magneticStrength ||
         _mapType == _MapType.magneticDeclination ||
         _mapType == _MapType.magneticInclination;
+    if (needsMask && _maskBusy) {
+      // A newer time or type was asked for while the overlay is being computed: run once more afterwards.
+      _maskPending = true;
+      return;
+    }
     if (!needsMask || _maskBusy) {
       if (!needsMask && _mask != null && mounted) {
         setState(() {
@@ -219,143 +359,33 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
         old?.image.dispose();
       } finally {
         _maskBusy = false;
+        if (_maskPending && mounted) {
+          _maskPending = false;
+          _refreshMask();
+        }
       }
     }();
   }
 
+  /// The overlay has 64 800 cells (the magnetic ones evaluate a spherical-harmonic model per cell), so it is
+  /// computed in a background isolate; only the image creation happens here.
   Future<_MaskResult> _makeMask(_MapType type, DateTime time) async {
-    const width = 360;
-    const height = 180;
-    final bytes = Uint8List(width * height * 4);
-    var sunMax = -1.0;
-    var moonMax = -1.0;
-    double sunX = 180;
-    double sunY = 90;
-    double moonX = 180;
-    double moonY = 90;
-
-    final jd = AstronomyMath.dateTimeToJd(time.toUtc());
-    final eps = astro.meanObliquity(jd);
-    final gast = AstronomyMath.normalizeRadians(sidereal.apparent(jd) / 86400 * math.pi * 2);
-    final sunEq = _eclipticToEquatorial(AstronomyMath.sunPosition(jd), eps);
-    final moonEq = _eclipticToEquatorial(AstronomyMath.moonPosition(jd), eps);
-    final sunLon = AstronomyMath.normalizeDegrees((sunEq.$1 - gast) * 180 / math.pi);
-    final moonLon = AstronomyMath.normalizeDegrees((moonEq.$1 - gast) * 180 / math.pi);
-
-    for (var y = 0; y < height; y++) {
-      final lat = 89.5 - y;
-      final latRad = lat * math.pi / 180;
-      for (var x = 0; x < width; x++) {
-        final lon = -179.5 + x;
-        final sunSinAlt = _sinAltitude(latRad, lon, sunLon, sunEq.$2);
-        final moonSinAlt = _sinAltitude(latRad, lon, moonLon, moonEq.$2);
-        final p = (y * width + x) * 4;
-        switch (type) {
-          case _MapType.dayNight:
-            if (sunSinAlt < 0) {
-              final alpha = math.min(120, (-sunSinAlt * 90 * 7).toInt());
-              bytes[p] = 0;
-              bytes[p + 1] = 0;
-              bytes[p + 2] = 0;
-              bytes[p + 3] = alpha;
-            }
-            break;
-          case _MapType.moonVisibility:
-            if (moonSinAlt > 0) {
-              final alpha = math.min(120, (moonSinAlt * 90 * 7).toInt());
-              bytes[p] = 244;
-              bytes[p + 1] = 244;
-              bytes[p + 2] = 244;
-              bytes[p + 3] = alpha;
-            }
-            break;
-          case _MapType.magneticStrength:
-          case _MapType.magneticDeclination:
-          case _MapType.magneticInclination:
-            final field = AospGeomagneticField(
-              latitudeDeg: lat,
-              longitudeDeg: lon,
-              altitudeMeters: 0,
-              timeMillis: time.millisecondsSinceEpoch,
-            );
-            if (type == _MapType.magneticStrength) {
-              final alpha = (field.fieldStrength / 68000 * 255).truncate().clamp(0, 255);
-              bytes[p] = 0;
-              bytes[p + 1] = 0;
-              bytes[p + 2] = 0;
-              bytes[p + 3] = alpha;
-            } else {
-              final value = type == _MapType.magneticDeclination
-                  ? field.declination
-                  : field.inclination;
-              int argbAlpha;
-              int rgb;
-              if (value > 1) {
-                argbAlpha = (value * 255 / 180).truncate().clamp(0, 255);
-                rgb = 0xFF0000;
-              } else if (value < -1) {
-                argbAlpha = (-value * 255 / 180).truncate().clamp(0, 255);
-                rgb = 0x0000FF;
-              } else {
-                argbAlpha = (30 - value.abs() * 30).truncate().clamp(0, 30);
-                rgb = 0x00FF00;
-              }
-              bytes[p] = (rgb >> 16) & 0xFF;
-              bytes[p + 1] = (rgb >> 8) & 0xFF;
-              bytes[p + 2] = rgb & 0xFF;
-              bytes[p + 3] = argbAlpha;
-            }
-            break;
-          default:
-            break;
-        }
-        if (sunSinAlt > sunMax) {
-          sunMax = sunSinAlt;
-          sunX = lon + 180;
-          sunY = 90 - lat;
-        }
-        if (moonSinAlt > moonMax) {
-          moonMax = moonSinAlt;
-          moonX = lon + 180;
-          moonY = 90 - lat;
-        }
-      }
-    }
-
+    final data = await compute(_computeMaskData, <int>[type.index, time.millisecondsSinceEpoch]);
     final completer = Completer<ui.Image>();
     ui.decodeImageFromPixels(
-      bytes,
-      width,
-      height,
+      data.bytes,
+      360,
+      180,
       ui.PixelFormat.rgba8888,
       completer.complete,
     );
     return _MaskResult(
       image: await completer.future,
-      sunX: sunX,
-      sunY: sunY,
-      moonX: moonX,
-      moonY: moonY,
+      sunX: data.sunX,
+      sunY: data.sunY,
+      moonX: data.moonX,
+      moonY: data.moonY,
     );
-  }
-
-  (double, double) _eclipticToEquatorial(EclipticPoint p, double eps) {
-    final lon = p.lon;
-    final lat = p.lat;
-    final ra = math.atan2(
-      math.sin(lon) * math.cos(eps) - math.tan(lat) * math.sin(eps),
-      math.cos(lon),
-    );
-    final dec = math.asin(
-      (math.sin(lat) * math.cos(eps) + math.cos(lat) * math.sin(eps) * math.sin(lon)).clamp(-1.0, 1.0),
-    );
-    return (ra, dec);
-  }
-
-  double _sinAltitude(double latRad, double lon, double subsolarLon, double declination) {
-    final h = (lon - subsolarLon) * math.pi / 180;
-    return math.sin(latRad) * math.sin(declination) +
-        math.cos(latRad) * math.cos(declination) * math.cos(h);
   }
 
   String _mapTypeTitle(_MapType type) => switch (type) {

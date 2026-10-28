@@ -1,7 +1,7 @@
 name: mooncalendar
 publish_to: "none"
 description: Mooncalendar — a Persian calendar built with Flutter, based on the Android Persian Calendar project.
-version: 1.1.8+13
+version: 1.1.9+14
 
 environment:
   sdk: ">=3.9.0 <4.0.0"
@@ -80,15 +80,9 @@ flutter:
     - assets/images/seasons/summer.webp
     - assets/images/seasons/autumn.webp
     - assets/images/seasons/winter.webp
-    - assets/images/android_astronomy/widget_moon.webp
-    - assets/images/android_astronomy/widget_sunview_preview.webp
-    - assets/images/android_astronomy/brightness4.webp
-    - assets/images/android_astronomy/brightness7.webp
     - assets/images/android_astronomy/ic_moon.png
     - assets/images/android_astronomy/ic_sun.png
-    - assets/images/android_astronomy/ic_sun_small.png
     - assets/images/android_astronomy/ic_earth.png
-    - assets/images/planets/
     - assets/images/planet_badges/
     - assets/tray_icon.ico
     - assets/day_icons/

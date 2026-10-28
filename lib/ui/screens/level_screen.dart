@@ -859,9 +859,8 @@ class _LevelScreenState extends State<LevelScreen>
   /// Logical pixels per inch for the ruler. xdpi/ydpi don't swap on screen
   /// rotation, so the same selection logic as RulerView.kt is used.
   double _rulerDpi(BuildContext context) {
-    final mq = MediaQuery.of(context);
-    final dpr = mq.devicePixelRatio;
-    final landscape = mq.orientation == Orientation.landscape;
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    final landscape = MediaQuery.orientationOf(context) == Orientation.landscape;
     final native = landscape ? _nativeXdpi : _nativeYdpi;
     if (native != null && native > 0) return native / dpr;
     // Android defines 1 logical pixel = 1/160 inch.

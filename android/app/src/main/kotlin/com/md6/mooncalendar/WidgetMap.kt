@@ -353,7 +353,7 @@ private object WorldMapRenderer {
             })
         }
 
-        // Night side: the mask is computed on a coarse 1-degree grid (360x180, like the Persian Calendar app's
+        // Night side: the mask is computed on a coarse 1-degree grid (360x180
         // low-resolution mask) and drawn scaled with filtering, which gives a soft terminator at a
         // tiny fraction of the cost of a per-pixel loop.
         val day = solarSubpoint(System.currentTimeMillis())

@@ -53,7 +53,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   String? _monthInfoKey;
   Future<({Set<int> holidays, Set<int> events})>? _monthInfoFuture;
 
-  // ---- main calendar (first enabled calendar of the priority list, like the Persian Calendar app) ---------
+  // ---- main calendar (first enabled calendar of the priority list) ---------
   CalendarSystem get _cal => widget.settings.mainCalendar;
   int get _hOff => widget.settings.hijriOffset;
   DateParts _partsOf(int jdn) => _cal.fromJdn(jdn, hijriOffset: _hOff);
@@ -450,7 +450,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     _warmYears(y);
   }
 
-  // ---- continuous year view (all years one after another, like the Persian Calendar app) ----------------
+  // ---- continuous year view (all years one after another) ----------------
   static const String _kYearContinuous = 'calendar_year_view_continuous';
   int get _yearListBase => _cal.yearListBase;
   static const int _yearListCount = 400;
@@ -558,7 +558,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   bool _prefetching = false;
 
   /// Works holidays out in the background, nearest years first, a few years per isolate pass, and keeps
-  /// going until the whole list is filled, so scrolling only ever reads ready data (like the Persian Calendar app,
+  /// going until the whole list is filled, so scrolling only ever reads ready data,
   /// whose tiles never wait for anything).
   void _warmYears(int year) {
     if (!_yearContinuous) {
@@ -643,6 +643,47 @@ class _CalendarScreenState extends State<CalendarScreen> {
   /// used to shade the day grid (holiday fill) and draw the small event dot.
   static final Map<String, ({Set<int> holidays, Set<int> events})> _monthInfoCache =
       <String, ({Set<int> holidays, Set<int> events})>{};
+
+  /// Days of the open month that have an event in the device calendar (Android), with the time they were read.
+  static final Map<String, ({Set<int> days, DateTime at})> _deviceMonthCache = <String, ({Set<int> days, DateTime at})>{};
+  String? _deviceMonthRequested;
+
+  String _deviceMonthKey() => '${_cal.name}-$monthYear-$month';
+
+  Set<int> _deviceDaysForMonth() {
+    if (!widget.settings.showDeviceCalendarEvents || !PlatformInfo.isAndroid) return const <int>{};
+    final key = _deviceMonthKey();
+    final cached = _deviceMonthCache[key];
+    final fresh = cached != null && DateTime.now().difference(cached.at) < const Duration(minutes: 2);
+    if (!fresh && _deviceMonthRequested != key) {
+      _deviceMonthRequested = key;
+      unawaited(_loadDeviceMonth(key));
+    }
+    return cached?.days ?? const <int>{};
+  }
+
+  Future<void> _loadDeviceMonth(String key) async {
+    final len = _daysInMonth();
+    final first = gregorianFromJdn(_jdnOf(monthYear, month, 1));
+    final last = gregorianFromJdn(_jdnOf(monthYear, month, len));
+    final start = DateTime(first.year, first.month, first.day);
+    final end = DateTime(last.year, last.month, last.day + 1);
+    final jdns = <int, int>{
+      for (var d = 1; d <= len; d++) _jdnOf(monthYear, month, d): d,
+    };
+    final events = await PlatformServices.deviceCalendarEvents(start, end);
+    final days = <int>{};
+    for (final event in events) {
+      for (final date in event.localDays) {
+        final day = jdns[gregorianToJdn(date.year, date.month, date.day)];
+        if (day != null) days.add(day);
+      }
+    }
+    if (_deviceMonthCache.length > 24) _deviceMonthCache.clear();
+    _deviceMonthCache[key] = (days: days, at: DateTime.now());
+    if (_deviceMonthRequested == key) _deviceMonthRequested = null;
+    if (mounted && _deviceMonthKey() == key) setState(() {});
+  }
 
   String _monthInfoCacheKey() =>
       '${_cal.name}-$monthYear-$month-${widget.settings.enabledEvents.join(',')}-${widget.settings.hijriOffset}-${widget.settings.weekEnds.join(',')}';
@@ -1326,6 +1367,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               builder: (context, snap) {
                 final holidays = snap.data?.holidays ?? const <int>{};
                 final events = snap.data?.events ?? const <int>{};
+                final deviceDays = _deviceDaysForMonth();
                 final Widget grid = GridView.builder(
                   shrinkWrap: true,
                   padding: EdgeInsets.zero,
@@ -1338,6 +1380,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     final int jdn = _jdnOf(monthYear, month, day);
                     final bool selected = _hasUserSelection && jdn == selectedJdn;
                     final bool isToday = jdn == today;
+                    final bool hasDeviceEvent = deviceDays.contains(day);
                     final bool hasEvent = events.contains(day);
                     final bool isHoliday = holidays.contains(day);
                     final bool moonInScorpio = widget.settings.showMoonInScorpio &&
@@ -1424,7 +1467,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                     // The number scales with its circle so a larger window
                                     // (or a bigger screen) gives a larger, clearer date.
-                                    fontSize: _dayNumberFontSize(cell.biggest.shortestSide, crowded: moonInScorpio || hasEvent || shiftHeader != null),
+                                    fontSize: _dayNumberFontSize(cell.biggest.shortestSide, crowded: moonInScorpio || hasEvent || hasDeviceEvent || shiftHeader != null),
                                     height: 1.1,
                                     fontWeight: selected || isToday || isHoliday ? FontWeight.w700 : FontWeight.w500,
                                     color: textColor,
@@ -1444,17 +1487,34 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                       color: textColor.withValues(alpha: .72),
                                     ),
                                   ),
-                                if (hasEvent) ...[
+                                if (hasEvent || hasDeviceEvent) ...[
                                   const SizedBox(height: 2),
-                                  Container(
-                                    width: 4,
-                                    height: 4,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: isToday
-                                          ? scheme.onPrimary.withValues(alpha: 0.90)
-                                          : scheme.onSurfaceVariant.withValues(alpha: 0.92),
-                                    ),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (hasEvent)
+                                        Container(
+                                          width: 4,
+                                          height: 4,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: isToday
+                                                ? scheme.onPrimary.withValues(alpha: 0.90)
+                                                : scheme.onSurfaceVariant.withValues(alpha: 0.92),
+                                          ),
+                                        ),
+                                      if (hasEvent && hasDeviceEvent) const SizedBox(width: 3),
+                                      // Events taken from the device calendar get their own colour.
+                                      if (hasDeviceEvent)
+                                        Container(
+                                          width: 4,
+                                          height: 4,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: isToday ? scheme.tertiaryContainer : scheme.tertiary,
+                                          ),
+                                        ),
+                                    ],
                                   ),
                                 ],
                               ],
@@ -1562,7 +1622,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         _ => 'سایر',
       };
 
-  Widget _eventBox({required String title, required String source, bool holiday = false, String? subtitle}) {
+  Widget _eventBox({required String title, required String source, bool holiday = false, String? subtitle, bool device = false}) {
     final scheme = Theme.of(context).colorScheme;
     final dark = Theme.of(context).brightness == Brightness.dark;
     final hc = _holidayColor(dark);
@@ -1570,9 +1630,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: holiday ? hc.withValues(alpha: dark ? 0.22 : 0.16) : scheme.surfaceContainerHighest,
+        color: holiday
+            ? hc.withValues(alpha: dark ? 0.22 : 0.16)
+            : device
+                ? scheme.tertiary.withValues(alpha: dark ? 0.24 : 0.16)
+                : scheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(14),
-        border: holiday ? Border.all(color: hc.withValues(alpha: 0.7), width: 1.2) : null,
+        border: holiday
+            ? Border.all(color: hc.withValues(alpha: 0.7), width: 1.2)
+            : device
+                ? Border.all(color: scheme.tertiary.withValues(alpha: 0.7), width: 1.2)
+                : null,
       ),
       child: Row(
         textDirection: L10n.direction,
@@ -1648,11 +1716,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
             final children = <Widget>[
               for (final e in events) _eventBox(title: e.title, source: _eventSource(e), holiday: e.holiday),
             ];
-            final device = deviceSnap.data ?? const <DeviceCalendarEvent>[];
+            final device = (deviceSnap.data ?? const <DeviceCalendarEvent>[])
+                .where((e) => e.localDays.any((d) => d.year == day.year && d.month == day.month && d.day == day.day));
             children.addAll(device.map((e) => _eventBox(
                   title: e.title.isEmpty ? 'رویداد بدون عنوان' : e.title,
                   source: e.calendar.isEmpty ? 'تقویم دستگاه' : e.calendar,
                   subtitle: e.allDay ? 'تمام‌روز' : '${_clock(e.start)} تا ${_clock(e.end)}',
+                  device: true,
                 )));
             if (children.isEmpty) return const EmptyCard(text: 'برای این روز رویدادی ثبت نشده است');
             return Padding(
@@ -1759,7 +1829,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       );
     }
 
-    // One column per enabled calendar, in the user's priority order (like the Persian Calendar app).
+    // One column per enabled calendar, in the user's priority order).
     final columns = <CalendarSystem, Widget>{
       CalendarSystem.shamsi: column(p, persianMonthNames[p.month - 1], CalendarSystem.shamsi),
       CalendarSystem.gregorian: column(g, gregorianMonthName(g.month, english: s.englishGregorianPersianMonths), CalendarSystem.gregorian),

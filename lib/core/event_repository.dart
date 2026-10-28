@@ -145,8 +145,18 @@ class EventRepository {
     int jdn, {
     Set<String> enabled = const {'iran_holidays'},
     int hijriOffset = 0,
-  }) =>
-      eventsOn(_events!, jdn, enabled: enabled, hijriOffset: hijriOffset);
+  }) {
+    // Month grids, week/schedule views and the day list ask for the same days again and again, and each lookup
+    // converts the date to four calendars and scans every event: remember recent answers (bounded).
+    final key = '$jdn|$hijriOffset|${enabled.length}|${(enabled.toList()..sort()).join(',')}';
+    final cached = _dayCache[key];
+    if (cached != null) return cached;
+    final result = eventsOn(_events!, jdn, enabled: enabled, hijriOffset: hijriOffset);
+    if (_dayCache.length >= 800) _dayCache.remove(_dayCache.keys.first);
+    return _dayCache[key] = result;
+  }
+
+  final Map<String, List<CalendarEvent>> _dayCache = <String, List<CalendarEvent>>{};
 
   /// Holiday jdns of a whole Persian year (weekends + enabled holiday events), worked out in a background
   /// isolate so flipping through the year view never blocks a frame.

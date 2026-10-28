@@ -141,7 +141,7 @@ class AppSettings extends ChangeNotifier {
   Set<int> weekEnds = <int>{6};
   bool showWeekNumber = false;
 
-  /// Enabled calendars in priority order; the first one is the main calendar (like the Persian Calendar app).
+  /// Enabled calendars in priority order; the first one is the main calendar).
   List<CalendarSystem> enabledCalendars = const <CalendarSystem>[CalendarSystem.shamsi, CalendarSystem.gregorian, CalendarSystem.hijri];
 
   /// Shows the second enabled calendar's day number in every cell of the month table.

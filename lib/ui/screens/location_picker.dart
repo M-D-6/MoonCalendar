@@ -51,7 +51,7 @@ class _CityPickerDialogState extends State<_CityPickerDialog> {
       contentPadding: const EdgeInsets.fromLTRB(0, 12, 0, 0),
       content: SizedBox(
         width: double.maxFinite,
-        height: MediaQuery.of(context).size.height * 0.6,
+        height: MediaQuery.sizeOf(context).height * 0.6,
         child: FutureBuilder<List<CityItem>>(
           future: _future,
           builder: (context, snapshot) {
@@ -124,7 +124,7 @@ class _ProvincePickerDialogState extends State<_ProvincePickerDialog> {
       contentPadding: const EdgeInsets.fromLTRB(0, 12, 0, 0),
       content: SizedBox(
         width: double.maxFinite,
-        height: MediaQuery.of(context).size.height * 0.6,
+        height: MediaQuery.sizeOf(context).height * 0.6,
         child: FutureBuilder<List<String>>(
           future: _future,
           builder: (context, snapshot) {
@@ -184,7 +184,7 @@ class _DistrictPickerDialogState extends State<_DistrictPickerDialog> {
       contentPadding: const EdgeInsets.fromLTRB(0, 12, 0, 0),
       content: SizedBox(
         width: double.maxFinite,
-        height: MediaQuery.of(context).size.height * 0.6,
+        height: MediaQuery.sizeOf(context).height * 0.6,
         child: FutureBuilder<List<DistrictItem>>(
           future: _future,
           builder: (context, snapshot) {

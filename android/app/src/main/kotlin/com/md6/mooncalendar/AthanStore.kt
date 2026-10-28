@@ -70,9 +70,13 @@ object AthanStore {
         prefs(context).edit().putInt(KEY_CHANNEL_ID, value).apply()
     }
 
-    fun lastFiredKey(context: Context): String? = prefs(context).getString(KEY_LAST_KEY, null)
+    /** Keys ("prayer|epoch") of the most recently shown athans, so an alarm and its backup never ring twice. */
+    fun wasFired(context: Context, key: String): Boolean =
+        prefs(context).getString(KEY_LAST_KEY, "").orEmpty().split(';').contains(key)
 
-    fun setLastFiredKey(context: Context, value: String) {
-        prefs(context).edit().putString(KEY_LAST_KEY, value).apply()
+    fun markFired(context: Context, key: String) {
+        val keys = prefs(context).getString(KEY_LAST_KEY, "").orEmpty().split(';').filter { it.isNotEmpty() }
+        val updated = (keys + key).takeLast(12).joinToString(";")
+        prefs(context).edit().putString(KEY_LAST_KEY, updated).apply()
     }
 }

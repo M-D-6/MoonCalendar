@@ -38,6 +38,9 @@ internal object DateNotificationStore {
     private const val KEY_LOCK_SCREEN = "lock_screen"
     private const val KEY_LARGE_DAY = "large_day"
     private const val KEY_RTL = "rtl"
+    private const val KEY_TEMPERATURE = "temperature_text"
+    private const val KEY_TEMPERATURE_AT = "temperature_at"
+    private const val TEMPERATURE_MAX_AGE_MS = 3 * 60 * 60 * 1000L
     const val NOTIFICATION_ID = 1003
     const val CHANNEL_ID = "mooncalendar_date_notification"
 
@@ -69,6 +72,28 @@ internal object DateNotificationStore {
         NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID)
     }
 
+    /** Weather text ("29°C City") shown opposite the first line; empty removes it. Re-posts only on a change. */
+    fun setTemperature(context: Context, text: String) {
+        val p = prefs(context)
+        if (p.getString(KEY_TEMPERATURE, "").orEmpty() == text) {
+            // Same reading: only remember that it is still current.
+            if (text.isNotEmpty()) p.edit { putLong(KEY_TEMPERATURE_AT, System.currentTimeMillis()) }
+            return
+        }
+        p.edit {
+            putString(KEY_TEMPERATURE, text)
+            putLong(KEY_TEMPERATURE_AT, System.currentTimeMillis())
+        }
+        postCurrent(context)
+    }
+
+    /** The stored weather text, or empty when none is set or it is too old to be trusted. */
+    private fun currentTemperature(p: android.content.SharedPreferences): String {
+        val text = p.getString(KEY_TEMPERATURE, "").orEmpty()
+        if (text.isEmpty()) return ""
+        return if (System.currentTimeMillis() - p.getLong(KEY_TEMPERATURE_AT, 0L) <= TEMPERATURE_MAX_AGE_MS) text else ""
+    }
+
     fun postCurrent(context: Context) {
         val p = prefs(context)
         if (!p.getBoolean(KEY_ENABLED, false)) {
@@ -94,6 +119,7 @@ internal object DateNotificationStore {
         }
 
         val contentIntent = AstronomyWidgetSupport.launchApp(context, requestCode = 1003)
+        val temperature = currentTemperature(p)
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(smallIcon(context, payload))
@@ -124,6 +150,7 @@ internal object DateNotificationStore {
             val small = RemoteViews(context.packageName, R.layout.custom_notification).also {
                 it.setInt(R.id.custom_notification_root, "setLayoutDirection", direction)
                 it.setTextViewText(R.id.title, titleText)
+                setTemperatureView(it, temperature)
                 if (firstLine == null) it.setViewVisibility(R.id.body, View.GONE)
                 else {
                     it.setTextViewText(R.id.body, firstLine)
@@ -135,6 +162,7 @@ internal object DateNotificationStore {
                 val big = RemoteViews(context.packageName, R.layout.custom_notification_big).also {
                     it.setInt(R.id.custom_notification_root, "setLayoutDirection", direction)
                     it.setTextViewText(R.id.title, titleText)
+                    setTemperatureView(it, temperature)
                     it.setTextViewText(R.id.body, expandedBody)
                 }
                 builder.setCustomBigContentView(big)
@@ -142,9 +170,19 @@ internal object DateNotificationStore {
             builder.setStyle(NotificationCompat.DecoratedCustomViewStyle())
         } else {
             builder.setStyle(NotificationCompat.BigTextStyle().bigText(expandedBody))
+            if (temperature.isNotEmpty()) builder.setSubText(temperature)
         }
 
         runCatching { notificationManager.notify(NOTIFICATION_ID, builder.build()) }
+    }
+
+    private fun setTemperatureView(views: RemoteViews, temperature: String) {
+        if (temperature.isEmpty()) {
+            views.setViewVisibility(R.id.title_end, View.GONE)
+        } else {
+            views.setTextViewText(R.id.title_end, temperature)
+            views.setViewVisibility(R.id.title_end, View.VISIBLE)
+        }
     }
 
     /**

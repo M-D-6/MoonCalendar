@@ -52,6 +52,7 @@ object DateRefresher {
         // Not at process start: the launcher alias must never be switched while the user is opening the app.
         if (refreshIcon) runCatching { AppIconManager.refresh(app) }
         runCatching { refreshWidgets(app) }
+        runCatching { AthanScheduler.ensureArmed(app) }
         ensureScheduled(app)
     }
 
@@ -90,7 +91,7 @@ object DateRefresher {
     }
 
     /**
-     * Third net, like the Persian Calendar app's repeating alarm: an inexact hourly alarm that is delivered even when
+     * Third net repeating alarm: an inexact hourly alarm that is delivered even when
      * the process is gone (it wakes the device in a Doze maintenance window), re-posting the notification
      * if it was removed. Only armed when not already pending, so frequent runs never push it back.
      */

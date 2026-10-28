@@ -85,7 +85,7 @@ class _Day {
 }
 
 /// Scrolling stops at the current moment: the timeline never goes back before "now" (today's card stays whole).
-/// Scrolling stays between "now" (the start) and the last hour that has forecast data (the end). The first and
+/// Scrolling stays between "now" (the start) and the end of the last day card. The first and
 /// last day cards are drawn whole, but their hours without data cannot be selected.
 class _FromNowPhysics extends ClampingScrollPhysics {
   const _FromNowPhysics(this.minOffset, this.maxOffset, {super.parent});
@@ -276,7 +276,9 @@ class WeatherTimelineState extends State<WeatherTimeline> {
     }
     _days = days;
     _contentWidth = x;
-    _dataEnd = rangeEnd;
+    // Scrolling reaches the end of the last day card: the forecast's final hour is 23:00 and a hard stop there felt
+    // like a lock; the remaining hour keeps the last values.
+    _dataEnd = days.isEmpty ? rangeEnd : days.last.endUtc;
   }
 
   WeatherConsensusPoint? _pointNear(DateTime time) {

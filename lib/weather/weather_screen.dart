@@ -493,24 +493,13 @@ class _HeroWeather extends StatelessWidget {
   final Widget? details;
   final String? sourceName;
 
-  /// "Consensus of N sources" on the left, the warmest and coldest source on the right (the spread).
+  /// "Consensus of N sources" (or the name of the single source).
   Widget _sourceRange(BuildContext context, AppLocalizations t) {
     final style = Theme.of(context).textTheme.labelMedium;
-    final temps = sourceTemperatures.where((v) => v.isFinite).toList()..sort();
-    final shown = !past && !noData && temps.isNotEmpty;
-    final label = sourceName ?? (shown ? t.consensusOf(temps.length) : '—');
-    final bold = Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800);
-    return Row(children: [
-      Flexible(child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: style)),
-      const Spacer(),
-      if (shown && sourceName == null) ...[
-        Icon(Icons.arrow_downward_rounded, size: 14, color: Colors.lightBlueAccent.shade100),
-        Text(formatTemperature(temps.first, 'celsius'), style: bold),
-        const SizedBox(width: 10),
-        Icon(Icons.arrow_upward_rounded, size: 14, color: Colors.deepOrangeAccent.shade100),
-        Text(formatTemperature(temps.last, 'celsius'), style: bold),
-      ],
-    ]);
+    final count = sourceTemperatures.where((v) => v.isFinite).length;
+    final shown = !past && !noData && count > 0;
+    final label = sourceName ?? (shown ? t.consensusOf(count) : '—');
+    return Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: style);
   }
 
   @override

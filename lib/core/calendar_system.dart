@@ -1,7 +1,7 @@
 import 'calendar_math.dart';
 import 'l10n/l10n.dart';
 
-/// The calendars the app can show, like the Persian Calendar app's `Calendar` enum (SHAMSI, GREGORIAN, ISLAMIC).
+/// The calendars the app can show `Calendar` enum (SHAMSI, GREGORIAN, ISLAMIC).
 enum CalendarSystem { shamsi, gregorian, hijri }
 
 extension CalendarSystemInfo on CalendarSystem {

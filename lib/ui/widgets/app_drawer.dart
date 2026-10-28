@@ -85,13 +85,13 @@ class AppDrawerMenuState extends State<AppDrawerMenu> with SingleTickerProviderS
                 itemCount: widget.entries.length,
                 itemBuilder: (context, i) {
                   final anim = _stagger(i);
-                  return AnimatedBuilder(
-                    animation: anim,
-                    builder: (context, child) => Opacity(
-                      opacity: anim.value,
-                      child: Transform.translate(offset: Offset(28 * (1 - anim.value), 0), child: child),
+                  return FadeTransition(
+                    opacity: anim,
+                    child: AnimatedBuilder(
+                      animation: anim,
+                      builder: (context, child) => Transform.translate(offset: Offset(28 * (1 - anim.value), 0), child: child),
+                      child: _item(context, widget.entries[i]),
                     ),
-                    child: _item(context, widget.entries[i]),
                   );
                 },
               ),

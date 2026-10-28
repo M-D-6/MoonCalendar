@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import '../../core/platform_info.dart';
 
 import '../../core/app_version.dart';
-import '../../core/calendar_math.dart' show toPersianDigits;
 import '../../core/settings.dart';
 import '../../core/update_service.dart';
 import '../../core/l10n/l10n.dart';
@@ -174,7 +173,7 @@ class UpdateUi {
     }
   }
 
-  static String _digits(String s) => toPersianDigits(s);
+  static String _digits(String s) => L10n.digits(s);
 
   static Future<void> _prompt(BuildContext context, AppSettings settings, UpdateInfo info) async {
     final choice = await showDialog<_Choice>(
@@ -185,7 +184,7 @@ class UpdateUi {
           width: 420,
           child: SingleChildScrollView(
             child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('نسخهٔ ${_digits(info.version)} منتشر شده است (نسخهٔ فعلی: ${_digits(appVersion)}).', textDirection: TextDirection.rtl),
+              PlainText('${tr('آخرین نسخهٔ منتشرشده')}: ${_digits(info.version)}\n${tr('نسخهٔ فعلی')}: ${_digits(appVersion)}', textDirection: L10n.direction),
               if (info.notes.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 const Text('تغییرات این نسخه', style: TextStyle(fontWeight: FontWeight.bold), textDirection: TextDirection.rtl),
@@ -241,7 +240,7 @@ class UpdateUi {
                 : '${(bytes / 1024).toStringAsFixed(0)} KB';
             final amount = total == null || total <= 0
                 ? size(value.received)
-                : '${size(value.received)} از ${size(total)}';
+                : '${size(value.received)} / ${size(total)}';
             return Column(mainAxisSize: MainAxisSize.min, children: [
               LinearProgressIndicator(value: ratio),
               const SizedBox(height: 10),
@@ -271,7 +270,7 @@ class UpdateUi {
           barrierDismissible: false,
           builder: (ctx) => AlertDialog(
             title: const Text('دانلود کامل شد', textDirection: TextDirection.rtl),
-            content: PlainText('''فایل به‌روزرسانی با موفقیت دریافت و اعتبارسنجی شد.\nحجم: ${(size / (1024 * 1024)).toStringAsFixed(1)} MB\nنسخه: ${_digits(info.version)}\n\nبرای جایگزینی فایل‌های برنامه و اجرای مجدد، روی دکمهٔ زیر بزنید.'''),
+            content: PlainText('${tr('فایل به‌روزرسانی با موفقیت دریافت و اعتبارسنجی شد.')}\n${tr('حجم')}: ${_digits((size / (1024 * 1024)).toStringAsFixed(1))} MB\n${tr('نسخه')}: ${_digits(info.version)}\n\n${tr('برای جایگزینی فایل‌های برنامه و اجرای مجدد، روی دکمهٔ زیر بزنید.')}'),
             actions: [
               TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('بعداً')),
               FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('شروع جایگزینی و اجرای مجدد')),

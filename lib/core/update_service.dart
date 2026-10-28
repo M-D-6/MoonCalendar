@@ -158,7 +158,11 @@ class UpdateService {
 
   /// Release file names that suit this device, best first.
   static Future<List<String>> _wantedAssetNames() async {
-    if (PlatformInfo.isWindows) return const ['MoonCalendar-windows-x64.zip'];
+    if (PlatformInfo.isWindows) {
+      // A native Arm64 build prefers the Arm64 package; the x64 package also runs there through emulation.
+      final arm64 = Platform.version.contains('windows_arm64');
+      return arm64 ? const ['MoonCalendar-windows-arm64.zip', 'MoonCalendar-windows-x64.zip'] : const ['MoonCalendar-windows-x64.zip'];
+    }
     final abis = await AthanAndroid.supportedAbis();
     return [for (final abi in abis) 'MoonCalendar-android-$abi.apk'];
   }

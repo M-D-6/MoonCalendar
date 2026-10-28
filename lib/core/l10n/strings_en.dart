@@ -1674,6 +1674,19 @@ const Map<String, String> enStrings = <String, String>{
   'لطفاً صبر کنید…': 'Please wait…',
   'نصب به‌روزرسانی شروع نشد. می‌توانید دوباره تلاش کنید یا فایل را از صفحهٔ دانلود بگیرید.': 'The update could not be started. You can try again or get the file from the download page.',
   'نسخه': 'Version',
+  'نمایش دما در اعلان': 'Show temperature in notification',
+  'دما و نام شهر انتخاب‌شده در انتهای خط اول اعلان نمایش داده می‌شود': 'The temperature and the selected city are shown at the end of the notification\'s first line',
+  'صدای پیش‌فرض': 'Default sound',
+  'عبدالباسط عبدالصمد': 'Abdul Basit Abdul Samad',
+  'رحیم مؤذن‌زاده اردبیلی': 'Rahim Mouezzinzadeh Ardebili',
+  'انتظار، روح‌الله کاظمی‌زاده': 'Entezar, Ruhollah Kazemizadeh',
+  'ابتدا موقعیت جغرافیایی را برای نمایش اوقات شرعی تنظیم کنید': 'Set your location first to show prayer times',
+  'باز کردن تقویم': 'Open calendar',
+  'بروزرسانی اعلان': 'Refresh notification',
+  'کمتر از ۱ دقیقه': 'Less than 1 minute',
+  'فایل به‌روزرسانی با موفقیت دریافت و اعتبارسنجی شد.': 'The update file was downloaded and verified successfully.',
+  'حجم': 'Size',
+  'برای جایگزینی فایل‌های برنامه و اجرای مجدد، روی دکمهٔ زیر بزنید.': 'To replace the app files and restart, press the button below.',
 };
 
 const Map<String, String> enTemplates = <String, String>{
@@ -1757,4 +1770,5 @@ const Map<String, String> enTemplates = <String, String>{
   '{1n} ه.ش': '{1} SH',
   '{1n} ه.ق': '{1} AH',
   '{1n} م': '{1} CE',
+  '{1n} ساعت و {2n} دقیقه': '{1} h {2} min',
 };

@@ -111,12 +111,8 @@ class AthanChannel(private val activity: Activity) : MethodChannel.MethodCallHan
                 result.success(null)
             }
 
-            "showTemperature" -> {
-                TemperatureNotification.show(
-                    activity,
-                    call.argument<String>("temperature").orEmpty(),
-                    call.argument<Boolean>("lockScreen") ?: true,
-                )
+            "setNotificationTemperature" -> {
+                DateNotificationStore.setTemperature(activity, call.argument<String>("text").orEmpty())
                 result.success(null)
             }
 
@@ -137,11 +133,6 @@ class AthanChannel(private val activity: Activity) : MethodChannel.MethodCallHan
                 val path = call.argument<String>("path")
                 result.success(if (path == null) "error:no file" else installApk(File(path)))
             }
-            "cancelTemperature" -> {
-                TemperatureNotification.cancel(activity)
-                result.success(null)
-            }
-
             "cancelDateNotification" -> {
                 DateNotificationStore.cancel(activity)
                 result.success(null)

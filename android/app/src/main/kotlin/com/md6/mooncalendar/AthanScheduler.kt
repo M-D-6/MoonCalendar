@@ -9,9 +9,6 @@ import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
@@ -41,6 +38,23 @@ object AthanScheduler {
         prayers.forEach { prayer ->
             scheduleNextForPrayer(app, alarms, prayer, now)
         }
+    }
+
+    /**
+     * Safety net run whenever the process starts or the date rolls over: an athan whose alarm the system delayed or
+     * dropped (doze, battery savers, a killed process) is still announced within the grace period, and every
+     * prayer's next alarm is armed again.
+     */
+    @Synchronized
+    fun ensureArmed(context: Context) {
+        val app = context.applicationContext
+        val alarms = AthanStore.loadAlarms(app)
+        if (alarms.isEmpty()) return
+        val now = System.currentTimeMillis()
+        alarms.filter { it.at <= now + LEAD_MS && now - it.at <= GRACE_MS }.forEach { fire(app, it.prayer, it.at) }
+        // Re-arming is idempotent (same request code, same time), and it also repairs a stale entry whose time passed
+        // without being delivered.
+        prayers.forEach { prayer -> scheduleNextForPrayer(app, alarms, prayer, now) }
     }
 
     fun cancel(context: Context) {
@@ -78,10 +92,9 @@ object AthanScheduler {
             .minByOrNull { abs(it.at - intendedAt) }
 
         if (alarm != null && abs(now - intendedAt) <= GRACE_MS) {
-            val dateKey = SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).format(Date(now))
-            val duplicateKey = "$dateKey|$prayer"
-            if (AthanStore.lastFiredKey(app) != duplicateKey) {
-                AthanStore.setLastFiredKey(app, duplicateKey)
+            val duplicateKey = "$prayer|${alarm.at}"
+            if (!AthanStore.wasFired(app, duplicateKey)) {
+                AthanStore.markFired(app, duplicateKey)
                 runCatching { AthanNotifier.show(app, alarm) }
             }
         }

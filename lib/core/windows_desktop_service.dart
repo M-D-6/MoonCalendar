@@ -11,6 +11,7 @@ import 'package:window_manager/window_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'athan/athan_service.dart';
+import 'l10n/l10n.dart';
 import 'settings.dart';
 import 'platform.dart';
 import 'desktop_widgets/desktop_widget_service.dart';
@@ -165,35 +166,46 @@ class WindowsDesktopService with WindowListener, tray.TrayListener {
     } catch (_) {}
   }
 
-  Future<void> _ensureTray() async {
-    if (_trayCreated) return;
-    try {
-      final showItem = tray.MenuItem(
-        key: 'show_window',
-        label: 'باز کردن تقویم',
-        onClick: (_) => unawaited(showWindow(fromTray: true)),
-      );
-      final refreshNotificationItem = tray.MenuItem(
-        key: 'refresh_notification',
-        label: 'بروزرسانی اعلان',
-        onClick: (_) => unawaited(
-          AthanService.instance.forceDateNotificationRefresh(),
+  /// The tray menu in the language chosen in the app.
+  tray.Menu _buildTrayMenu() {
+    return tray.Menu(
+      items: [
+        tray.MenuItem(
+          key: 'show_window',
+          label: tr('باز کردن تقویم'),
+          onClick: (_) => unawaited(showWindow(fromTray: true)),
         ),
-      );
-      final exitItem = tray.MenuItem(
-        key: 'exit_app',
-        label: 'خروج',
-        onClick: (_) => unawaited(exitApp()),
-      );
+        tray.MenuItem(
+          key: 'refresh_notification',
+          label: tr('بروزرسانی اعلان'),
+          onClick: (_) => unawaited(AthanService.instance.forceDateNotificationRefresh()),
+        ),
+        tray.MenuItem.separator(),
+        tray.MenuItem(
+          key: 'exit_app',
+          label: tr('خروج'),
+          onClick: (_) => unawaited(exitApp()),
+        ),
+      ],
+    );
+  }
 
-      final menu = tray.Menu(
-        items: [
-          showItem,
-          refreshNotificationItem,
-          tray.MenuItem.separator(),
-          exitItem,
-        ],
-      );
+  AppLanguage? _trayLanguage;
+
+  Future<void> _ensureTray() async {
+    if (_trayCreated) {
+      // The menu texts follow the app language: rebuild them when it changed.
+      if (_trayLanguage != L10n.lang) {
+        _trayLanguage = L10n.lang;
+        try {
+          await tray.trayManager.setContextMenu(_buildTrayMenu());
+        } catch (_) {}
+      }
+      return;
+    }
+    try {
+      final menu = _buildTrayMenu();
+      _trayLanguage = L10n.lang;
 
       await _applyTrayIcon(force: true);
       await tray.trayManager.setToolTip('Mooncalendar');

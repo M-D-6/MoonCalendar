@@ -99,35 +99,12 @@ class AthanAndroid {
     } catch (_) {}
   }
 
-  /// Posts (or updates) the ongoing temperature notification. The text is already in the app language.
-  static Future<void> showTemperature({
-    required String city,
-    required String temperature,
-    required String wind,
-    required double? windDegrees,
-    required String feelsLike,
-    required Uint8List? icon,
-    required bool rtl,
-    bool lockScreen = true,
-  }) async {
+  /// Sets the weather text shown at the end of the main notification's first line (empty removes it).
+  static Future<void> setNotificationTemperature(String text) async {
     if (!isSupported) return;
     try {
-      await _channel.invokeMethod<void>('showTemperature', <String, dynamic>{
-        'city': city,
-        'temperature': temperature,
-        'wind': wind,
-        'windDegrees': windDegrees ?? -1.0,
-        'feelsLike': feelsLike,
-        'icon': icon,
-        'rtl': rtl,
-        'lockScreen': lockScreen,
-      });
+      await _channel.invokeMethod<void>('setNotificationTemperature', <String, dynamic>{'text': text});
     } catch (_) {}
-  }
-
-  static Future<void> cancelTemperature() async {
-    if (!isSupported) return;
-    try { await _channel.invokeMethod<void>('cancelTemperature'); } catch (_) {}
   }
 
   /// Opens a web page in the phone's browser.

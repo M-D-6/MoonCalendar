@@ -84,6 +84,13 @@ set(MSVC_RUNTIME_ROOTS
   "$ENV{SystemRoot}/System32"
 )
 
+# Runtime folder name inside the Visual C++ redistributable: x64 or arm64.
+if(CMAKE_GENERATOR_PLATFORM MATCHES "(?i)arm64" OR CMAKE_SYSTEM_PROCESSOR MATCHES "(?i)arm64|aarch64")
+  set(MSVC_RUNTIME_ARCH "arm64")
+else()
+  set(MSVC_RUNTIME_ARCH "x64")
+endif()
+
 foreach(MSVC_RUNTIME_NAME IN ITEMS
   msvcp140.dll
   vcruntime140.dll
@@ -93,7 +100,7 @@ foreach(MSVC_RUNTIME_NAME IN ITEMS
   find_file(MSVC_RUNTIME_FILE
     NAMES "${MSVC_RUNTIME_NAME}"
     PATHS ${MSVC_RUNTIME_ROOTS}
-    PATH_SUFFIXES "x64/Microsoft.VC143.CRT" "x64"
+    PATH_SUFFIXES "${MSVC_RUNTIME_ARCH}/Microsoft.VC143.CRT" "${MSVC_RUNTIME_ARCH}"
     NO_DEFAULT_PATH
   )
   if(NOT MSVC_RUNTIME_FILE)

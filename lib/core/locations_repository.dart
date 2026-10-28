@@ -1,8 +1,12 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/services.dart';
 
 import 'l10n/l10n.dart';
+
+/// Parsed off the UI isolate so start-up and the location pickers never stall a frame.
+Object? _decodeJson(String raw) => jsonDecode(raw);
 
 /// A single selectable city, as ported from the Android app's cities.json
 /// (assets/data/cities.json). Mirrors `com.md6.Mooncalendar.entities.CityItem`.
@@ -86,7 +90,7 @@ class LocationsRepository {
   Future<List<CityItem>> loadCities() async {
     if (_cities != null) return _cities!;
     final raw = await rootBundle.loadString('assets/data/cities.json');
-    final decoded = jsonDecode(raw) as Map<String, dynamic>;
+    final decoded = await compute(_decodeJson, raw) as Map<String, dynamic>;
     final result = <CityItem>[];
     for (final countryEntry in decoded.entries) {
       final countryCode = countryEntry.key;
@@ -128,7 +132,7 @@ class LocationsRepository {
     }
     try {
       // Iranian provinces / counties / districts (cities.json only holds the major cities).
-      final names = jsonDecode(await rootBundle.loadString('assets/data/place_names.json')) as Map<String, dynamic>;
+      final names = await compute(_decodeJson, await rootBundle.loadString('assets/data/place_names.json')) as Map<String, dynamic>;
       names.forEach((fa, v) {
         final m = v as Map<String, dynamic>;
         en.putIfAbsent(fa, () => (m['en'] as String?) ?? fa);
@@ -146,7 +150,7 @@ class LocationsRepository {
     // Read only the province keys here. Do not retain the full 4k+ district
     // object graph just to populate the province selector.
     final raw = await rootBundle.loadString('assets/data/districts.json');
-    final decoded = jsonDecode(raw) as Map<String, dynamic>;
+    final decoded = await compute(_decodeJson, raw) as Map<String, dynamic>;
     final provinces = decoded.keys.toList(growable: false)
       ..sort((a, b) => a.compareTo(b));
     _provinceNames = provinces;
@@ -158,7 +162,7 @@ class LocationsRepository {
     // after this call. This keeps the large district dataset out of the
     // process heap between location-picker visits.
     final raw = await rootBundle.loadString('assets/data/districts.json');
-    final decoded = jsonDecode(raw) as Map<String, dynamic>;
+    final decoded = await compute(_decodeJson, raw) as Map<String, dynamic>;
     final counties = decoded[province] as Map<String, dynamic>?;
     if (counties == null) return const <DistrictItem>[];
 

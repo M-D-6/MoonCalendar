@@ -733,7 +733,7 @@ class _ReferenceCompassPainter extends CustomPainter {
       final planetAlpha = (127 - sunAlt.toInt() * 3).clamp(0, 255);
       final planetPaint = Paint()..color = Colors.grey.withAlpha(planetAlpha);
       for (final planet in snapshot.planets) {
-        // Naked-eye planets only, and (like the Persian Calendar app) none that are well below the horizon: a negative
+        // Naked-eye planets only, and) none that are well below the horizon: a negative
         // altitude would put the label outside the dial and the phone's display frame.
         if (planet.body.id == planetUranus || planet.body.id == planetNeptune) continue;
         final h = _horizontal(planet.geocentric, snapshot.jd);

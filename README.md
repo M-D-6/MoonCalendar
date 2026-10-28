@@ -94,6 +94,18 @@ flutter build windows --release
 
 ---
 
+## 🔒 Privacy · حریم خصوصی
+
+- The app has no accounts, analytics, ads or crash reporting. Settings and counters stay on your device.
+- Location is used only on the device for prayer times and astronomy. When you open the weather screen, the coordinates of the selected place are sent to the weather services it uses (Open-Meteo, Bright Sky, MET Norway, NWS, Aviation Weather), and place searches go to Open-Meteo geocoding.
+- Update checks contact the GitHub releases API of this repository. Downloads are installed only when GitHub publishes a matching SHA-256 for the file.
+- Device calendar events are read on Android only after you grant the calendar permission and are never uploaded.
+
+- برنامه حساب کاربری، آمار، تبلیغ و گزارش خطا ندارد؛ تنظیمات و شمارنده‌ها روی دستگاه می‌مانند.
+- مکان فقط روی دستگاه برای اوقات شرعی و ستاره‌شناسی استفاده می‌شود. در صفحهٔ آب‌وهوا، مختصات مکان انتخاب‌شده برای سرویس‌های هواشناسی (Open-Meteo، Bright Sky، MET Norway، NWS و Aviation Weather) فرستاده می‌شود.
+- بررسی به‌روزرسانی فقط به GitHub همین پروژه وصل می‌شود و فایل فقط با SHA-256 منتشرشده نصب می‌شود.
+- رویدادهای تقویم دستگاه فقط پس از اجازهٔ شما خوانده می‌شوند و جایی ارسال نمی‌شوند.
+
 ## 📄 License · مجوز
 
 Released under the **GNU General Public License v3.0** — see [`LICENSE`](LICENSE).
@@ -104,6 +116,8 @@ Third-party licenses and attributions are listed in [`THIRD_PARTY_NOTICES.md`](T
 برنامه تحت **GPLv3** منتشر شده است؛ چون از پروژهٔ GPLv3 «تقویم فارسی» مشتق شده، آثار مشتق باید همین مجوز و اعلان‌های حق نشر اصلی را حفظ کنند.
 
 
-## Latest patch release
+## Building on Windows
 
-See [MoonCalendar 1.1.8 release notes](docs/RELEASE_NOTES_1.1.8.md) for the updater, memory and notification changes. On Windows, run `tool/build_windows_release.ps1` to analyze, build the portable bundle, and compile the installer (Inno Setup 6 or 7 required).
+Run `tool/build_windows_release.ps1` to analyze, build the portable bundle and compile the installer (Inno Setup 6 or 7 required).
+
+Pass `-Arch arm64` on an Arm64 PC (with the Arm64 Flutter SDK) to build the native Arm64 version; the default is `x64`. Releases publish both `MoonCalendar-windows-x64` and `MoonCalendar-windows-arm64` as a portable zip and a setup file.

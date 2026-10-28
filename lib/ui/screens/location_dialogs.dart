@@ -68,7 +68,7 @@ String _normalizeNumber(String raw) {
 double? parseCoordinate(String raw) => double.tryParse(_normalizeNumber(raw));
 
 Future<void> _shareOrCopy(BuildContext context, String text) async {
-  // Android shares like the Persian Calendar app; on Windows copying is what people
+  // Android shares; on Windows copying is what people
   // expect from a desktop dialog.
   if (PlatformInfo.isAndroid) {
     try {
@@ -431,7 +431,7 @@ class _CoordinatesDialogState extends State<_CoordinatesDialog> {
   double? get _altValue {
     if (_alt.text.trim().isEmpty) return 0; // empty elevation means zero
     final v = parseCoordinate(_alt.text);
-    // From the Dead Sea shore to Mount Everest, like the Persian Calendar app.
+    // From the Dead Sea shore to Mount Everest.
     return v != null && v >= -418 && v <= 8849 ? v : null;
   }
 

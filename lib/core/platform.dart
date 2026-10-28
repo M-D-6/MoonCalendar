@@ -22,6 +22,29 @@ class DeviceCalendarEvent {
   final bool allDay;
   final String calendar;
   const DeviceCalendarEvent({required this.id, required this.title, required this.start, required this.end, required this.allDay, required this.calendar});
+
+  /// The local calendar days the event touches. All-day events are stored as UTC midnights, so their dates are
+  /// read in UTC; timed events use the local clock and an end exactly at midnight belongs to the previous day.
+  List<DateTime> get localDays {
+    DateTime first;
+    DateTime endExclusive;
+    if (allDay) {
+      final s = DateTime.fromMillisecondsSinceEpoch(start.millisecondsSinceEpoch, isUtc: true);
+      final e = DateTime.fromMillisecondsSinceEpoch(end.millisecondsSinceEpoch, isUtc: true);
+      first = DateTime(s.year, s.month, s.day);
+      endExclusive = DateTime(e.year, e.month, e.day);
+    } else {
+      first = DateTime(start.year, start.month, start.day);
+      final last = end.isAfter(start) ? end.subtract(const Duration(milliseconds: 1)) : start;
+      endExclusive = DateTime(last.year, last.month, last.day + 1);
+    }
+    final days = <DateTime>[];
+    for (var d = first; d.isBefore(endExclusive) && days.length < 62; d = DateTime(d.year, d.month, d.day + 1)) {
+      days.add(d);
+    }
+    if (days.isEmpty) days.add(first);
+    return days;
+  }
 }
 
 class LevelReading {

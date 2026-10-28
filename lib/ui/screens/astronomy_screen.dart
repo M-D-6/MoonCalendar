@@ -158,6 +158,10 @@ const double _oneDayMs = 86400000;
 
 /// A scalar driven by a spring / fling, like Compose's `animate(...)` on a
 /// MutableFloatState.
+class _TransformTick extends ChangeNotifier {
+  void tick() => notifyListeners();
+}
+
 class _SpringValue {
   _SpringValue(
     TickerProvider vsync,
@@ -215,11 +219,12 @@ class _SpringValue {
 }
 
 class _AstronomyScreenState extends State<AstronomyScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late double _timeMs;
   double _timeBase = 0;
   late Future<_AndroidAstronomyAssets> _assetsFuture;
   Timer? _timer;
+  DateTime? _pausedAt;
 
   _AstronomyMode _mode = _AstronomyMode.earth;
   bool _tropical = false;
@@ -261,6 +266,23 @@ class _AstronomyScreenState extends State<AstronomyScreen>
   DateTime get _time => DateTime.fromMillisecondsSinceEpoch(_timeMs.round());
   bool get _isUnscaled => (_scaleV - 1).abs() < .001;
 
+  final _TransformTick _transformTick = _TransformTick();
+  bool _transformShowsToday = false;
+
+  bool get _transformMovesPicture => (!_isUnscaled && _introDone) || _offX != 0 || _offY != 0;
+
+  /// Called on every zoom/pan frame: the transform layer listens to [_transformTick]; the rest of the screen is
+  /// rebuilt only when the "back to today" button has to appear or disappear.
+  void _transformChanged() {
+    if (!mounted) return;
+    final shows = _transformMovesPicture;
+    if (shows != _transformShowsToday) {
+      _transformShowsToday = shows;
+      setState(() {});
+    }
+    _transformTick.tick();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -269,17 +291,18 @@ class _AstronomyScreenState extends State<AstronomyScreen>
     _assetsFuture = _loadAndroidAstronomyAssets();
 
     _timeSpring = _SpringValue(this, 0, (v) => _applyTime(_timeBase + v));
+    // Zoom and pan only move the picture: they repaint the transform layer, not the whole screen.
     _scaleSpring = _SpringValue(this, .25, (v) {
-      if (!mounted) return;
-      setState(() => _scaleV = v);
+      _scaleV = v;
+      _transformChanged();
     });
     _offXSpring = _SpringValue(this, 0, (v) {
-      if (!mounted) return;
-      setState(() => _offX = v);
+      _offX = v;
+      _transformChanged();
     });
     _offYSpring = _SpringValue(this, 0, (v) {
-      if (!mounted) return;
-      setState(() => _offY = v);
+      _offY = v;
+      _transformChanged();
     });
     _tropSpring = _SpringValue(this, 0, (v) {
       if (!mounted) return;
@@ -290,9 +313,18 @@ class _AstronomyScreenState extends State<AstronomyScreen>
     _scaleSpring
         .animateTo(1, ratio: .5, stiffness: 200)
         .whenCompleteOrCancel(() {
-      if (mounted) _introDone = true;
+      if (!mounted) return;
+      _introDone = true;
+      _transformChanged();
     });
 
+    WidgetsBinding.instance.addObserver(this);
+    _startClock();
+  }
+
+  /// The sky follows real time in 10 s steps, but only while the app is in the foreground.
+  void _startClock() {
+    _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 10), (_) {
       if (!mounted) return;
       _timeBase += 10000;
@@ -301,8 +333,29 @@ class _AstronomyScreenState extends State<AstronomyScreen>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (_timer == null || !_timer!.isActive) {
+        // Catch up with the time that passed while the clock was stopped.
+        final away = _pausedAt == null ? 0 : DateTime.now().difference(_pausedAt!).inMilliseconds;
+        _pausedAt = null;
+        if (away > 0) {
+          _timeBase += away;
+          _applyTime(_timeMs + away, haptic: false);
+        }
+        _startClock();
+      }
+    } else if (state == AppLifecycleState.paused || state == AppLifecycleState.hidden) {
+      _pausedAt ??= DateTime.now();
+      _timer?.cancel();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
+    _transformTick.dispose();
     // The decoded planet pictures are no longer needed once the screen is gone.
     _assetsFuture.then((a) {
       a.sun.dispose();
@@ -586,10 +639,8 @@ class _AstronomyScreenState extends State<AstronomyScreen>
     final todayJdn = gregorianToJdn(now.year, now.month, now.day);
     final jdn = gregorianToJdn(time.year, time.month, time.day);
     final isWide = MediaQuery.sizeOf(context).width >= 920;
-    final showToday = jdn != todayJdn ||
-        (!_isUnscaled && _introDone) ||
-        _offX != 0 ||
-        _offY != 0;
+    _transformShowsToday = _transformMovesPicture;
+    final showToday = jdn != todayJdn || _transformShowsToday;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -1149,14 +1200,17 @@ class _AstronomyScreenState extends State<AstronomyScreen>
     return Stack(
       children: <Widget>[
         Positioned.fill(
-          child: Transform.translate(
-            offset: Offset(_offX, _offY),
-            child: Transform.scale(
-              scale: _scaleV,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: SizedBox.expand(
-                  key: ValueKey<_AstronomyMode>(_mode),
+          child: AnimatedBuilder(
+            animation: _transformTick,
+            builder: (context, child) => Transform.translate(
+              offset: Offset(_offX, _offY),
+              child: Transform.scale(scale: _scaleV, child: child),
+            ),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: SizedBox.expand(
+                key: ValueKey<_AstronomyMode>(_mode),
+                child: RepaintBoundary(
                   child: CustomPaint(
                     painter: _AndroidAstronomyPainter(
                       snapshot: snapshot,
@@ -1247,12 +1301,14 @@ class _AstronomyScreenState extends State<AstronomyScreen>
                               const Tolerance(distance: 1, velocity: 6000),
                         );
                       },
-                      child: CustomPaint(
-                        size: Size.infinite,
-                        painter: _AndroidTimeRulerPainter(
-                          primary: primary,
-                          minutes: _timeMs / _oneMinuteMs,
-                          dpr: dpr,
+                      child: RepaintBoundary(
+                        child: CustomPaint(
+                          size: Size.infinite,
+                          painter: _AndroidTimeRulerPainter(
+                            primary: primary,
+                            minutes: _timeMs / _oneMinuteMs,
+                            dpr: dpr,
+                          ),
                         ),
                       ),
                     ),

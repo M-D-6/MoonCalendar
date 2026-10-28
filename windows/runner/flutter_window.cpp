@@ -207,8 +207,23 @@ std::unique_ptr<PlatformChannel> CreatePlatformChannel(
 std::vector<std::unique_ptr<PlatformChannel>> g_child_platform_channels;
 std::unordered_set<HWND> g_stay_behind_windows;
 
+// Widget windows are tool windows: they stay off the taskbar, Alt+Tab and the "Apps" group of Task Manager, so the
+// application is not presented as open while only desktop widgets are on screen.
+void MarkAsToolWindow(HWND window) {
+  LONG_PTR style = GetWindowLongPtr(window, GWL_EXSTYLE);
+  const LONG_PTR wanted = (style | WS_EX_TOOLWINDOW) & ~static_cast<LONG_PTR>(WS_EX_APPWINDOW);
+  if (wanted == style) return;
+  const bool visible = IsWindowVisible(window) != FALSE;
+  if (visible) ShowWindow(window, SW_HIDE);
+  SetWindowLongPtr(window, GWL_EXSTYLE, wanted);
+  if (visible) ShowWindow(window, SW_SHOWNOACTIVATE);
+  SetWindowPos(window, nullptr, 0, 0, 0, 0,
+               SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+}
+
 void SetWidgetStayBehind(HWND window, bool stay_behind) {
   if (!window) return;
+  MarkAsToolWindow(window);
   if (stay_behind) {
     g_stay_behind_windows.insert(window);
     SetWindowPos(window, HWND_BOTTOM, 0, 0, 0, 0,

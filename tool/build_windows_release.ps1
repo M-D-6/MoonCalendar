@@ -1,3 +1,9 @@
+param(
+    # Target architecture of the Windows build: x64 (default) or arm64 (needs an Arm64 PC and the Arm64 Flutter SDK).
+    [ValidateSet('x64', 'arm64')]
+    [string]$Arch = 'x64'
+)
+
 $ErrorActionPreference = 'Stop'
 
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
@@ -9,7 +15,7 @@ if (-not $versionLine) {
 }
 $version = $versionLine.Matches[0].Groups[1].Value
 $buildNumber = $versionLine.Matches[0].Groups[2].Value
-$archive = "MoonCalendar-$version-windows-x64.zip"
+$archive = "MoonCalendar-$version-windows-$Arch.zip"
 
 $appVersionFile = Get-Content (Join-Path $ProjectRoot 'lib\core\app_version.dart') -Raw
 if ($appVersionFile -notmatch "appVersion\s*=\s*'$([regex]::Escape($version))'") {
@@ -31,7 +37,7 @@ if (-not $flutter) {
     throw 'Flutter is not on PATH. Open a new PowerShell after configuring Flutter, then retry.'
 }
 
-Write-Host "Preparing MoonCalendar $version+$buildNumber"
+Write-Host "Preparing MoonCalendar $version+$buildNumber ($Arch)"
 Write-Host 'Flutter version:'
 flutter --version
 if ($LASTEXITCODE -ne 0) { throw 'flutter --version failed.' }
@@ -48,7 +54,7 @@ if ($LASTEXITCODE -ne 0) { throw 'flutter analyze failed; resolve errors before 
 flutter build windows --release
 if ($LASTEXITCODE -ne 0) { throw 'flutter build windows --release failed.' }
 
-$bundle = Join-Path $ProjectRoot 'build\windows\x64\runner\Release'
+$bundle = Join-Path $ProjectRoot "build\windows\$Arch\runner\Release"
 $exe = Join-Path $bundle 'mooncalendar.exe'
 if (-not (Test-Path $exe)) {
     throw "Build reported success, but the executable was not found at $exe"
@@ -59,7 +65,7 @@ New-Item -ItemType Directory -Path $dist -Force | Out-Null
 $destination = Join-Path $dist $archive
 if (Test-Path $destination) { Remove-Item $destination -Force }
 Compress-Archive -Path (Join-Path $bundle '*') -DestinationPath $destination -CompressionLevel Optimal
-$portableLatest = Join-Path $dist 'MoonCalendar-windows-x64.zip'
+$portableLatest = Join-Path $dist "MoonCalendar-windows-$Arch.zip"
 Copy-Item $destination $portableLatest -Force
 
 # The updater deliberately looks for this exact release asset name. Build it locally too, rather than
@@ -82,17 +88,18 @@ if (-not $iscc) {
 }
 
 $env:MOONCALENDAR_VERSION = $version
+$env:MOONCALENDAR_ARCH = $Arch
 $iss = Join-Path $ProjectRoot 'windows\installer\Mooncalendar.iss'
 Write-Host "Compiling installer with $iscc"
 & $iscc $iss
 if ($LASTEXITCODE -ne 0) { throw 'Inno Setup failed to compile the installer.' }
 
-$setupBuilt = Join-Path $ProjectRoot 'windows\installer\Output\MoonCalendar-Setup-x64.exe'
+$setupBuilt = Join-Path $ProjectRoot "windows\installer\Output\MoonCalendar-Setup-$Arch.exe"
 if (-not (Test-Path $setupBuilt)) {
     throw "Inno Setup reported success, but installer was not found at $setupBuilt"
 }
-$setupLatest = Join-Path $dist 'MoonCalendar-windows-x64-setup.exe'
-$setupVersioned = Join-Path $dist "MoonCalendar-$version-windows-x64-setup.exe"
+$setupLatest = Join-Path $dist "MoonCalendar-windows-$Arch-setup.exe"
+$setupVersioned = Join-Path $dist "MoonCalendar-$version-windows-$Arch-setup.exe"
 Copy-Item $setupBuilt $setupLatest -Force
 Copy-Item $setupBuilt $setupVersioned -Force
 

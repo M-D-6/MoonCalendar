@@ -16,7 +16,7 @@ add_executable(${BINARY_NAME} WIN32
 apply_standard_settings(${BINARY_NAME})
 target_compile_options(${BINARY_NAME} PRIVATE /utf-8)
 
-target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION=\"1.1.8\"")
+target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION=\"1.1.9\"")
 target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MAJOR=1")
 target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MINOR=1")
 target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_PATCH=7")

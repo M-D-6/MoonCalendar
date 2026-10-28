@@ -263,7 +263,7 @@ class AboutScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(shape: BoxShape.circle, color: scheme.surface),
                   child: ClipOval(
-                    child: Image.asset('assets/images/branding/mooncalendar_icon.png', fit: BoxFit.cover, filterQuality: FilterQuality.high),
+                    child: Image.asset('assets/images/branding/mooncalendar_icon.png', fit: BoxFit.cover, filterQuality: FilterQuality.high, cacheWidth: 384),
                   ),
                 ),
               ),

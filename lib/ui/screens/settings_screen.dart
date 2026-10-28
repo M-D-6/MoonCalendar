@@ -38,13 +38,15 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProviderStateMixin {
   late final TabController _tabController;
-  final List<ScrollController> _scrolls = List.generate(3, (_) => ScrollController());
+  // The web build has no notifications or widgets, so it only has the interface and location pages.
+  static final int _tabCount = PlatformInfo.isWeb ? 2 : 3;
+  final List<ScrollController> _scrolls = List.generate(_tabCount, (_) => ScrollController());
   int tab = 0;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: _tabCount, vsync: this);
     AthanService.instance.refreshStatus();
     _tabController.addListener(() {
       if (!mounted) return;
@@ -125,7 +127,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                 child: TabBar(
                   tabs: [
                     Tab(icon: const Icon(Icons.palette_outlined), height: 74, child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 92), child: Text(tr('رابط و تقویم'), maxLines: 2, textAlign: TextAlign.center, softWrap: true, style: const TextStyle(fontSize: 12.5, height: 1.15)))),
-                    Tab(icon: const Icon(Icons.widgets_outlined), height: 74, child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 92), child: Text(tr('اعلان و ویجت'), maxLines: 2, textAlign: TextAlign.center, softWrap: true, style: const TextStyle(fontSize: 12.5, height: 1.15)))),
+                    if (!PlatformInfo.isWeb) Tab(icon: const Icon(Icons.widgets_outlined), height: 74, child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 92), child: Text(tr('اعلان و ویجت'), maxLines: 2, textAlign: TextAlign.center, softWrap: true, style: const TextStyle(fontSize: 12.5, height: 1.15)))),
                     Tab(icon: const Icon(Icons.location_on_outlined), height: 74, child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 92), child: Text(tr('موقعیت و اذان'), maxLines: 2, textAlign: TextAlign.center, softWrap: true, style: const TextStyle(fontSize: 12.5, height: 1.15)))),
                   ],
                   isScrollable: true,
@@ -151,7 +153,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
     switch (index) {
       case 0:
         return _interfaceAndCalendar();
-      case 1:
+      case 1 when !PlatformInfo.isWeb:
         return _notificationAndWidget();
       default:
         return _locationAndAthan();
@@ -311,22 +313,14 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
               },
               Icons.notifications_outlined,
             ),
-            _switch(
-              'اعلان دما',
-              'نمایش دمای فعلی هوای شهر انتخاب‌شده در یک اعلان بی‌صدا',
-              settings.notifyTemperature,
-              (value) async {
-                if (value && PlatformInfo.isAndroid) {
-                  final granted = await AthanAndroid.requestNotificationPermission();
-                  if (!granted) {
-                    _snack('برای نمایش اعلان همیشگی، دسترسی اعلان را فعال کنید');
-                    return;
-                  }
-                }
-                await settings.setNotifyTemperature(value);
-              },
-              Icons.thermostat_outlined,
-            ),
+            if (settings.notifyDate)
+              _switch(
+                'نمایش دما در اعلان',
+                'دما و نام شهر انتخاب‌شده در انتهای خط اول اعلان نمایش داده می‌شود',
+                settings.notifyTemperature,
+                settings.setNotifyTemperature,
+                Icons.thermostat_outlined,
+              ),
             if (settings.notifyDate)
               _switch('نمایش اعلان در قفل صفحه', 'فقط هنگامی که قفل صفحه فعال باشد', settings.notifyDateLockScreen, settings.setNotifyDateLockScreen, Icons.lock_outline),
             if (settings.notifyDate)

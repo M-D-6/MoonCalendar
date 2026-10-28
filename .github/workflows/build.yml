@@ -80,12 +80,36 @@ jobs:
           path: build/app/outputs/flutter-apk/MoonCalendar-android-*.apk
 
   windows:
-    name: Windows
-    runs-on: windows-latest
+    name: Windows (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            runner: windows-latest
+          - arch: arm64
+            runner: windows-11-arm
+    runs-on: ${{ matrix.runner }}
+    env:
+      MOONCALENDAR_ARCH: ${{ matrix.arch }}
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
+        if: matrix.arch == 'x64'
         with: { channel: stable, cache: true }
+      # The setup action has no Windows Arm64 SDK, so the stable channel is cloned and must pick the arm64 Dart.
+      - name: Install Flutter (arm64)
+        if: matrix.arch == 'arm64'
+        shell: pwsh
+        run: |
+          git clone --depth 1 --branch stable https://github.com/flutter/flutter.git "$env:RUNNER_TEMP\flutter"
+          "$env:RUNNER_TEMP\flutter\bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+          $flutterBin = "$env:RUNNER_TEMP\flutter\bin"
+          Write-Host "PROCESSOR_ARCHITECTURE=$env:PROCESSOR_ARCHITECTURE"
+          & "$flutterBin\flutter.bat" --version
+          $dart = & "$flutterBin\dart.bat" --version 2>&1 | Out-String
+          Write-Host $dart
+          if ($dart -notmatch 'windows_arm64') { throw "Flutter picked a non-arm64 Dart SDK: $dart" }
       - run: flutter pub get
       - name: Verify release version
         shell: pwsh
@@ -106,14 +130,23 @@ jobs:
       - run: flutter build windows --release
       - name: Zip (portable)
         shell: pwsh
-        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath MoonCalendar-windows-x64.zip
+        run: Compress-Archive -Path "build/windows/${{ matrix.arch }}/runner/Release/*" -DestinationPath "MoonCalendar-windows-${{ matrix.arch }}.zip"
       - name: Inno Setup
         shell: pwsh
         run: |
           # The usual setup: the compiler that ships with the runner image, installed from Chocolatey when missing.
           function Find-Iscc {
-            @("${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe", "$env:ProgramFiles\Inno Setup 6\ISCC.exe") |
-              Where-Object { Test-Path $_ } | Select-Object -First 1
+            $command = Get-Command ISCC.exe -ErrorAction SilentlyContinue
+            if ($command) { return $command.Source }
+            $roots = @(${env:ProgramFiles(x86)}, $env:ProgramFiles, (Join-Path $env:LOCALAPPDATA 'Programs')) |
+              Where-Object { $_ -and (Test-Path $_) }
+            foreach ($root in $roots) {
+              foreach ($dir in Get-ChildItem -Path $root -Directory -Filter 'Inno Setup*' -ErrorAction SilentlyContinue) {
+                $candidate = Join-Path $dir.FullName 'ISCC.exe'
+                if (Test-Path $candidate) { return $candidate }
+              }
+            }
+            return $null
           }
           $exe = Find-Iscc
           if (-not $exe) {
@@ -132,13 +165,13 @@ jobs:
           Write-Host "Inno Setup version used: $version"
           # A new major version is a deliberate upgrade, not something a runner image update should do silently.
           if (-not $version.StartsWith('6.')) { throw "Unexpected Inno Setup version '$version' (expected 6.x)" }
-          Move-Item "windows/installer/Output/MoonCalendar-Setup-x64.exe" "MoonCalendar-windows-x64-setup.exe"
+          Move-Item "windows/installer/Output/MoonCalendar-Setup-${{ matrix.arch }}.exe" "MoonCalendar-windows-${{ matrix.arch }}-setup.exe"
       - uses: actions/upload-artifact@v4
         with:
-          name: MoonCalendar-windows-x64
+          name: MoonCalendar-windows-${{ matrix.arch }}
           path: |
-            MoonCalendar-windows-x64.zip
-            MoonCalendar-windows-x64-setup.exe
+            MoonCalendar-windows-${{ matrix.arch }}.zip
+            MoonCalendar-windows-${{ matrix.arch }}-setup.exe
 
   linux:
     name: Linux

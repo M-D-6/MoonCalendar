@@ -22,7 +22,7 @@ class StartupSplash extends StatefulWidget {
     _allowFirstFrame();
   }
 
-  // Android 12+: like the Persian Calendar app there is only the system splash (animated icon). Flutter's first frame is
+  // Android 12+: there is only the system splash (animated icon). Flutter's first frame is
   // held back until the calendar is ready, so the system splash hands over straight to the real app - no second,
   // look-alike splash and therefore no gap or blink between the two.
   static bool _deferred = false;

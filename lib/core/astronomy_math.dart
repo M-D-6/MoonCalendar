@@ -750,6 +750,12 @@ class AstronomyMath {
     double elevationMeters = 0,
   }) {
     final utc = from.toUtc();
+    // The answer does not change between "from" and the first listed event, so scrubbing through days reuses it
+    // instead of searching the lunations again.
+    final cacheKey = Object.hash(years, latitude, longitude, elevationMeters);
+    for (final entry in _eclipseCache) {
+      if (entry.key == cacheKey && !utc.isBefore(entry.from) && utc.isBefore(entry.until)) return entry.result;
+    }
     final kStart = ((utc.year + (utc.month - 1) / 12.0) - 2000) * 12.3685;
     var k = kStart.floor() - 2;
     EclipseEvent? nextSolar;
@@ -773,8 +779,15 @@ class AstronomyMath {
       ?nextSolar,
       ?nextLunar,
     ]..sort((a, b) => a.time.compareTo(b.time));
+    if (nextSolar != null && nextLunar != null) {
+      final until = result.first.time.toUtc();
+      if (_eclipseCache.length >= 24) _eclipseCache.removeAt(0);
+      _eclipseCache.add(_EclipseCacheEntry(cacheKey, utc, until, result));
+    }
     return result;
   }
+
+  static final List<_EclipseCacheEntry> _eclipseCache = <_EclipseCacheEntry>[];
 
   static double _angularSeparation(double lon1, double lat1, double lon2, double lat2) {
     final c = math.sin(lat1) * math.sin(lat2) + math.cos(lat1) * math.cos(lat2) * math.cos(lon1 - lon2);
@@ -1527,4 +1540,13 @@ class AstronomyMath {
     };
     return target == null ? null : searchMoonAgeTime(date, target);
   }
+}
+
+class _EclipseCacheEntry {
+  const _EclipseCacheEntry(this.key, this.from, this.until, this.result);
+
+  final int key;
+  final DateTime from;
+  final DateTime until;
+  final List<EclipseEvent> result;
 }
